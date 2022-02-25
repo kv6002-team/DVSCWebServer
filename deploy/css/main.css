@@ -1,0 +1,82 @@
+* {
+    --bg: white;
+    --fg: black;
+
+    --accent-1: rgb(255,64,64);
+    --light-accent-1: rgb(255, 172, 64);
+    --accent-2: rgb(64, 64, 255);
+    --light-accent-2: rgb(64, 172, 255);
+}
+
+body {
+    margin: 50px;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1.5em;
+}
+
+h1 {
+    font-size: 3em;
+    text-align: center;
+}
+
+pre {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+.truncation {
+    color: var(--light-accent-2);
+}
+
+/* Errors
+-------------------------------------------------- */
+
+.error > .error-reason, .error > .error-detailed-reason {
+    margin-left: 15px;
+    padding-left: 15px;
+    border-left: 3px solid var(--accent-1);
+}
+
+/* Documentation
+-------------------------------------------------- */
+
+.resource > h3 {
+    text-decoration: var(--accent-1) underline;
+}
+
+.resource .method {
+    margin: 0 0 15px 15px;
+    padding-left: 15px;
+    border-left: 3px solid var(--accent-1);
+}
+
+.resource .auth-required {
+    color: var(--light-accent-1);
+}
+
+.resource .examples p,
+.resource .examples pre {
+    font-size: 0.8em;
+}
+
+.resource .examples .request,
+.resource .examples .response {
+    margin: 0 0 15px 15px;
+    padding-left: 15px;
+}
+.resource .examples .request {
+    border-left: 3px solid var(--light-accent-2);
+}
+.resource .examples .response {
+    border-left: 3px solid var(--light-accent-1);
+}
+
+.resource .examples .example:first-child {
+    border-top: 3px solid black;
+}
+.resource .examples .example {
+    padding: 15px 0 15px 0;
+    border-bottom: 3px solid black;
+}
