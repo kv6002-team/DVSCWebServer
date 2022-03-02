@@ -19,19 +19,13 @@ class Page extends DocumentTemplate {
             "content" => new MutableElement()
         ];
 
-        $nav = [
-            "Home" => "/"
-        ];
+        $nav = [];
 
         parent::__construct(
             HTML::basicDocument(
                 "Donaldsons' Vehicle Specialist Consultantcy (DVSC)",
                 "We can assist you in running your garage business.",
-                [
-                    HTML::linkCSS(
-                        $pathfinder->serverPathFor("/css/main.css", true)
-                    )
-                ],
+                null,
                 [
                     HTML::nav([
                         HTML::ul(Util::mapKeysValues(
