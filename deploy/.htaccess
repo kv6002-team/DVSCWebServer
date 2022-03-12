@@ -1,5 +1,10 @@
 RewriteEngine on
-RewriteRule images/ - [L]
-RewriteRule css/ - [L]
-RewriteRule js/ - [L]
-RewriteRule ^api/(.*)$ index.php
+
+RewriteRule ^static/(.*)$ - [S=4]
+RewriteRule backend/index.php - [S=3]
+RewriteRule frontend/index.html - [S=2]
+RewriteRule ^api(/.*)?$ backend/index.php [L]
+RewriteRule ^(.*)$ frontend/index.html
+
+ErrorDocument 404 /backend/index.php
+ErrorDocument 403 /backend/index.php

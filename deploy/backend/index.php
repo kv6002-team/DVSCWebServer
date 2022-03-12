@@ -67,9 +67,7 @@ $router->registerGlobalError(
 
 // Including any endpoint-specific error resources
 
-$router->register("/", new resources\Home($pathfinder));
-
-$router->register("/api/auth/auth", new resources\Authenticate(
+$router->register("/api/user/auth", new resources\Authenticate(
     $db,
     $authenticator
 ));
