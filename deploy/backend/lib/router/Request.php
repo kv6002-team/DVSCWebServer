@@ -241,8 +241,10 @@ class Request {
      *   requested.
      */
     public function acceptedContentTypes() {
-        $accept = $this->headers["Accept"];
-        if ($accept === null || $accept === "") {
+        if (
+                !isset($this->headers["Accept"]) ||
+                $this->headers["Accept"] === ""
+        ) {
             return [];
         }
 
