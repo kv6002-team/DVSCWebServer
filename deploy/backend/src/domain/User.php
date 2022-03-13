@@ -8,25 +8,22 @@ use database\Bindable;
  * 
  * @author William Taylor (19009576)
  */
-final class User {
+abstract class User {
     use Bindable;
 
     private $id;
 
-    private $username;
     private $password;
     private $passwordResetRequired;
 
     /**
      * Create a new user.
      * 
-     * @param string $username The User's username.
-     * @param string $password The User's password.
+     * @param string $password The User's hashed password.
      * @param bool $passwordResetRequired Whether the User must reset their
      *   password before being allowed to make any further API requests.
      */
-    public function __construct($username, $password, $passwordResetRequired) {
-        $this->username = $username;
+    public function __construct($password, $passwordResetRequired) {
         $this->password = $password;
         $this->passwordResetRequired = $passwordResetRequired;
     }
@@ -45,9 +42,7 @@ final class User {
      * 
      * @return string The username of the User.
      */
-    public function username() {
-        return $this->username;
-    }
+    public abstract function username();
 
     /**
      * Get the hashed password of the User.

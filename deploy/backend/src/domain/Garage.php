@@ -2,18 +2,14 @@
 namespace kf6012\domain;
 
 use database\Bindable;
+use kf6012\domain\User;
 
 /**
  * A garage.
  * 
  * @author William Taylor (19009576)
  */
-final class Garage {
-    use Bindable;
-
-    private $id;
-
-    private $user;
+final class Garage extends User {
     private $vts;
     private $name;
     private $ownerName;
@@ -24,7 +20,6 @@ final class Garage {
     /**
      * Create a new garage.
      * 
-     * @param User $user The User account for the Garage.
      * @param string $vts The vehicle testing station (VTS) number for the
      *   Garage.
      * @param string $name The name of the Garage.
@@ -34,42 +29,30 @@ final class Garage {
      * @param string $telephoneNumber The telephone number for the Garage.
      * @param DateTime $paidUntil The date up to which the Garage has paid. If
      *   this is before now, then payment is overdue.
+     * 
+     * @param string $password The Garage's hashed password.
+     * @param bool $passwordResetRequired Whether the Garage must reset their
+     *   password before being allowed to make any further API requests.
      */
     public function __construct(
-            $user,
             $vts,
             $name,
             $ownerName,
             $emailAddress,
             $telephoneNumber,
-            $paidUntil
+            $paidUntil,
+
+            $password,
+            $passwordResetRequired
     ) {
-        $this->id = null;
-        $this->user = $user;
+        parent::__construct($password, $passwordResetRequired);
+
         $this->vts = $vts;
         $this->name = $name;
         $this->ownerName = $ownerName;
         $this->emailAddress = $emailAddress;
         $this->telephoneNumber = $telephoneNumber;
         $this->paidUntil = $paidUntil;
-    }
-
-    /**
-     * Get the ID of the Garage.
-     * 
-     * @return int The ID of the Garage.
-     */
-    public function id() {
-        return $this->id;
-    }
-
-    /**
-     * Get the User for this Garage.
-     * 
-     * @return User The User for this Garage.
-     */
-    public function user() {
-        return $this->user;
     }
 
     /**
@@ -128,5 +111,12 @@ final class Garage {
      */
     public function paidUntil() {
         return $this->paidUntil;
+    }
+    
+    /* Implement User
+    -------------------- */
+    
+    public function username() {
+        return $this->vts;
     }
 }

@@ -2,44 +2,39 @@
 namespace kf6012\domain;
 
 use database\Bindable;
+use kf6002\domain\User;
 
 /**
  * A garage.
  * 
  * @author William Taylor (19009576)
  */
-final class GarageConsultant {
-    use Bindable;
-
-    private $id;
-
-    private $user;
-
+final class GarageConsultant extends User {
     /**
      * Create a new garage consultant.
      * 
-     * @param User $user The User account for this consultant.
+     * @param string $emailAddress The email address for this consultant.
+     * 
+     * @param string $password The Garage Consultant's hashed password.
+     * @param bool $passwordResetRequired Whether the Garage Consultant must
+     *   reset their password before being allowed to make any further API
+     *   requests.
      */
-    public function __construct($user) {
-        $this->id = null;
-        $this->user = $user;
+    public function __construct(
+            $emailAddress,
+
+            $password,
+            $passwordResetRequired
+    ) {
+        parent::__construct($password, $passwordResetRequired);
+
+        $this->emailAddress = $emailAddress;
     }
 
-    /**
-     * Get the ID of the Garage Consultant.
-     * 
-     * @return int The ID of the Garage Consultant.
-     */
-    public function id() {
-        return $this->id;
-    }
-
-    /**
-     * Get the User for this Garage Consultant.
-     * 
-     * @return User The User for this Garage Consultant.
-     */
-    public function user() {
-        return $this->user;
+    /* Implement User
+    -------------------- */
+    
+    public function username() {
+        return $this->emailAddress;
     }
 }
