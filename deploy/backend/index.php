@@ -69,10 +69,7 @@ $router->registerGlobalError(
 
 $router->register("/api/ping", new resources\Ping());
 
-$router->register("/api/user/auth", new resources\Authenticate(
-    $db,
-    $authenticator
-));
+$router->register("/api/auth", new resources\Authenticate($db, $authenticator));
 
 /* Dispatch Request
 -------------------------------------------------- */
