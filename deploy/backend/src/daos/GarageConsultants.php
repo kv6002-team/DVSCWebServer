@@ -22,17 +22,15 @@ class GarageConsultants {
      * @param int $id The ID of the consultant to fetch.
      * @return GarageConsultant A GarageConsultant object for that consultant.
      */
-    public function getConsultant($id) {
-        // Fetch authors
-        $authors = $this->db->fetchAll(
+    public function getGarageConsultant($id) {
+        return $this->db->fetch(
             "SELECT DISTINCT GarageConsultant.id as id,"
             ."   emailAddress,"
             ."   password,"
             ."   passwordResetRequired"
             ." FROM GarageConsultant"
             ." JOIN User ON GarageConsultant.id = User.id"
-            ." WHERE id = :id"
-            ." ORDER BY id",
+            ." WHERE id = :id",
             ["id" => $id],
             domain\GarageConsultant::class,
             null,
