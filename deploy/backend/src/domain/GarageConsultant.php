@@ -1,8 +1,8 @@
 <?php
-namespace kf6012\domain;
+namespace kv6002\domain;
 
 use database\Bindable;
-use kf6002\domain\User;
+use kv6002\domain\User;
 
 /**
  * A garage.

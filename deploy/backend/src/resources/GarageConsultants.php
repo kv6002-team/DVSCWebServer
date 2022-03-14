@@ -1,17 +1,18 @@
 <?php
-namespace kf6012\resources;
+namespace kv6002\resources;
 
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
-use kf6012\standard\builders\JSONBuilder;
+use kv6002\standard\builders\JSONBuilder;
+use kv6002\standard\builders\NoContentBuilder;
 
 use router\Request;
 use router\resource\WithMetadata;
 use router\resource\MetadataUtils;
 
-use kf6012\daos;
-use kf6012\views;
+use kv6002\daos;
+use kv6002\views;
 
 /**
  * Provide a list of garage consultants.

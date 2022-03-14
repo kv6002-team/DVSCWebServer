@@ -1,5 +1,5 @@
 <?php
-namespace kf6012\views;
+namespace kv6002\views;
 
 /**
  * The data view for GarageConsultant objects.
