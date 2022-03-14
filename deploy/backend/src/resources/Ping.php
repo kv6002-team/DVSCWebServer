@@ -12,12 +12,18 @@ use kv6002\standard\builders\JSONBuilder;
  */
 class Ping extends BasicResource {
     public function __construct() {
+        $responder = JSONBuilder::typeSelector(
+            function ($request) {
+                return ["pong"];
+            }
+        );
         parent::__construct([
-            "GET" => JSONBuilder::typeSelector(
-                function ($request) {
-                    return ["pong"];
-                }
-            )
+            "GET" => $responder,
+            "POST" => $responder,
+            "PUT" => $responder,
+            "PATCH" => $responder,
+            "DELETE" => $responder,
+            "OPTIONS" => $responder,
         ]);
     }
 }
