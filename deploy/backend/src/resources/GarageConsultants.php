@@ -63,16 +63,26 @@ class GarageConsultants extends BasicResource implements WithMetadata {
 
             "create" => Dispatcher::funcToPipeOf([
                 function ($request) {
-                    return [
-                        $request,
-                        $request->privateParam("emailAddress"),
-                        $request->privateParam("password")
-                    ];
+                    $username = $request->privateParam("emailAddress");
+                    if ($username === null) {
+                        throw new HTTPError(422,
+                            "Must provide emailAddress parameter"
+                        );
+                    }
+
+                    $password = $request->privateParam("password");
+                    if ($username === null) {
+                        throw new HTTPError(422,
+                            "Must provide password parameter"
+                        );
+                    }
+
+                    return [$request, $username, $password];
                 },
                 function ($request, $emailAddress, $password) use ($dao) {
                     $dao->createGarageConsultant(
                         $emailAddress,
-                        password_hash($password),
+                        password_hash($password, PASSWORD_DEFAULT),
                         false
                     );
                     return [$request];
