@@ -71,6 +71,10 @@ $router->register("/api/ping", new resources\Ping());
 
 $router->register("/api/auth", new resources\Authenticate($db, $authenticator));
 
+$router->register("/api/garage-consultants",
+    new resources\GarageConsultants($db)
+);
+
 /* Dispatch Request
 -------------------------------------------------- */
 
