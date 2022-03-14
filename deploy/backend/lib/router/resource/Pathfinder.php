@@ -209,7 +209,7 @@ class Pathfinder {
         }
 
         $realAppRoot = realpath($appRoot);
-        if (!$realAppRoot) {
+        if (!$realAppRoot || !Util::hasPrefix($realAppRoot, $serverRoot)) {
             throw new URIError(
                 "Invalid application root path path: '$appRoot'"
             );
@@ -300,9 +300,33 @@ class Pathfinder {
         $internalPath = $this->internalPathFor($path, $enforceExists);
         if ($internalPath === null) return null; // Cascade null
 
+        // Can assume that $internalPath will have the serverRoot as prefix, as
+        // internalPathFor() enforces it.
         $relativePath = substr($internalPath, strlen($this->serverRoot));
         $serverPath = str_replace("\\", "/", $relativePath);
         return $serverPath;
+    }
+
+    /**
+     * Return the cannonical path relative to the application root for the given
+     * path, or null if all candidate paths are invalid (including if the path
+     * is not in the application root).
+     * 
+     * This will include an initial slash.
+     * 
+     * @param string $path The path to cannonicalise.
+     * @param bool $enforceExists (Optional) Make an invalid path one that does
+     *   not point to an existing file or directory. Defaults to false (ie. all
+     *   paths are valid).
+     * @return string The cannonicalised path, or null if the path is not valid.
+     */
+    public function appPathFor($path, $enforceExists = false) {
+        $serverPath = $this->serverPathFor($path, $enforceExists);
+        if ($serverPath === null) return null; // Cascade null
+
+        if (!Util::hasPrefix($serverPath, "/".$this->appPrefix)) return null;
+        $appPath = substr($serverPath, strlen("/".$this->appPrefix));
+        return $appPath;
     }
 
     /**

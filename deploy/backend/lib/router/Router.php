@@ -182,7 +182,7 @@ class Router {
      * @see Router::registerGlobalError()
      */
     public function register($endpoint, $resource, $errorResource = null) {
-        $endpoint = $this->pathfinder->serverPathFor($endpoint);
+        $endpoint = $this->pathfinder->appPathFor($endpoint);
 
         $this->resources->register($endpoint, $resource);
         if ($errorResource !== null) {
