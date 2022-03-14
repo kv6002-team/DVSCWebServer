@@ -159,7 +159,7 @@ class Request {
      *   not given.
      */
     public function param($name) {
-        return $this->params[$name]; // Returns null if $name doesn't exist
+        return isset($this->params[$name]) ? $this->params[$name] : null;
     }
 
     /**
