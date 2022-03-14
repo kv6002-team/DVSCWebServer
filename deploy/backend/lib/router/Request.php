@@ -87,7 +87,7 @@ class Request {
         // of the possible content types. Splitting those responsibilities out
         // into other classes and an interface would be over-engineering for
         // this project.
-        // This is best I could come up with to break apart (yet leaverage)
+        // This is the best I could come up with to break apart (yet leaverage)
         // PHP's magic parsing.
         switch ($_SERVER["REQUEST_METHOD"]) {
             case "POST":
