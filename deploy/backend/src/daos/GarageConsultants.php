@@ -1,6 +1,8 @@
 <?php
 namespace kv6002\daos;
 
+use database\Field;
+
 use kv6002\domain;
 
 /**
