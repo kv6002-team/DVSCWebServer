@@ -135,5 +135,6 @@ class GarageConsultants {
                 "emailAddress" => $emailAddress
             ]
         );
+        $this->db->execute("COMMIT");
     }
 }
