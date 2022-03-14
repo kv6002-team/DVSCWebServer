@@ -25,19 +25,27 @@ class Authenticate extends BasicResource implements WithMetadata {
     public function __construct($db, $authenticator) {
         $this->authenticator = $authenticator;
 
-        $dao = new daos\Users($db);
-
         // Define action
         $contentBuilder = Dispatcher::funcToPipeOf([
             function ($request) {
                 return [
                     $request,
+                    explode(",", $request->privateParam("types")),
                     $request->privateParam("username"),
                     $request->privateParam("password")
                 ];
             },
-            function ($request, $username, $password) use ($dao) {
-                $user = $dao->getUserByUsername($username);
+            function ($request, $types, $username, $password) {
+                $dao = new daos\User($db);
+                
+                // Try each user type in turn
+                foreach ($types as $type) {
+                    $user = $dao->getUserByUsername($type, $username);
+                    if ($user !== null) break; // If one is found, use it.
+                }
+
+                // If the user does not exist as any of the given types, or
+                // auth fails, then return an error.
                 if (
                         $user === null ||
                         !password_verify($password, $user->password())
@@ -45,6 +53,7 @@ class Authenticate extends BasicResource implements WithMetadata {
                     throw new HTTPError(401, self::$INVALID_AUTH_ERR_STR);
                 }
 
+                // Construct a JWT from the user.
                 $jwt = [
                     "token" => $this->authenticator->standardAuthToken($user)
                 ];

@@ -4,47 +4,63 @@ namespace kv6002\domain;
 use database\Bindable;
 
 /**
- * A user.
+ * A user (account).
  * 
  * @author William Taylor (19009576)
  */
-final class User {
+abstract class User {
     use Bindable;
 
     private $id;
 
-    private $username;
     private $password;
+    private $passwordResetRequired;
 
-    public function __construct($username, $password) {
-        $this->username = $username;
+    /**
+     * Create a new user.
+     * 
+     * @param string $password The User's hashed password.
+     * @param bool $passwordResetRequired Whether the User must reset their
+     *   password before being allowed to make any further API requests.
+     */
+    public function __construct($password, $passwordResetRequired) {
         $this->password = $password;
+        $this->passwordResetRequired = $passwordResetRequired;
     }
 
     /**
-     * Get the ID of the user.
+     * Get the ID of the User.
      * 
-     * @return int The ID of the user.
+     * @return int The ID of the User.
      */
     public function id() {
         return $this->id;
     }
 
     /**
-     * Get the username of the user.
+     * Get the username of the User.
      * 
-     * @return string The username of the user.
+     * @return string The username of the User.
      */
-    public function username() {
-        return $this->username;
-    }
+    public abstract function username();
 
     /**
-     * Get the hashed password of the user.
+     * Get the hashed password of the User.
      * 
-     * @return string The hashed password of the user.
+     * @return string The hashed password of the User.
      */
     public function password() {
         return $this->password;
+    }
+
+    /**
+     * Get whether the User must change their password before being allowed to
+     * make any further API requests.
+     * 
+     * @return bool Whether the User is allowed to make API requests other than
+     *   a password change request.
+     */
+    public function passwordResetRequired() {
+        return $this->passwordResetRequired;
     }
 }

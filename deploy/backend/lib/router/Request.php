@@ -87,7 +87,7 @@ class Request {
         // of the possible content types. Splitting those responsibilities out
         // into other classes and an interface would be over-engineering for
         // this project.
-        // This is best I could come up with to break apart (yet leaverage)
+        // This is the best I could come up with to break apart (yet leaverage)
         // PHP's magic parsing.
         switch ($_SERVER["REQUEST_METHOD"]) {
             case "POST":
@@ -159,7 +159,7 @@ class Request {
      *   not given.
      */
     public function param($name) {
-        return $this->params[$name]; // Returns null if $name doesn't exist
+        return isset($this->params[$name]) ? $this->params[$name] : null;
     }
 
     /**
@@ -184,7 +184,9 @@ class Request {
      */
     public function privateParam($name) {
         // Returns null if $name doesn't exist
-        return $this->privateParams[$name];
+        return isset($this->privateParams[$name]) ?
+            $this->privateParams[$name] :
+            null;
     }
 
     /**
@@ -223,10 +225,11 @@ class Request {
      * Return the value of the given named header, or null if it was not sent in
      * the request.
      * 
-     * @return string The value of the given header.
+     * @return string The value of the given header, or null if the header was
+     *   not given.
      */
     public function header($header) {
-        return $this->headers[$header];
+        return isset($this->headers[$header]) ? $this->headers[$header] : null;
     }
 
     /* Header-Parsing Utils 
@@ -241,10 +244,11 @@ class Request {
      *   requested.
      */
     public function acceptedContentTypes() {
-        $accept = $this->headers["Accept"];
-        if ($accept === null || $accept === "") {
-            return [];
-        }
+        $accept = isset($this->headers["Accept"]) ?
+            $this->headers["Accept"] :
+            null;
+
+        if (empty($accept)) return [];
 
         $rawParts = explode(",", $accept);
 
@@ -285,8 +289,11 @@ class Request {
      *   no authorisation was given.
      */
     public function authType() {
-        $auth = $this->headers["Authorization"];
+        $auth = isset($this->headers["Authorization"]) ?
+            $this->headers["Authorization"] :
+            null;
         if ($auth === null) return null; // No auth
+
         list($type, $value) = explode(" ", $auth, 2);
         return $type;
     }
@@ -299,8 +306,11 @@ class Request {
      *   null if no authorisation was given.
      */
     public function authValue() {
-        $auth = $this->headers["Authorization"];
+        $auth = isset($this->headers["Authorization"]) ?
+            $this->headers["Authorization"] :
+            null;
         if ($auth === null) return null; // No auth
+        
         list($type, $value) = explode(" ", $auth, 2);
         return $value;
     }
