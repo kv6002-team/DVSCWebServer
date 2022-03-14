@@ -241,12 +241,11 @@ class Request {
      *   requested.
      */
     public function acceptedContentTypes() {
-        if (
-                !isset($this->headers["Accept"]) ||
-                $this->headers["Accept"] === ""
-        ) {
-            return [];
-        }
+        $accept = isset($this->headers["Accept"]) ?
+            $this->headers["Accept"] :
+            null;
+
+        if ($accept === null || $accept === "") return [];
 
         $rawParts = explode(",", $accept);
 
