@@ -184,7 +184,9 @@ class Request {
      */
     public function privateParam($name) {
         // Returns null if $name doesn't exist
-        return $this->privateParams[$name];
+        return isset($this->privateParams[$name]) ?
+            $this->privateParams[$name] :
+            null;
     }
 
     /**
@@ -223,10 +225,11 @@ class Request {
      * Return the value of the given named header, or null if it was not sent in
      * the request.
      * 
-     * @return string The value of the given header.
+     * @return string The value of the given header, or null if the header was
+     *   not given.
      */
     public function header($header) {
-        return $this->headers[$header];
+        return isset($this->headers[$header]) ? $this->headers[$header] : null;
     }
 
     /* Header-Parsing Utils 
@@ -245,7 +248,7 @@ class Request {
             $this->headers["Accept"] :
             null;
 
-        if ($accept === null || $accept === "") return [];
+        if (empty($accept)) return [];
 
         $rawParts = explode(",", $accept);
 
@@ -286,8 +289,11 @@ class Request {
      *   no authorisation was given.
      */
     public function authType() {
-        $auth = $this->headers["Authorization"];
+        $auth = isset($this->headers["Authorization"]) ?
+            $this->headers["Authorization"] :
+            null;
         if ($auth === null) return null; // No auth
+
         list($type, $value) = explode(" ", $auth, 2);
         return $type;
     }
@@ -300,8 +306,11 @@ class Request {
      *   null if no authorisation was given.
      */
     public function authValue() {
-        $auth = $this->headers["Authorization"];
+        $auth = isset($this->headers["Authorization"]) ?
+            $this->headers["Authorization"] :
+            null;
         if ($auth === null) return null; // No auth
+        
         list($type, $value) = explode(" ", $auth, 2);
         return $value;
     }
