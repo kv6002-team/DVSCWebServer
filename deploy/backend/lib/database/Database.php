@@ -36,7 +36,7 @@
  *         new Field("c"),
  *                             // Plus constants needed by AThing's constructor,
  *                             // eg. injected dependencies.
- *         new ConstValue($someDependencyA)
+ *         $someDependencyA
  *       ]                     // Except foreign key
  *     );
  * 
@@ -64,7 +64,7 @@
  *         new RecordValue($aThingsByBThing, []),
  *                             // Plus constants needed by BThing's constructor,
  *                             // eg. injected dependencies.
- *         new ConstValue($someDependencyB)
+ *         $someDependencyB
  *       ]
  *     );
  */
@@ -446,14 +446,10 @@ class Database {
                 // Use $constructorArgs
                 $args = array_map(
                     function ($argSpec) use ($record, $id, &$additionalFields) {
-                        if ($argSpec instanceof Field) {
-                            return $record[$argSpec->name()];
-
-                        } elseif ($argSpec instanceof Value) {
-                            return $argSpec->getFor($id);
+                        if (!($argSpec instanceof ArgumentSpec)) {
+                            return $argSpec;
                         }
-
-                        return null;
+                        return $argSpec->getValue($record, $id);
                     },
                     $constructorArgs
                 );
