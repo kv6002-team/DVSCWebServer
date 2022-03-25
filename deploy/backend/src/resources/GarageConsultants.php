@@ -40,10 +40,10 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                     }
                 )
             ]),
-            
+
             "get_one" => Dispatcher::funcToPipeOf([
                 function ($request) {
-                    return [$request, $request->param("id")];
+                    return [$request, $request->endpointParam("id")];
                 },
                 function ($request, $id) use ($dao) {
                     $consultant = $dao->getGarageConsultant($id);
@@ -147,7 +147,7 @@ class GarageConsultants extends BasicResource implements WithMetadata {
         parent::__construct([
             "GET" => $getAction(
                 function ($request) {
-                    if ($request->param("id") !== null) {
+                    if ($request->endpointParam("id") !== null) {
                         return "get_one";
                     }
                     return "get_all";
