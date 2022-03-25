@@ -17,15 +17,20 @@ class Request {
     // GET /some/endpoint
     private $method;
     private $endpoint;
+    private $endpointScheme;
 
     // The inputs and selected outputs
     private $params;
     private $privateParams; // 'private' because they can be encrypted (HTTPS)
+    private $endpointParams; // from the URL, eg. /api/endpoint/1523
     private $body;
     private $fragment;
 
     // Headers
     private $headers;
+
+    /* Constructors
+    -------------------------------------------------- */
 
     /**
      * Construct an immutable Request.
@@ -47,20 +52,26 @@ class Request {
     public function __construct(
             $method,
             $endpoint,
+            $endpointScheme = null,
             $params = null,
             $privateParams = null,
+            $endpointParams = null,
             $body = null,
             $fragment = null,
             $headers = null
     ) {
         if ($params === null) $params = [];
         if ($privateParams === null) $privateParams = [];
+        if ($endpointParams === null) $endpointParams = [];
         if ($headers === null) $headers = [];
 
         $this->method = $method;
         $this->endpoint = $endpoint;
+
+        $this->endpointScheme = $endpointScheme;
         $this->params = $params;
         $this->privateParams = $privateParams;
+        $this->endpointParams = $endpointParams;
         $this->body = $body;
         $this->fragment = $fragment;
         $this->headers = $headers;
@@ -115,14 +126,89 @@ class Request {
             $method,
             $endpoint,
 
+            null, // endpointScheme - we don't know yet
             $params,
             $privateParams,
+            null, // endpointParams - we don't know yet
             $body,
             $fragment,
 
             $headers
         );
     }
+
+    /* Mutators
+    -------------------------------------------------- */
+
+    /**
+     * Parse the stored endpoint based on the given endpoint scheme and, if the
+     * scheme is valid for the requested enpoint, add the endpoint scheme and
+     * parsed endpoint params to the request.
+     * 
+     * @param string $scheme The endpoint scheme to attempt to set.
+     * @return bool True if setting the endpoint scheme was successful, false
+     *   otherwise.
+     */
+    public function setEndpointScheme($scheme) {
+        // Split into URL segments
+        $schemeParts = explode("/", ltrim(rtrim($scheme, "/"), "/"));
+        $endpointParts = explode("/", ltrim($this->endpoint, "/")); // Already rtrimed
+
+        // Cannot match if different lengths (number of parts)
+        if (count($schemeParts) !== count($endpointParts)) {
+            return false;
+        }
+
+        // Match scheme <-> endpoint
+        $endpointParams = [];
+        for ($i = 0; $i < count($schemeParts); $i++) {
+            if (strlen($schemeParts[$i]) > 0 && $schemeParts[$i][0] === ":") {
+                // Remove ID tag
+                $schemeParts[$i] = ltrim($schemeParts[$i], ":");
+
+                // Extract tag type if exists
+                $type = null;
+                if ($schemeParts[count($schemeParts)-1] === ">") {
+                    $schemeParts[$i] = rtrim($schemeParts[$i], ">");
+                    list($name, $type) = explode("<", $schemeParts[i]);
+                    $schemeParts[$i] = $name;
+                }
+
+                // Extract tag name and value
+                $name = $schemeParts[$i];
+                $value = $endpointParts[$i];
+
+                // Parse type
+                switch ($type) {
+                    case null:
+                    case "str":
+                    case "string":
+                        break; // Already a string
+
+                    case "int":
+                    case "integer":
+                        $value = intval($value);
+                        break;
+
+                    default:
+                        break; // Don't know how to parse it - keep as a string
+                }
+
+                // Add param
+                $endpointParams[$name] = $value;
+
+            // If not a parameter, and the parts don't match exactly, then fail
+            } else if ($schemeParts[$i] !== $endpointParts[$i]) {
+                return false;
+            }
+        }
+
+        $this->endpointScheme = $scheme;
+        $this->endpointParams = $endpointParams;
+    }
+
+    /* Getters
+    -------------------------------------------------- */
 
     /**
      * Return the HTTP method of the request.
@@ -167,7 +253,7 @@ class Request {
      * 
      * Private parameters are those passed in the body as url-encoded form data.
      * 
-     * @return array<string,string> The parameters for this request.
+     * @return array<string,string> The private parameters for this request.
      */
     public function privateParams() {
         return $this->privateParams;
@@ -178,7 +264,7 @@ class Request {
      * 
      * Private parameters are those passed in the body as url-encoded form data.
      * 
-     * @param string $name The name of the parameter to get.
+     * @param string $name The name of the private parameter to get.
      * @return string The value of the requested private parameter, or null if
      *   was not given.
      */
@@ -186,6 +272,41 @@ class Request {
         // Returns null if $name doesn't exist
         return isset($this->privateParams[$name]) ?
             $this->privateParams[$name] :
+            null;
+    }
+
+    /**
+     * Return the endpoint parameters for this request.
+     * 
+     * Endpoint parameters are those passed in the URL itself, eg.
+     * "/api/things/154" if parsed using the endpoint scheme
+     * "/api/things/:id<int>" will translate:
+     * - the endpoint into the endpoint scheme - "/api/things/:id<int>"
+     * - the endpoint params into ["id" => 154]
+     * 
+     * @return array<string,string> The endpoint parameters for this request.
+     */
+    public function endpointParams() {
+        return $this->endpointParams;
+    }
+
+    /**
+     * Return the given endpoint parameter for this request.
+     * 
+     * Endpoint parameters are those passed in the URL itself, eg.
+     * "/api/things/154" if parsed using the endpoint scheme
+     * "/api/things/:id<int>" will translate:
+     * - the endpoint into the endpoint scheme - "/api/things/:id<int>"
+     * - the endpoint params into ["id" => 154]
+     * 
+     * @param string $name The name of the endpoint parameter to get.
+     * @return string The value of the requested endpoint parameter, or null if
+     *   was not given.
+     */
+    public function endpointParam($name) {
+        // Returns null if $name doesn't exist
+        return isset($this->endpointParams[$name]) ?
+            $this->endpointParams[$name] :
             null;
     }
 

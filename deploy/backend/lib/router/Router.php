@@ -306,14 +306,47 @@ class Router {
      * resources.
      */
     public function dispatch() {
-        // Try normal request dispatch
-        $key = $this->request->endpoint();
-        $realKey = $this->resources->realKey($key, [
-            $this->resources->keyMatchesRegisteredMutator(),
-            $this->resources->firstOrDefaultMutator($key)
-        ]);
+        // Convert registered endpoint schemes to regexes
+        $registeredSchemeRegexs = Util::mapValues(
+            $this->resources->getKeys(),
+            function ($scheme) {
+                // Replace every scheme with the regex that matches it
+                return preg_replace("#/:[^/]*/#", "/:[^/]*/", $scheme);
+            },
+            false
+        );
 
+        // Create a mutator like Dispatcher::keyMatchesRegisteredMutator(), but
+        // that matches the regex-translated endpoint schemes (rather than the
+        // raw schemes) against the request.
+        $keyMatchesRegisteredSchemeMutator = function ($key) use (
+                $registeredSchemeRegexs
+        ) {
+            return Util::filterValues(
+                $registeredSchemeRegexs,
+                function ($registeredSchemeRegex) use ($key) {
+                    return preg_match("|^$registeredSchemeRegex$|", $key);
+                },
+                false
+            );
+        };
+
+        // Try normal dispatch
         try {
+            // Get the scheme that matches the requested endpoint
+            $key = $this->request->endpoint();
+            $realKey = $this->resources->realKey($key, [
+                $keyMatchesRegisteredSchemeMutator,
+                $this->resources->firstOrDefaultMutator(null)
+            ]);
+
+            // If any scheme matched, set the endpoint scheme in the request.
+            // This shouldn't fail if anything matched.
+            if ($realKey !== null) {
+                $this->request->setEndpointScheme($realKey);
+            }
+
+            // Dispatch
             $response = $this->resources->toKey($realKey, [$this->request]);
             $response->send();
             return;
