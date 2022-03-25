@@ -39,7 +39,7 @@ class Garages extends BasicResource{
 
             "get_one_full" => Dispatcher::funcToPipeOf([
                 function($request){
-                    return  [$request, $request->param("id")];
+                    return  [$request, $request->endpointParam("id")];
                 },
                 function($request, $id) use ($dao){
                     $garage = $dao->getGarage($id);
@@ -100,7 +100,7 @@ class Garages extends BasicResource{
         parent::__construct([
             "GET" => $getAction(
                 function ($request) {
-                    if ($request->param("id") !== null) {
+                    if ($request->endpointParam("id") !== null) {
                         return "get_one_full";
                     }
                     return "get_all_simple";
