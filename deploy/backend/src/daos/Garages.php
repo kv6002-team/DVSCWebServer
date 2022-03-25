@@ -26,7 +26,7 @@ class Garages{
      */
     public function getGarage($id){
         return $this->db->fetch(
-            "SELECT Garage.id as id,"
+            "SELECT Garage.id,"
             ."   vts,"
             ."   name,"
             ."   ownerName,"
@@ -37,7 +37,7 @@ class Garages{
             ."   passwordResetRequired"
             ." FROM Garage"
             ." JOIN User ON Garage.id = User.id"
-            ." WHERE id = :id",
+            ." WHERE Garage.id = :id",
             ["id" => $id],
             domain\Garage::class,
             null,
@@ -65,7 +65,7 @@ class Garages{
      */
     public function getGarages(){
         return $this->db->fetchAll(
-            "SELECT Garage.id as id,"
+            "SELECT Garage.id,"
             ."   vts,"
             ."   name,"
             ."   ownerName,"
