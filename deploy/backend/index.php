@@ -75,9 +75,9 @@ $garageConsultantsRes = new resources\GarageConsultants($db);
 $router->register("/api/garage-consultants", $garageConsultantsRes);
 $router->register("/api/garage-consultants/:id<int>", $garageConsultantsRes);
 
-$garageRes = new resources\GarageConsultants($db);
-$router->register("/api/garage-consultants", $garageRes);
-$router->register("/api/garage-consultants/:id<int>", $garageRes);
+$garageRes = new resources\Garages($db);
+$router->register("/api/garages", $garageRes);
+$router->register("/api/garages/:id<int>", $garageRes);
 
 /* Dispatch Request
 -------------------------------------------------- */

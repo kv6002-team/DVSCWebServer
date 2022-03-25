@@ -32,7 +32,7 @@ class Garages extends BasicResource{
                 },
                 JSONBuilder::typeSelector(
                     function($request, $garages){
-                        return $this->view->simpleGarages();
+                        return $this->view->simpleGarages($garages);
                     }
                 )
             ]),
@@ -51,7 +51,7 @@ class Garages extends BasicResource{
                     return  [$request, $garage];
                 },
                 JSONBuilder::typeSelector(
-                    funtion($request, $garage){
+                    function($request, $garage){
                         return $this->view->garage($garage);
                     }
                 )

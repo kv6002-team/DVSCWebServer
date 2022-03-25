@@ -321,7 +321,7 @@ class Router {
                 false
             );
         };
-
+        
         // Try normal dispatch
         try {
             // Get the scheme that matches the requested endpoint

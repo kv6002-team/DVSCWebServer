@@ -13,7 +13,7 @@ use kv6002\domain;
 class Garages{
     private $db;
 
-    public funtion __construct($db){
+    public function __construct($db){
         $this->db = $db;
     }
 
@@ -76,7 +76,7 @@ class Garages{
             ."   passwordResetRequired"
             ." FROM Garage"
             ." JOIN User ON Garage.id = User.id",
-            ["id" => $id],
+            null,
             domain\Garage::class,
             null,
             [
