@@ -46,17 +46,17 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                     return [$request, $request->param("id")];
                 },
                 function ($request, $id) use ($dao) {
-                    $consultants = $dao->getGarageConsultant($id);
-                    if ($consultants === null) {
+                    $consultant = $dao->getGarageConsultant($id);
+                    if ($consultant === null) {
                         throw new HTTPError(404,
                             "Requested garage consultant does not exist"
                         );
                     }
-                    return [$request, $consultants];
+                    return [$request, $consultant];
                 },
                 JSONBuilder::typeSelector(
-                    function ($request, $consultants) {
-                        return $this->view->garageConsultants($consultants);
+                    function ($request, $consultant) {
+                        return $this->view->garageConsultant($consultant);
                     }
                 )
             ]),

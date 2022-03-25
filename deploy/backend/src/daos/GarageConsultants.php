@@ -26,13 +26,13 @@ class GarageConsultants {
      */
     public function getGarageConsultant($id) {
         return $this->db->fetch(
-            "SELECT DISTINCT GarageConsultant.id as id,"
+            "SELECT DISTINCT GarageConsultant.id,"
             ."   emailAddress,"
             ."   password,"
             ."   passwordResetRequired"
             ." FROM GarageConsultant"
             ." JOIN User ON GarageConsultant.id = User.id"
-            ." WHERE id = :id",
+            ." WHERE GarageConsultant.id = :id",
             ["id" => $id],
             domain\GarageConsultant::class,
             null,
@@ -54,7 +54,7 @@ class GarageConsultants {
      */
     public function getGarageConsultantByUsername($username) {
         return $this->db->fetch(
-            "SELECT DISTINCT GarageConsultant.id as id,"
+            "SELECT DISTINCT GarageConsultant.id,"
             ."   emailAddress,"
             ."   password,"
             ."   passwordResetRequired"
@@ -81,7 +81,7 @@ class GarageConsultants {
      */
     public function getGarageConsultants() {
         return $this->db->fetchAll(
-            "SELECT DISTINCT GarageConsultant.id as id,"
+            "SELECT DISTINCT GarageConsultant.id,"
             ."   emailAddress,"
             ."   password,"
             ."   passwordResetRequired"
