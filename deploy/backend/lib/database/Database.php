@@ -4,6 +4,7 @@
  * 
  * Currently supports the following databases (remember: your SQL is still
  * database-specific):
+ * - MySQL
  * - SQLite
  * 
  * A Database takes ConnectionInfo and can connect to and disconnect from the
