@@ -67,7 +67,7 @@ $router->registerGlobalError(
 
 // Including any endpoint-specific error resources
 
-$router->register("/api/ping", new resources\Ping());
+$router->register("/api/ping/:hello<int>", new resources\Ping());
 
 $router->register("/api/auth", new resources\Authenticate($db, $authenticator));
 

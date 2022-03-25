@@ -306,25 +306,16 @@ class Router {
      * resources.
      */
     public function dispatch() {
-        // Convert registered endpoint schemes to regexes
-        $registeredSchemeRegexs = Util::mapValues(
-            $this->resources->getKeys(),
-            function ($scheme) {
-                // Replace every scheme with the regex that matches it
-                return preg_replace("#/:[^/]*/#", "/:[^/]*/", $scheme);
-            },
-            false
-        );
-
         // Create a mutator like Dispatcher::keyMatchesRegisteredMutator(), but
         // that matches the regex-translated endpoint schemes (rather than the
         // raw schemes) against the request.
-        $keyMatchesRegisteredSchemeMutator = function ($key) use (
-                $registeredSchemeRegexs
-        ) {
+        $keyMatchesRegisteredSchemeMutator = function ($key) {
             return Util::filterValues(
-                $registeredSchemeRegexs,
-                function ($registeredSchemeRegex) use ($key) {
+                $this->resources->getKeys(),
+                function ($registeredScheme) use ($key) {
+                    $registeredSchemeRegex = preg_replace(
+                        "|:[^/]*|", "[^/]*", $registeredScheme
+                    );
                     return preg_match("|^$registeredSchemeRegex$|", $key);
                 },
                 false
