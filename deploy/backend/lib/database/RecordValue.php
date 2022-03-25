@@ -16,7 +16,7 @@ namespace database;
  * @see Database
  * @author William Taylor (19009576)
  */
-class RecordValue implements Value {
+class RecordValue implements ArgumentSpec {
     private $values;
     private $default;
 
@@ -32,15 +32,10 @@ class RecordValue implements Value {
         $this->default = $default;
     }
 
-    /* Implement Value
-    -------------------------------------------------- */
+    /* Implement ArgumentSpec
+    -------------------- */
 
-    /**
-     * Get the actual constructor parameter for the given primary object ID.
-     * 
-     * @param mixed $id The primary object ID for the object to construct.
-     */
-    public function getFor($id) {
+    public function getValue($record, $id) {
         if (!array_key_exists($id, $this->values)) {
             return $this->default;
         }
