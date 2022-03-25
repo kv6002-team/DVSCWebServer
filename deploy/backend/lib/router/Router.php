@@ -331,10 +331,17 @@ class Router {
                 $this->resources->firstOrDefaultMutator(null)
             ]);
 
-            // If any scheme matched, set the endpoint scheme in the request.
-            // This shouldn't fail if anything matched.
+            // If any scheme matched, try to set the endpoint scheme in the
+            // request.
             if ($realKey !== null) {
-                $this->request->setEndpointScheme($realKey);
+                $success = $this->request->setEndpointScheme($realKey);
+                if (!$success) {
+                    throw new HTTPError(404,
+                        "Resource at '{$this->request->endpoint()}' not found: "
+                        ."validation against resource endpoint scheme "
+                        ."'$realKey' failed"
+                    );
+                }
             }
 
             // Dispatch

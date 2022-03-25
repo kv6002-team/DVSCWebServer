@@ -168,9 +168,9 @@ class Request {
 
                 // Extract tag type if exists
                 $type = null;
-                if ($schemeParts[count($schemeParts)-1] === ">") {
+                if ($schemeParts[$i][strlen($schemeParts[$i])-1] === ">") {
                     $schemeParts[$i] = rtrim($schemeParts[$i], ">");
-                    list($name, $type) = explode("<", $schemeParts[i]);
+                    list($name, $type) = explode("<", $schemeParts[$i]);
                     $schemeParts[$i] = $name;
                 }
 
@@ -187,6 +187,9 @@ class Request {
 
                     case "int":
                     case "integer":
+                        if (!is_numeric($value) || str_contains($value, ".")) {
+                            return false;
+                        }
                         $value = intval($value);
                         break;
 
@@ -205,6 +208,7 @@ class Request {
 
         $this->endpointScheme = $scheme;
         $this->endpointParams = $endpointParams;
+        return true;
     }
 
     /* Getters
