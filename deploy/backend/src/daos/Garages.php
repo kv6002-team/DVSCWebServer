@@ -3,6 +3,7 @@ namespace kv6002\daos;
 
 use database\Field;
 
+use kv6002\standard;
 use kv6002\domain;
 
 /**
@@ -46,22 +47,18 @@ class Garages{
                 new Field("name"),
                 new Field("ownerName"),
                 new Field("emailAddress"),
-                new Field("telephoneNum"),
-                new Field("paidUntil"),
+                new Field("telephoneNumber"),
+                new Field("paidUntil", [standard\DateTime::class, "parse"]),
                 new Field("password"),
                 new Field("passwordResetRequired")
-
             ]
-
         );
     } 
 
     /**
-     * 
      * Return all Garages in the database.
      * 
      * @return Garage A Garage object for that Garage
-     * 
      */
     public function getGarages(){
         return $this->db->fetchAll(
@@ -84,13 +81,11 @@ class Garages{
                 new Field("name"),
                 new Field("ownerName"),
                 new Field("emailAddress"),
-                new Field("telephoneNum"),
-                new Field("paidUntil"),
+                new Field("telephoneNumber"),
+                new Field("paidUntil", [standard\DateTime::class, "parse"]),
                 new Field("password"),
                 new Field("passwordResetRequired")
-
             ]
-
         );
     }
 

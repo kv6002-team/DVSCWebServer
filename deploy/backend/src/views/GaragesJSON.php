@@ -1,6 +1,8 @@
 <?php
 namespace kv6002\views;
 
+use kv6002\standard;
+
 /**
  * @author Callum
  */
@@ -27,7 +29,7 @@ namespace kv6002\views;
             "ownerName" => "(string) The name of the Garage's owner",
             "emailAddress" => "(string) The email address for the Garage",
             "telephoneNumber" => "(string) The telephone number for the garage",
-            "paidUntil" => "(DateTime) The date up to which the Garage has paid"
+            "paidUntil" => "(string) The date up to which the Garage has paid"
         ];
     }
 
@@ -47,7 +49,7 @@ namespace kv6002\views;
             "ownerName" => $garage->ownerName(),
             "emailAddress" => $garage->emailAddress(),
             "telephoneNumber" => $garage->telephoneNumber(),
-            "paidUntil" => $garage->paidUntil()
+            "paidUntil" => standard\DateTime::format($garage->paidUntil())
         ];
     }
 
