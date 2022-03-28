@@ -1,31 +1,31 @@
- <?php
+<?php
 namespace kv6002\resources;
 
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
 use kv6002\standard\builders\JSONBuilder;
+use kv6002\standard\builders\NoContentBuilder;
+use kv6002\standard\DateTime;
 
 use kv6002\daos;
 use kv6002\views;
 
 /**
- * 
  * provide a list of garages
  * 
  * @author Callum
  */
-class Garages extends BasicResource{
-    public function __construct($db){
+class Garages extends BasicResource {
+    public function __construct($db) {
         $dao = new daos\Garages($db);
 
         $this->view = new views\GaragesJSON();
-        
-        
+
         $actions = [
             "get_all_simple" => Dispatcher::funcToPipeOf([
                 function($request) use ($dao){
-                    return  [
+                    return [
                         $request,
                         $dao->getGarages()
                     ];
@@ -39,7 +39,7 @@ class Garages extends BasicResource{
 
             "get_one_full" => Dispatcher::funcToPipeOf([
                 function($request){
-                    return  [$request, $request->endpointParam("id")];
+                    return [$request, $request->endpointParam("id")];
                 },
                 function($request, $id) use ($dao){
                     $garage = $dao->getGarage($id);
@@ -48,7 +48,7 @@ class Garages extends BasicResource{
                             "Requested Garage does not exist"
                         );
                     }
-                    return  [$request, $garage];
+                    return [$request, $garage];
                 },
                 JSONBuilder::typeSelector(
                     function($request, $garage){
@@ -58,90 +58,75 @@ class Garages extends BasicResource{
             ]),
 
             "create" => Dispatcher::funcToPipeOf([
+                // Extract and Validate Input
                 function ($request) {
-                    $vts = $request->privateParam("vts");
-                    if($vts === null){
+                    // Utility
+                    $requiredPrivateParam = function ($name) use ($request) {
+                        $value = $request->privateParam($name);
+                        if ($value === null) {
+                            throw new HTTPError(422,
+                                "Must provide $name parameter"
+                            );
+                        }
+                        return $value;
+                    };
+
+                    // Extract
+                    $garageData = [
+                        "vts" => $requiredPrivateParam("vts"),
+                        "name" => $requiredPrivateParam("name"),
+                        "ownerName" => $requiredPrivateParam("ownerName"),
+                        "emailAddress" => $requiredPrivateParam("emailAddress"),
+                        "telephoneNumber" => $requiredPrivateParam(
+                            "telephoneNumber"
+                        ),
+                        "paidUntil" => $requiredPrivateParam("paidUntil")
+                    ];
+                    $password = $requiredPrivateParam("password");
+
+                    // Validate
+                    try {
+                        $garageData["paidUntil"] = DateTime::parse(
+                            $garageData["paidUntil"]
+                        );
+                    } catch (Exception $e) {
                         throw new HTTPError(422,
-                            "Must provide vts parameter"
+                            "Must provide paidUntil in a correct format (eg."
+                            ." YYYY-MM-DD HH:MM:SS)"
                         );
                     }
 
-                    $name = $request->privateParam("name");
-                    if($name === null){
-                        throw new HTTPError(422,
-                            "Must provide name parameter"
-                        );
-                    }
-
-                    $ownerName = $request->privateParam("ownerName");
-                    if($ownerName === null){
-                        throw new HTTPError(422,
-                            "Must provide ownerName parameter"
-                        );
-                    }
-
-                    $emailAddress = $request->privateParam("emailAddress");
-                    if($emailAddress === null){
-                        throw new HTTPError(422,
-                            "Must provide emailAddress parameter"
-                        );
-                    }
-
-                    $telephoneNumber = $request->privateParam("telephoneNumber");
-                    if($telephoneNumber === null){
-                        throw new HTTPError(422,
-                            "Must provide telephoneNumber parameter"
-                        );
-                    }
-
-                    $paidUntil = $request->privateParam("paidUntil");
-                    if($paidUntil === null){
-                        throw new HTTPError(422,
-                            "Must provide paidUntil parameter"
-                        );
-                    }
-                    
-                    try{
-                        $paidUntil = standard\DateTime::parse($paidUntil);
-                    }catch(Exception $e){
-                        throw new HTTPError(422,
-                            "Must provide paidUntil in a correct format (e.g. YYYY-MM-DD HH:MM:SS)"
-                        );
-                    }
-                    
-        
-
-                    $password = $request->privateParam("password");
-                    if($paidUntil === null){
+                    if ($password === null) {
                         throw new HTTPError(422,
                             "Must provide password parameter"
                         );
                     }
 
-                    return  [
-                                $request, 
-                                $vts, 
-                                $name, 
-                                $ownerName, 
-                                $emailAddress, 
-                                $telephoneNumber, 
-                                $paidUntil, 
-                                $password
-                            ];
+                    // Return
+                    return [
+                        $request,
+                        $garageData,
+                        $password
+                    ];
                 },
-                function ($request, $vts, $name, $ownerName, $emailAddress, $telephoneNumber, $paidUntil, $password) use ($dao) {
+
+                // Process Request
+                function (
+                        $request,
+                        $garageData,
+                        $password
+                ) use ($dao) {
                     $dao->createGarage(
-                        $vts,
-                        $name, 
-                        $ownerName, 
-                        $emailAddress,
-                        $telephoneNumber, 
-                        $paidUntil,
-                        password_hash($password, PASSWORD_DEFAULT),
-                        false
+                        ...$garageData,
+                        ...[
+                            password_hash($password, PASSWORD_DEFAULT),
+                            false
+                        ]
                     );
                     return [$request];
                 },
+
+                // Return Success
                 new NoContentBuilder()
             ]),
 
@@ -161,6 +146,7 @@ class Garages extends BasicResource{
                     return [$request];
                 },
                 new NoContentBuilder()
+            ])
         ];
 
         /**
@@ -206,9 +192,11 @@ class Garages extends BasicResource{
                     }
                     return "get_all_simple";
                 }
-            )
+            ),
+
+            "POST" => $getAction("create"),
+            "OPTIONS" => $getAction("cors_preflight")
         ]);
-    
     }
 
     /* Implement Resource (Override BasicResource)
@@ -223,8 +211,5 @@ class Garages extends BasicResource{
         return "application/json";
     }
 
-    
-
     //TODO: add metadata
-
 }
