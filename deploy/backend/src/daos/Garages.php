@@ -127,14 +127,14 @@ class Garages{
         $id = $this->db->fetch("SELECT max(id) as maxID FROM User")->maxID;
 
         $this->db->execute(
-            "INSERT INTO Garage (id, vts, name, ownerName, emailAddress, telephoneNum, paidUntil)"
+            "INSERT INTO Garage (id, vts, name, ownerName, emailAddress, telephoneNumber, paidUntil)"
             ." VALUES ("
             ."   :id,"
             ."   :vts,"
             ."   :name,"
             ."   :ownerName,"
             ."   :emailAddress,"
-            ."   :telephoneNum,"
+            ."   :telephoneNumber,"
             ."   :paidUntil"
             ." )",
             [
@@ -142,9 +142,9 @@ class Garages{
                 "vts" => $vts,
                 "name" => $name,
                 "ownerName" => $ownerName
-                "emailAddress" => $emailAddress
-                "telephoneNum" => $telephoneNum
-                "paidUntil" => $paidUntil
+                "emailAddress" => $emailAddress,
+                "telephoneNumber" => $telephoneNumber,
+                "paidUntil" => standard\DateTime::format($paidUntil);
             ]
         );
         $this->$db->execute("COMMIT");
