@@ -100,6 +100,16 @@ class Garages extends BasicResource{
                             "Must provide paidUntil parameter"
                         );
                     }
+                    
+                    try{
+                        $paidUntil = standard\DateTime::parse($paidUntil);
+                    }catch(Exception $e){
+                        throw new HTTPError(422,
+                            "Must provide paidUntil in a correct format (e.g. YYYY-MM-DD HH:MM:SS)"
+                        );
+                    }
+                    
+        
 
                     $password = $request->privateParam("password");
                     if($paidUntil === null){
