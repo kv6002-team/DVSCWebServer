@@ -29,7 +29,6 @@ final class Garage extends User {
      * @param string $telephoneNumber The telephone number for the Garage.
      * @param DateTime $paidUntil The date up to which the Garage has paid. If
      *   this is before now, then payment is overdue.
-     * 
      * @param string $password The Garage's hashed password.
      * @param bool $passwordResetRequired Whether the Garage must reset their
      *   password before being allowed to make any further API requests.
