@@ -182,7 +182,7 @@ class Garages{
             $paidUntil,
             $password,
             $passwordResetRequired
-    ){
+    ) {
         $this->db->execute(
             "INSERT INTO User (password, passwordResetRequired)"
             ." VALUES ("
@@ -197,8 +197,15 @@ class Garages{
         $id = $this->db->fetch("SELECT max(id) as maxID FROM User")->maxID;
 
         $this->db->execute(
-            "INSERT INTO Garage (id, vts, name, ownerName, emailAddress, telephoneNumber, paidUntil)"
-            ." VALUES ("
+            "INSERT INTO Garage ("
+            ."   id,"
+            ."   vts,"
+            ."   name,"
+            ."   ownerName,"
+            ."   emailAddress,"
+            ."   telephoneNumber,"
+            ."   paidUntil"
+            ." ) VALUES ("
             ."   :id,"
             ."   :vts,"
             ."   :name,"
@@ -211,13 +218,12 @@ class Garages{
                 "id" => $id,
                 "vts" => $vts,
                 "name" => $name,
-                "ownerName" => $ownerName
+                "ownerName" => $ownerName,
                 "emailAddress" => $emailAddress,
                 "telephoneNumber" => $telephoneNumber,
-                "paidUntil" => standard\DateTime::format($paidUntil);
+                "paidUntil" => standard\DateTime::format($paidUntil)
             ]
         );
-        $this->$db->execute("COMMIT");
+        $this->db->execute("COMMIT");
     }
-
 }

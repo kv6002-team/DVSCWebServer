@@ -154,7 +154,8 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                 }
             ),
 
-            "POST" => $getAction("create")
+            "POST" => $getAction("create"),
+            "OPTIONS" => $getAction("cors_preflight")
         ]);
     }
 
