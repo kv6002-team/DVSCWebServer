@@ -49,10 +49,24 @@ use kv6002\standard;
             "ownerName" => $garage->ownerName(),
             "emailAddress" => $garage->emailAddress(),
             "telephoneNumber" => $garage->telephoneNumber(),
-            "paidUntil" => standard\DateTime::format($garage->paidUntil())
+            "paidUntil" => standard\DateTime::format($garage->paidUntil()),
+
+            "instruments" => array_map(function ($instrument) {
+                return [
+                    "id" => $instrument->id(),
+                    "name" => $instrument->name(),
+                    "serialNumber" => $instrument->serialNumber(),
+                    "officialCheckExpiryDate" => standard\DateTime::format(
+                        $instrument->officialCheckExpiryDate()
+                    ),
+                    "ourCheckStatus" => $instrument->ourCheckStatus(),
+                    "ourCheckDate" => standard\DateTime::format(
+                        $instrument->ourCheckDate()
+                    )
+                ];
+            }, $garage->instruments())
         ];
     }
-
 
     /**
      * Return JSON view of SimpleGarages as a JSON-encodable 

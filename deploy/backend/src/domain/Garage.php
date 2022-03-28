@@ -17,6 +17,8 @@ final class Garage extends User {
     private $telephoneNumber;
     private $paidUntil;
 
+    private $instruments;
+
     /**
      * Create a new garage.
      * 
@@ -29,6 +31,10 @@ final class Garage extends User {
      * @param string $telephoneNumber The telephone number for the Garage.
      * @param DateTime $paidUntil The date up to which the Garage has paid. If
      *   this is before now, then payment is overdue.
+     * 
+     * @param array<Instrument> $instruments The list of instruments this garage
+     *   owns.
+     * 
      * @param string $password The Garage's hashed password.
      * @param bool $passwordResetRequired Whether the Garage must reset their
      *   password before being allowed to make any further API requests.
@@ -41,6 +47,8 @@ final class Garage extends User {
             $telephoneNumber,
             $paidUntil,
 
+            $instruments,
+
             $password,
             $passwordResetRequired
     ) {
@@ -52,6 +60,8 @@ final class Garage extends User {
         $this->emailAddress = $emailAddress;
         $this->telephoneNumber = $telephoneNumber;
         $this->paidUntil = $paidUntil;
+
+        $this->instruments = $instruments;
     }
 
     /**
@@ -110,6 +120,15 @@ final class Garage extends User {
      */
     public function paidUntil() {
         return $this->paidUntil;
+    }
+
+    /**
+     * Get the list of instruments this garage owns.
+     * 
+     * @return array<Instrument> The list of instruments this garage owns.
+     */
+    public function instruments() {
+        return $this->instruments;
     }
     
     /* Implement User

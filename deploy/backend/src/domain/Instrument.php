@@ -20,12 +20,28 @@ final class Instrument {
 
     private $name;
     private $serialNumber;
-    private $checkExpiryDate;
-    private $checkStatus;
+    private $officialCheckExpiryDate;
+    private $ourCheckStatus;
+    private $ourCheckDate;
 
-    // Valid status values
-    public const SATISFACTORY = 'satisfactory';
-    public const UNSATISFACTORY = 'unsatisfactory';
+    // Valid ourCheckStatus values
+    public const CHECKED_SATISFACTORY = 'checked_satisfactory';
+    public const CHECKED_UNSATISFACTORY = 'checked_unsatisfactory';
+    public const UNCHECKED = 'unchecked';
+
+    public static function parseOurCheckStatus($ourCheckStatus) {
+        switch ($ourCheckStatus) {
+            case Instrument::CHECKED_SATISFACTORY:
+            case Instrument::CHECKED_UNSATISFACTORY:
+            case Instrument::UNCHECKED:
+                return $ourCheckStatus;
+
+            default:
+                throw new \InvalidArgumentException(
+                    "Invalid check status: '$ourCheckStatus'"
+                );
+        }
+    }
 
     /**
      * Create a new instrument.
@@ -34,28 +50,26 @@ final class Instrument {
      *   explanatory enough that the garage owner can uniquely identify each of
      *   their devices by name.
      * @param string $serialNumber The Instrument's serial number.
-     * @param DateTime $checkExpiryDate The date the checkStatus becomes invalid
-     *   (and so ignored).
-     * @param string checkStatus The status of the instrument's last check.
-     *   Either 'satisfactory' or 'unsatisfactory'.
+     * @param DateTime $officialCheckExpiryDate The date by which the Instrument
+     *   must be officially checked again.
+     * @param string $ourCheckStatus The status of the Instrument's last
+     *   unofficial check. One of 'checked_satisfactory',
+     *   'checked_unsatisfactory', or 'unchecked'.
+     * @param DateTime $ourCheckDate The date the Instrument was last
+     *   unofficially checked.
      */
     public function __construct(
             $name,
             $serialNumber,
-            $checkExpiryDate,
-            $checkStatus
+            $officialCheckExpiryDate,
+            $ourCheckStatus,
+            $ourCheckDate
     ) {
         $this->name = $name;
         $this->serialNumber = $serialNumber;
-        $this->checkExpiryDate = $checkExpiryDate;
-
-        if (!self::isValidStatus($checkStatus)) {
-            throw new InvalidArgumentException(
-                "Invalid status given, must be either 'satisfactory' or "+
-                "'unsatisfactory'"
-            );
-        }
-        $this->checkStatus = $checkStatus;
+        $this->officialCheckExpiryDate = $officialCheckExpiryDate;
+        $this->ourCheckStatus = self::parseOurCheckStatus($ourCheckStatus);
+        $this->ourCheckDate = $ourCheckDate;
     }
 
     /**
@@ -86,44 +100,36 @@ final class Instrument {
     }
 
     /**
-     * Get the date that the check status becomes invalid (and so after which
-     *   the check status should be ignored and an 'unchecked' status be
-     *   assumed).
+     * Get the date that the next official check must be done by.
      * 
-     * @return DateTime The date that the check status becomes invalid.
+     * @return DateTime The date that the next official check must be done by.
      */
-    public function checkExpiryDate() {
-        return $this->checkExpiryDate;
+    public function officialCheckExpiryDate() {
+        return $this->officialCheckExpiryDate;
     }
 
     /**
-     * Get whether the User must change their password before being allowed to
-     * make any further API requests.
+     * Get the status of the unofficial check.
      * 
-     * @return bool Whether the User is allowed to make API requests other than
-     *   a password change request.
+     * Will be one of:
+     * - 'checked_satisfactory' - The unofficial check has been carried out, and
+     *   the instrument was deemed in satisfactory condition.
+     * - 'checked_unsatisfactory' - The unofficial check has been carried out,
+     *   and the instrument was not deemed in satisfactory condition.
+     * - 'unchecked' - The unnoficial check has not yet been carried out.
+     * 
+     * @return string The status of the unofficial check.
      */
-    public function isCheckSatisfactory() {
-        return $this->checkStatus === self::SATISFACTORY;
+    public function ourCheckStatus() {
+        return $this->ourCheckStatus;
     }
     
-    /* Utils
-    -------------------------------------------------- */
-
     /**
-     * Check if the given string is a valid status.
+     * Get the date that the last unofficial check was carried out.
      * 
-     * @param string $status The status string to test.
-     * @return bool True if $status is a valid status, false otherwise.
+     * @return DateTime The date that the last unofficial check was carried out.
      */
-    private static function isValidStatus($status) {
-        return !in_array(
-            $checkStatus,
-            [
-                self::SATISFACTORY,
-                self::UNSATISFACTORY
-            ],
-            true
-        );
+    public function ourCheckDate() {
+        return $this->ourCheckDate;
     }
 }
