@@ -1,4 +1,4 @@
-<?php
+ <?php
 namespace kv6002\resources;
 
 use dispatcher\Dispatcher;
@@ -57,9 +57,110 @@ class Garages extends BasicResource{
                 )
             ]),
 
-            //TODO : create action
-            
-            //TODO : cors_preflight action
+            "create" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    $vts = $request->privateParam("vts");
+                    if($vts === null){
+                        throw new HTTPError(422,
+                            "Must provide vts parameter"
+                        );
+                    }
+
+                    $name = $request->privateParam("name");
+                    if($name === null){
+                        throw new HTTPError(422,
+                            "Must provide name parameter"
+                        );
+                    }
+
+                    $ownerName = $request->privateParam("ownerName");
+                    if($ownerName === null){
+                        throw new HTTPError(422,
+                            "Must provide ownerName parameter"
+                        );
+                    }
+
+                    $emailAddress = $request->privateParam("emailAddress");
+                    if($emailAddress === null){
+                        throw new HTTPError(422,
+                            "Must provide emailAddress parameter"
+                        );
+                    }
+
+                    $telephoneNumber = $request->privateParam("telephoneNumber");
+                    if($telephoneNumber === null){
+                        throw new HTTPError(422,
+                            "Must provide telephoneNumber parameter"
+                        );
+                    }
+
+                    $paidUntil = $request->privateParam("paidUntil");
+                    if($paidUntil === null){
+                        throw new HTTPError(422,
+                            "Must provide paidUntil parameter"
+                        );
+                    }
+                    
+                    try{
+                        $paidUntil = standard\DateTime::parse($paidUntil);
+                    }catch(Exception $e){
+                        throw new HTTPError(422,
+                            "Must provide paidUntil in a correct format (e.g. YYYY-MM-DD HH:MM:SS)"
+                        );
+                    }
+                    
+        
+
+                    $password = $request->privateParam("password");
+                    if($paidUntil === null){
+                        throw new HTTPError(422,
+                            "Must provide password parameter"
+                        );
+                    }
+
+                    return  [
+                                $request, 
+                                $vts, 
+                                $name, 
+                                $ownerName, 
+                                $emailAddress, 
+                                $telephoneNumber, 
+                                $paidUntil, 
+                                $password
+                            ];
+                },
+                function ($request, $vts, $name, $ownerName, $emailAddress, $telephoneNumber, $paidUntil, $password) use ($dao) {
+                    $dao->createGarage(
+                        $vts,
+                        $name, 
+                        $ownerName, 
+                        $emailAddress,
+                        $telephoneNumber, 
+                        $paidUntil,
+                        password_hash($password, PASSWORD_DEFAULT),
+                        false
+                    );
+                    return [$request];
+                },
+                new NoContentBuilder()
+            ]),
+
+            "cors_preflight" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    $origin = $request->header("Origin");
+                    $corsMethod =
+                        $request->header("Access-Control-Request-Method");
+
+                    if ($origin === null || $corsMethod === null) {
+                        throw new HTTPError(405,
+                            "OPTIONS is only supported for CORS preflight"
+                            ." requests"
+                        );
+                    }
+
+                    return [$request];
+                },
+                new NoContentBuilder()
         ];
 
         /**

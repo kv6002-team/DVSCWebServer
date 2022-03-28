@@ -89,6 +89,65 @@ class Garages{
         );
     }
 
-    //TODO : Garage Creation
+    
+    /**
+     * Add Garage to ther database
+     * 
+     * @param string $vts The VTS number for the Garage
+     * @param string $name The name of the Garage
+     * @param string $ownerName The name of the owner of the Garage
+     * @param string $emailAddress The email address of the Garage
+     * @param string $telephoneNumber The telephone number of the Garage
+     * @param string $paidUntil The date of which the garage has paid until
+     * @param string $password The hashed password for the new consultant.
+     * @param bool $passwordResetRequired Whether the new User must reset
+     * 
+     */
+    public function createGarage(
+            $vts,
+            $name,
+            $ownerName,
+            $emailAddress,
+            $telephoneNumber,
+            $paidUntil,
+            $password,
+            $passwordResetRequired
+    ){
+        $this->db->execute(
+            "INSERT INTO User (password, passwordResetRequired)"
+            ." VALUES ("
+            ."   :password,"
+            ."   :passwordResetRequired"
+            ." )",
+            [
+                "password" => $password,
+                "passwordResetRequired" => $passwordResetRequired    
+            ]
+        );
+        $id = $this->db->fetch("SELECT max(id) as maxID FROM User")->maxID;
+
+        $this->db->execute(
+            "INSERT INTO Garage (id, vts, name, ownerName, emailAddress, telephoneNumber, paidUntil)"
+            ." VALUES ("
+            ."   :id,"
+            ."   :vts,"
+            ."   :name,"
+            ."   :ownerName,"
+            ."   :emailAddress,"
+            ."   :telephoneNumber,"
+            ."   :paidUntil"
+            ." )",
+            [
+                "id" => $id,
+                "vts" => $vts,
+                "name" => $name,
+                "ownerName" => $ownerName
+                "emailAddress" => $emailAddress,
+                "telephoneNumber" => $telephoneNumber,
+                "paidUntil" => standard\DateTime::format($paidUntil);
+            ]
+        );
+        $this->$db->execute("COMMIT");
+    }
 
 }
