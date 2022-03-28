@@ -2,12 +2,14 @@
 namespace kv6002\daos;
 
 use database\Field;
+use database\RecordValue;
+use database\Database;
 
 use kv6002\standard;
 use kv6002\domain;
 
 /**
- * Allows retrieving garages
+ * Allows retrieving garages.
  * 
  * @author Callum
  */
@@ -19,13 +21,47 @@ class Garages{
     }
 
     /**
-     * Return a Garage object for the Garage within the database 
-     * with a given ID 
+     * Return a Garage object for the Garage within the database with a given
+     * ID.
      * 
-     * @param int $id The ID of the Garage to fetch
-     * @return Garage A Garage object for that garage
+     * @param int $id The ID of the Garage to fetch.
+     * @return Garage A Garage object for that garage, including the list of
+     *   Instruments that Garage manages.
      */
-    public function getGarage($id){
+    public function getGarage($id) {
+        // Some of these could throw InvalidArgumentException (parse
+        // ourCheckStatus) or Exception (parse DateTime). These will be caught
+        // by the global error handler and a 500 error emitted.
+
+        $instruments = $this->db->fetchAll(
+            "SELECT Instrument.id,"
+            ."   garageID,"
+            ."   name,"
+            ."   serialNumber,"
+            ."   officialCheckExpiryDate,"
+            ."   ourCheckStatus,"
+            ."   ourCheckDate"
+            ." FROM Instrument"
+            ." WHERE garageID = :garageID",
+            ["garageID" => $id],
+            domain\Instrument::class,
+            null,
+            [
+                new Field("name"),
+                new Field("serialNumber"),
+
+                new Field("officialCheckExpiryDate",
+                    [standard\DateTime::class, "parse"]),
+
+                new Field("ourCheckStatus",
+                    [domain\Instrument::class, "parseOurCheckStatus"]),
+
+                new Field("ourCheckDate",
+                    [standard\DateTime::class, "parse"])
+            ]
+        );
+        $instrumentsByGarage = Database::groupByFKey($instruments, "garageID");
+
         return $this->db->fetch(
             "SELECT Garage.id,"
             ."   vts,"
@@ -49,6 +85,7 @@ class Garages{
                 new Field("emailAddress"),
                 new Field("telephoneNumber"),
                 new Field("paidUntil", [standard\DateTime::class, "parse"]),
+                new RecordValue($instrumentsByGarage, []),
                 new Field("password"),
                 new Field("passwordResetRequired")
             ]
@@ -58,9 +95,41 @@ class Garages{
     /**
      * Return all Garages in the database.
      * 
-     * @return Garage A Garage object for that Garage
+     * @return Garage A Garage object for that Garage.
      */
-    public function getGarages(){
+    public function getGarages() {
+        // Some of these could throw InvalidArgumentException (parse
+        // ourCheckStatus) or Exception (parse DateTime). These will be caught
+        // by the global error handler and a 500 error emitted.
+
+        $instruments = $this->db->fetchAll(
+            "SELECT Instrument.id,"
+            ."   garageID,"
+            ."   name,"
+            ."   serialNumber,"
+            ."   officialCheckExpiryDate,"
+            ."   ourCheckStatus,"
+            ."   ourCheckDate"
+            ." FROM Instrument",
+            null,
+            domain\Instrument::class,
+            null,
+            [
+                new Field("name"),
+                new Field("serialNumber"),
+
+                new Field("officialCheckExpiryDate",
+                    [standard\DateTime::class, "parse"]),
+
+                new Field("ourCheckStatus",
+                    [domain\Instrument::class, "parseOurCheckStatus"]),
+
+                new Field("ourCheckDate",
+                    [standard\DateTime::class, "parse"])
+            ]
+        );
+        $instrumentsByGarage = Database::groupByFKey($instruments, "garageID");
+
         return $this->db->fetchAll(
             "SELECT Garage.id,"
             ."   vts,"
@@ -83,6 +152,7 @@ class Garages{
                 new Field("emailAddress"),
                 new Field("telephoneNumber"),
                 new Field("paidUntil", [standard\DateTime::class, "parse"]),
+                new RecordValue($instrumentsByGarage, []),
                 new Field("password"),
                 new Field("passwordResetRequired")
             ]
