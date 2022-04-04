@@ -35,8 +35,8 @@ class Authenticate extends BasicResource implements WithMetadata {
                     $request->privateParam("password")
                 ];
             },
-            function ($request, $types, $username, $password) {
-                $dao = new daos\User($db);
+            function ($request, $types, $username, $password) use ($db) {
+                $dao = new daos\Users($db);
                 
                 // Try each user type in turn
                 foreach ($types as $type) {
