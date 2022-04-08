@@ -71,6 +71,11 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                             "Must provide a non-empty emailAddress parameter"
                         );
                     }
+                    if (str_contains($username, ":")) {
+                        throw new HTTPError(422,
+                            "emailAddress must not contain a colon"
+                        );
+                    }
 
                     $password = $request->privateParam("password");
                     if ($password === null || $password === "") {

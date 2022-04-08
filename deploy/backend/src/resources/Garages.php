@@ -98,6 +98,12 @@ class Garages extends BasicResource {
                         );
                     }
 
+                    if (str_contains($username, ":")) {
+                        throw new HTTPError(422,
+                            "VTS number must not contain a colon"
+                        );
+                    }
+
                     if ($password === "") {
                         throw new HTTPError(422,
                             "Must provide a non-empty password"
