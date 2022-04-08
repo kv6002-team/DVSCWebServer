@@ -120,7 +120,7 @@ class Emails extends BasicResource {
                         ["address" => $garage->emailAddress()]
                     ],
                     "msg" => [
-                        "subject" => "MOT - Instrument official check reminder",
+                        "subject" => "DVSC tools servicing - monthly reminder",
                         "html" => HTML::rawTable(
                             HTML::trHeader([
                                 "Instrument Name", 
