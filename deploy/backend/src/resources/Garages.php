@@ -1,6 +1,8 @@
 <?php
 namespace kv6002\resources;
 
+use database\exceptions\DatabaseError;
+
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
@@ -116,13 +118,21 @@ class Garages extends BasicResource {
                         $garageData,
                         $password
                 ) use ($dao) {
-                    $dao->createGarage(
-                        ...$garageData,
-                        ...[
-                            password_hash($password, PASSWORD_DEFAULT),
-                            false
-                        ]
-                    );
+                    try {
+                        $dao->createGarage(
+                            ...$garageData,
+                            ...[
+                                password_hash($password, PASSWORD_DEFAULT),
+                                false
+                            ]
+                        );
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(409,
+                            "A garage with that VTS number is already "+
+                            "registered"
+                        );
+                    }
+
                     return [$request];
                 },
 

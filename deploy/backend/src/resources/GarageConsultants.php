@@ -1,6 +1,8 @@
 <?php
 namespace kv6002\resources;
 
+use database\exceptions\DatabaseError;
+
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
@@ -80,11 +82,19 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                     return [$request, $username, $password];
                 },
                 function ($request, $emailAddress, $password) use ($dao) {
-                    $dao->createGarageConsultant(
-                        $emailAddress,
-                        password_hash($password, PASSWORD_DEFAULT),
-                        false
-                    );
+                    try {
+                        $dao->createGarageConsultant(
+                            $emailAddress,
+                            password_hash($password, PASSWORD_DEFAULT),
+                            false
+                        );
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(409,
+                            "A garage consultant with that email address is "+
+                            "already registered"
+                        );
+                    }
+
                     return [$request];
                 },
                 new NoContentBuilder()
