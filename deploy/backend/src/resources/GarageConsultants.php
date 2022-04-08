@@ -64,16 +64,16 @@ class GarageConsultants extends BasicResource implements WithMetadata {
             "create" => Dispatcher::funcToPipeOf([
                 function ($request) {
                     $username = $request->privateParam("emailAddress");
-                    if ($username === null) {
+                    if ($username === null || $username === "") {
                         throw new HTTPError(422,
-                            "Must provide emailAddress parameter"
+                            "Must provide a non-empty emailAddress parameter"
                         );
                     }
 
                     $password = $request->privateParam("password");
-                    if ($username === null) {
+                    if ($password === null || $password === "") {
                         throw new HTTPError(422,
-                            "Must provide password parameter"
+                            "Must provide a non-empty password parameter"
                         );
                     }
 

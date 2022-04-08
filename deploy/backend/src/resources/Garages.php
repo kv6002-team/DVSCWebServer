@@ -43,7 +43,7 @@ class Garages extends BasicResource {
                 },
                 function($request, $id) use ($dao){
                     $garage = $dao->getGarage($id);
-                    if($garage === null){
+                    if ($garage === null) {
                         throw new HTTPError(404,
                             "Requested Garage does not exist"
                         );
@@ -65,7 +65,7 @@ class Garages extends BasicResource {
                         $value = $request->privateParam($name);
                         if ($value === null) {
                             throw new HTTPError(422,
-                                "Must provide $name parameter"
+                                "Must provide the $name parameter"
                             );
                         }
                         return $value;
@@ -96,9 +96,9 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    if ($password === null) {
+                    if ($password === "") {
                         throw new HTTPError(422,
-                            "Must provide password parameter"
+                            "Must provide a non-empty password"
                         );
                     }
 
