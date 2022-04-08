@@ -13,7 +13,7 @@ use router\resource\MetadataUtils;
 use kv6002\daos;
 
 /**
- * 
+ * Authenticate a user with username and password credentials.
  * 
  * @author William Taylor (19009576)
  */
