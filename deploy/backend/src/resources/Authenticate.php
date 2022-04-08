@@ -96,6 +96,7 @@ class Authenticate extends BasicResource implements WithMetadata {
 
                 // Construct a JWT from the user.
                 $jwt = [
+                    "token_type" => "bearer",
                     "token" => $this->authenticator->standardAuthToken($user)
                 ];
                 return [$request, $jwt];
