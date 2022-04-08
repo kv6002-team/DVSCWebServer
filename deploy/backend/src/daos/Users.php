@@ -62,4 +62,13 @@ class Users {
                 return null;
         }
     }
+
+    /**
+     * Return a list of the supported types of user.
+     * 
+     * @return array<string> A list of the supported types of user, as strings.
+     */
+    public function getSupportedUserTypes() {
+        return ["garage-consultant", "garage"];
+    }
 }
