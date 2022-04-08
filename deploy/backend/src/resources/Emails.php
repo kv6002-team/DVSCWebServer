@@ -9,6 +9,7 @@ use router\resource\BasicResource;
 use router\exceptions\HTTPError;
 use kv6002\standard\builders\JSONBuilder;
 use kv6002\standard\builders\NoContentBuilder;
+use kv6002\standard\DateTime;
 
 use kv6002\daos;
 use kv6002\views;
@@ -113,14 +114,34 @@ class Emails extends BasicResource {
     public function formatEmails($requestedGarages) {
         return Util::mapValues(
             $requestedGarages, 
-            function ($garage){
+            function ($garage) {
                 return [
                     "to" => [
                         ["address" => $garage->emailAddress()]
                     ],
                     "msg" => [
                         "subject" => "MOT - Instrument official check reminder",
-                        "html" => html::div(null)->toString(),
+                        "html" => HTML::rawTable(
+                            HTML::trHeader([
+                                "Instrument Name", 
+                                "Serial Number", 
+                                "Expiry Date"
+                            ]),
+                            Util::mapValues(
+                                $garage->instruments(),
+                                function ($instrument) {
+                                    $aMonthAway = (new \DateTime())->add(new \DateInterval("P1M"));
+                                    $style = (
+                                        $instrument->officialCheckExpiryDate() < $aMonthAway
+                                    ) ? ["style" => "color: red"] : [];
+                                    return HTML::tr($style, [
+                                        $instrument->name(), 
+                                        $instrument->serialNumber(),
+                                        DateTime::format($instrument->officialCheckExpiryDate())
+                                    ]);  
+                                }
+                            )
+                        )->toString(),
                         "attachments" => []
                     ]
                 ];
