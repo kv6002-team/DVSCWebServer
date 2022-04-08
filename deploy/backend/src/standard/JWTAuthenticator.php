@@ -46,7 +46,7 @@ class JWTAuthenticator {
         return $this->createToken(
             $user,
             Timestamp::now(),
-            Duration::of(90, Duration::DAY)
+            Duration::of(1, Duration::DAY)
         );
     }
 
