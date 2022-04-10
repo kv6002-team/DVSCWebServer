@@ -137,4 +137,61 @@ class GarageConsultants {
         );
         $this->db->execute("COMMIT");
     }
+
+    /**
+     * Update a Garage Consultant in the database.
+     * 
+     * @param int $id The ID of the consultant to update.
+     * @param string $emailAddress The new email address for the consultant.
+     * @param string $password The new hashed password for the consultant.
+     * @param bool $passwordResetRequired Whether the User must reset their
+     *   password before being allowed to make any further API requests.
+     */
+    public function updateGarageConsultant(
+            $id,
+            $emailAddress,
+            $password,
+            $passwordResetRequired
+    ) {
+        $this->db->execute(
+            "UPDATE User SET"
+            ."   password = :password,"
+            ."   passwordResetRequired = :passwordResetRequired"
+            ." WHERE id = :id",
+            [
+                "id" => $id,
+                "password" => $password,
+                "passwordResetRequired" => $passwordResetRequired
+            ]
+        );
+
+        $this->db->execute(
+            "UPDATE GarageConsultant SET"
+            ."   emailAddress = :emailAddress"
+            ." WHERE id = :id",
+            [
+                "id" => $id,
+                "emailAddress" => $emailAddress
+            ]
+        );
+
+        $this->db->execute("COMMIT");
+    }
+
+    /**
+     * Delete a consultant from the database.
+     * 
+     * @param int $id The ID of the consultant to remove.
+     */
+    public function removeGarageConsultant($id) {
+        $this->db->execute(
+            "DELETE FROM GarageConsultant WHERE id = :id",
+            ["id" => $id]
+        );
+        $this->db->execute(
+            "DELETE FROM User WHERE id = :id",
+            ["id" => $id]
+        );
+        $this->db->execute("COMMIT");
+    }
 }

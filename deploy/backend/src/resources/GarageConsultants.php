@@ -63,7 +63,7 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                 )
             ]),
 
-            "create" => Dispatcher::funcToPipeOf([
+            "add" => Dispatcher::funcToPipeOf([
                 function ($request) {
                     $username = $request->privateParam("emailAddress");
                     if ($username === null || $username === "") {
@@ -88,7 +88,7 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                 },
                 function ($request, $emailAddress, $password) use ($dao) {
                     try {
-                        $dao->createGarageConsultant(
+                        $dao->addGarageConsultant(
                             $emailAddress,
                             password_hash($password, PASSWORD_DEFAULT),
                             false
@@ -104,7 +104,80 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                 },
                 new NoContentBuilder()
             ]),
-            
+
+            "update" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    $id = $request->endpointParam("id");
+                    if ($id === null) {
+                        throw new HTTPError(422,
+                            "Must provide an id parameter"
+                        );
+                    }
+
+                    $username = $request->privateParam("emailAddress");
+                    if ($username === null || $username === "") {
+                        throw new HTTPError(422,
+                            "Must provide a non-empty emailAddress parameter"
+                        );
+                    }
+                    if (str_contains($username, ":")) {
+                        throw new HTTPError(422,
+                            "emailAddress must not contain a colon"
+                        );
+                    }
+
+                    $password = $request->privateParam("password");
+                    if ($password === null || $password === "") {
+                        throw new HTTPError(422,
+                            "Must provide a non-empty password parameter"
+                        );
+                    }
+
+                    return [$request, $id, $username, $password];
+                },
+                function ($request, $id, $emailAddress, $password) use ($dao) {
+                    try {
+                        $dao->updateGarageConsultant(
+                            $id,
+                            $emailAddress,
+                            password_hash($password, PASSWORD_DEFAULT),
+                            false
+                        );
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(404,
+                            "No garage consultant with that ID exists."
+                        );
+                    }
+
+                    return [$request];
+                },
+                new NoContentBuilder()
+            ]),
+
+            "remove" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    $id = $request->endpointParam("id");
+                    if ($id === null) {
+                        throw new HTTPError(422,
+                            "Must provide an id parameter"
+                        );
+                    }
+                    return [$request, $id];
+                },
+                function ($request, $id) use ($dao) {
+                    try {
+                        $dao->removeGarageConsultant($id);
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(404,
+                            "No garage consultant with that ID exists."
+                        );
+                    }
+
+                    return [$request];
+                },
+                new NoContentBuilder()
+            ]),
+
             "cors_preflight" => Dispatcher::funcToPipeOf([
                 function ($request) {
                     $origin = $request->header("Origin");
@@ -169,7 +242,10 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                 }
             ),
 
-            "POST" => $getAction("create"),
+            "POST" => $getAction("add"),
+            "DELETE" => $getAction("remove"),
+            "PATCH" => $getAction("update"),
+
             "OPTIONS" => $getAction("cors_preflight")
         ]);
     }

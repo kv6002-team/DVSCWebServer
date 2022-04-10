@@ -110,7 +110,7 @@ class Request {
                         isset($_SERVER["CONTENT_TYPE"]) &&
                         $_SERVER["CONTENT_TYPE"] === self::$BASIC_FORM_TYPE
                 ) {
-                    $privateParams = parseQueryStr($body);
+                    $privateParams = self::parseQueryStr($body);
 
                 } else {
                     // A self::$MULTIPART_FORM_TYPE parser is too complex to
@@ -461,6 +461,11 @@ class Request {
     -------------------------------------------------- */
 
     private static function parseQueryStr($queryStr) {
-        return Util::parseAttrsStr($queryStr, "&", "=", "");
+        return Util::mapValues(
+            Util::parseAttrsStr($queryStr, "&", "=", ""),
+            function ($value) {
+                return urldecode($value);
+            }
+        );
     }
 }
