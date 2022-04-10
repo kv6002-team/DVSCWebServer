@@ -28,13 +28,12 @@ class Users {
     public function getUser($type, $id) {
         switch ($type) {
             case "garage-consultant":
-                $dao = new daos\GarageConsultants();
+                $dao = new daos\GarageConsultants($this->db);
                 return $dao->getGarageConsultant($id);
 
             case "garage":
-                throw new HTTPError(501,
-                    "Getting 'garage'-type Users is not yet implemented"
-                );
+                $dao = new daos\Garages($this->db);
+                return $dao->getGarage($id);
     
             default:
                 return null;
@@ -52,16 +51,24 @@ class Users {
     public function getUserByUsername($type, $username) {
         switch ($type) {
             case "garage-consultant":
-                $dao = new daos\GarageConsultants();
+                $dao = new daos\GarageConsultants($this->db);
                 return $dao->getGarageConsultantByUsername($username);
 
             case "garage":
-                throw new HTTPError(501,
-                    "Getting 'garage'-type Users is not yet implemented"
-                );
+                $dao = new daos\Garages($this->db);
+                return $dao->getGarageByUsername($username);
     
             default:
                 return null;
         }
+    }
+
+    /**
+     * Return a list of the supported types of user.
+     * 
+     * @return array<string> A list of the supported types of user, as strings.
+     */
+    public function getSupportedUserTypes() {
+        return ["garage-consultant", "garage"];
     }
 }

@@ -93,6 +93,79 @@ class Garages{
     } 
 
     /**
+     * Return a Garage Consultant object for the consultant in the database with
+     * the given username (email address).
+     * 
+     * @param string $username The username (email address) of the consultant to
+     *   fetch.
+     * @return GarageConsultant A GarageConsultant object for that consultant.
+     */
+    public function getGarageByUsername($username) {
+        // Some of these could throw InvalidArgumentException (parse
+        // ourCheckStatus) or Exception (parse DateTime). These will be caught
+        // by the global error handler and a 500 error emitted.
+
+        $instruments = $this->db->fetchAll(
+            "SELECT DISTINCT Instrument.id,"
+            ."   garageID,"
+            ."   Instrument.name,"
+            ."   serialNumber,"
+            ."   officialCheckExpiryDate,"
+            ."   ourCheckStatus,"
+            ."   ourCheckDate"
+            ." FROM Instrument"
+            ." JOIN Garage"
+            ." WHERE vts = :garageVTS",
+            ["garageVTS" => $username],
+            domain\Instrument::class,
+            null,
+            [
+                new Field("name"),
+                new Field("serialNumber"),
+
+                new Field("officialCheckExpiryDate",
+                    [standard\DateTime::class, "parse"]),
+
+                new Field("ourCheckStatus",
+                    [domain\Instrument::class, "parseOurCheckStatus"]),
+
+                new Field("ourCheckDate",
+                    [standard\DateTime::class, "parse"])
+            ]
+        );
+        $instrumentsByGarage = Database::groupByFKey($instruments, "garageID");
+
+        return $this->db->fetch(
+            "SELECT Garage.id,"
+            ."   vts,"
+            ."   name,"
+            ."   ownerName,"
+            ."   emailAddress,"
+            ."   telephoneNumber,"
+            ."   paidUntil,"
+            ."   password,"
+            ."   passwordResetRequired"
+            ." FROM Garage"
+            ." JOIN User ON Garage.id = User.id"
+            ." WHERE vts = :garageVTS",
+            ["garageVTS" => $username],
+            domain\Garage::class,
+            null,
+            [
+                new Field("vts"),
+                new Field("name"),
+                new Field("ownerName"),
+                new Field("emailAddress"),
+                new Field("telephoneNumber"),
+                new Field("paidUntil", [standard\DateTime::class, "parse"]),
+                new RecordValue($instrumentsByGarage, []),
+                new Field("password"),
+                new Field("passwordResetRequired")
+            ]
+        );
+    }
+
+    /**
      * Return all Garages in the database.
      * 
      * @return Garage A Garage object for that Garage.

@@ -419,7 +419,8 @@ class Request {
             null;
         if ($auth === null) return null; // No auth
 
-        list($type, $value) = explode(" ", $auth, 2);
+        list($type) = explode(" ", $auth, 2);
+        if ($type === "") return null; // Invalid type
         return $type;
     }
 
@@ -436,7 +437,11 @@ class Request {
             null;
         if ($auth === null) return null; // No auth
         
-        list($type, $value) = explode(" ", $auth, 2);
+        list(, $value) = array_merge(
+            explode(" ", $auth, 2),
+            [null] // No value given
+        );
+        if ($value === "") return null; // Invalid value
         return $value;
     }
 

@@ -37,38 +37,6 @@ class JWTAuthenticator {
     }
 
     /**
-     * Encode an auth JWT for the given user.
-     * 
-     * @param User $user The user to generate an auth JWT for.
-     * @param Timestamp $issueTimestamp The 'generation time' of the token. May
-     *   or may not be the current time.
-     * @param Duration $validDuration The duration after the 'generation time'
-     *   that this token is valid.
-     * 
-     * @return string An encoded JWT.
-     * 
-     * @see standardAuthToken() for the correct way of making an auth token for
-     *   the actual application (rather than a test token).
-     */
-    public function createToken($user, $issueTimestamp, $validDuration) {
-        return JWT::encode(
-            [
-                // Data
-                "id" => $user->id(),
-                "username" => $user->username(),
-
-                // Metadata
-                "iss" => $this->issuer,
-                "iat" => $issueTimestamp->get(),
-                "nbf" => $issueTimestamp->get(),
-                "exp" => $issueTimestamp->plus($validDuration)->get()
-            ],
-            $this->jwtSecret,
-            "HS256"
-        );
-    }
-
-    /**
      * Generate and return an auth JWT for the given user.
      * 
      * @param User $user The user to generate an auth JWT for.
@@ -78,22 +46,7 @@ class JWTAuthenticator {
         return $this->createToken(
             $user,
             Timestamp::now(),
-            Duration::of(90, Duration::DAY)
-        );
-    }
-
-    /**
-     * Generate and return an auth JWT for the given user that is always valid.
-     * 
-     * @return string An encoded JWT suitable for test code.
-     */
-    public function testAuthToken() {
-        // Yes, this is a security vulnerability waiting to happen, and I
-        // wouldn't do it in a real application.
-        return $this->createToken(
-            $this->getUser(-1), // testuser, not_a_password_hash
-            Timestamp::first(),
-            Duration::max()
+            Duration::of(1, Duration::DAY)
         );
     }
 
@@ -139,6 +92,41 @@ class JWTAuthenticator {
 
         $user = $this->getUser($token->id);
         return [$request, $user];
+    }
+
+    /* Utils
+    -------------------------------------------------- */
+
+    /**
+     * Encode an auth JWT for the given user.
+     * 
+     * @param User $user The user to generate an auth JWT for.
+     * @param Timestamp $issueTimestamp The 'generation time' of the token. May
+     *   or may not be the current time.
+     * @param Duration $validDuration The duration after the 'generation time'
+     *   that this token is valid.
+     * 
+     * @return string An encoded JWT.
+     * 
+     * @see standardAuthToken() for the correct way of making an auth token for
+     *   the application.
+     */
+    private function createToken($user, $issueTimestamp, $validDuration) {
+        return JWT::encode(
+            [
+                // Data
+                "id" => $user->id(),
+                "username" => $user->username(),
+
+                // Metadata
+                "iss" => $this->issuer,
+                "iat" => $issueTimestamp->get(),
+                "nbf" => $issueTimestamp->get(),
+                "exp" => $issueTimestamp->plus($validDuration)->get()
+            ],
+            $this->jwtSecret,
+            "HS256"
+        );
     }
 
     /**

@@ -13,31 +13,72 @@ use router\resource\MetadataUtils;
 use kv6002\daos;
 
 /**
- * 
+ * Authenticate a user with username and password credentials.
  * 
  * @author William Taylor (19009576)
  */
 class Authenticate extends BasicResource implements WithMetadata {
-    private static $INVALID_AUTH_ERR_STR = "Username or password incorrect";
+    private static $TYPES_NOT_GIVEN_ERR_STR = "Account type not given";
+    private static $TYPES_INVALID_ERR_STR = "Account type invalid";
+    private static $CREDS_NOT_GIVEN_ERR_STR = "Username or password not given";
+    private static $AUTH_INVALID_ERR_STR = "Username or password incorrect";
 
     private $authenticator;
 
     public function __construct($db, $authenticator) {
         $this->authenticator = $authenticator;
 
+        $dao = new daos\Users($db);
+
         // Define action
         $contentBuilder = Dispatcher::funcToPipeOf([
-            function ($request) {
+            // Try to get the credentials
+            function ($request) use ($dao) {
+                $credentialsStrEncoded = $request->authValue();
+                if ($credentialsStrEncoded === null) {
+                    throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
+                }
+
+                $credentialsStr = base64_decode($credentialsStrEncoded, true);
+                if ($credentialsStr === false) {
+                    throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
+                }
+
+                list($username, $password) = array_merge(
+                    explode(":", $credentialsStr, 2),
+                    [null] // Make sure that password contains a value
+                );
+                if (
+                    $username === "" ||
+                    $password === "" ||
+                    $password === null
+                ) {
+                    throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
+                }
+
+                // Try to get the types
+                $typesStr = $request->privateParam("types");
+                if ($typesStr === null || $typesStr === "") {
+                    throw new HTTPError(401, self::$TYPES_NOT_GIVEN_ERR_STR);
+                }
+
+                $types = explode(",", $typesStr);
+                foreach ($types as $type) {
+                    $supportedUserTypes = $dao->getSupportedUserTypes();
+                    if (!in_array($type, $supportedUserTypes, true)) {
+                        throw new HTTPError(401, self::$TYPES_INVALID_ERR_STR);
+                    }
+                }
+
+                // Return everything
                 return [
                     $request,
-                    explode(",", $request->privateParam("types")),
-                    $request->privateParam("username"),
-                    $request->privateParam("password")
+                    $types,
+                    $username,
+                    $password
                 ];
             },
-            function ($request, $types, $username, $password) {
-                $dao = new daos\User($db);
-                
+            function ($request, $types, $username, $password) use ($dao) {
                 // Try each user type in turn
                 foreach ($types as $type) {
                     $user = $dao->getUserByUsername($type, $username);
@@ -50,11 +91,12 @@ class Authenticate extends BasicResource implements WithMetadata {
                         $user === null ||
                         !password_verify($password, $user->password())
                 ) {
-                    throw new HTTPError(401, self::$INVALID_AUTH_ERR_STR);
+                    throw new HTTPError(401, self::$AUTH_INVALID_ERR_STR);
                 }
 
                 // Construct a JWT from the user.
                 $jwt = [
+                    "token_type" => "bearer",
                     "token" => $this->authenticator->standardAuthToken($user)
                 ];
                 return [$request, $jwt];

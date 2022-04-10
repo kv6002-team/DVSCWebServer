@@ -1,6 +1,8 @@
 <?php
 namespace kv6002\resources;
 
+use database\exceptions\DatabaseError;
+
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
@@ -43,7 +45,7 @@ class Garages extends BasicResource {
                 },
                 function($request, $id) use ($dao){
                     $garage = $dao->getGarage($id);
-                    if($garage === null){
+                    if ($garage === null) {
                         throw new HTTPError(404,
                             "Requested Garage does not exist"
                         );
@@ -65,7 +67,7 @@ class Garages extends BasicResource {
                         $value = $request->privateParam($name);
                         if ($value === null) {
                             throw new HTTPError(422,
-                                "Must provide $name parameter"
+                                "Must provide the $name parameter"
                             );
                         }
                         return $value;
@@ -96,9 +98,15 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    if ($password === null) {
+                    if (str_contains($username, ":")) {
                         throw new HTTPError(422,
-                            "Must provide password parameter"
+                            "VTS number must not contain a colon"
+                        );
+                    }
+
+                    if ($password === "") {
+                        throw new HTTPError(422,
+                            "Must provide a non-empty password"
                         );
                     }
 
@@ -116,13 +124,21 @@ class Garages extends BasicResource {
                         $garageData,
                         $password
                 ) use ($dao) {
-                    $dao->createGarage(
-                        ...$garageData,
-                        ...[
-                            password_hash($password, PASSWORD_DEFAULT),
-                            false
-                        ]
-                    );
+                    try {
+                        $dao->createGarage(
+                            ...$garageData,
+                            ...[
+                                password_hash($password, PASSWORD_DEFAULT),
+                                false
+                            ]
+                        );
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(409,
+                            "A garage with that VTS number is already "+
+                            "registered"
+                        );
+                    }
+
                     return [$request];
                 },
 

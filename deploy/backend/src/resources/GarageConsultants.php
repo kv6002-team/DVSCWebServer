@@ -1,6 +1,8 @@
 <?php
 namespace kv6002\resources;
 
+use database\exceptions\DatabaseError;
+
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
@@ -64,27 +66,40 @@ class GarageConsultants extends BasicResource implements WithMetadata {
             "create" => Dispatcher::funcToPipeOf([
                 function ($request) {
                     $username = $request->privateParam("emailAddress");
-                    if ($username === null) {
+                    if ($username === null || $username === "") {
                         throw new HTTPError(422,
-                            "Must provide emailAddress parameter"
+                            "Must provide a non-empty emailAddress parameter"
+                        );
+                    }
+                    if (str_contains($username, ":")) {
+                        throw new HTTPError(422,
+                            "emailAddress must not contain a colon"
                         );
                     }
 
                     $password = $request->privateParam("password");
-                    if ($username === null) {
+                    if ($password === null || $password === "") {
                         throw new HTTPError(422,
-                            "Must provide password parameter"
+                            "Must provide a non-empty password parameter"
                         );
                     }
 
                     return [$request, $username, $password];
                 },
                 function ($request, $emailAddress, $password) use ($dao) {
-                    $dao->createGarageConsultant(
-                        $emailAddress,
-                        password_hash($password, PASSWORD_DEFAULT),
-                        false
-                    );
+                    try {
+                        $dao->createGarageConsultant(
+                            $emailAddress,
+                            password_hash($password, PASSWORD_DEFAULT),
+                            false
+                        );
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(409,
+                            "A garage consultant with that email address is "+
+                            "already registered"
+                        );
+                    }
+
                     return [$request];
                 },
                 new NoContentBuilder()
