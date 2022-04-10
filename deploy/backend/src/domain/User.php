@@ -34,7 +34,7 @@ abstract class User {
      * @return int The ID of the User.
      */
     public function id() {
-        return $this->id;
+        return intval($this->id);
     }
 
     /**

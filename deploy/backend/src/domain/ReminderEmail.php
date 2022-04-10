@@ -47,7 +47,7 @@ final class ReminderEmail {
      * @return int The ID of the Reminder Email.
      */
     public function id() {
-        return $this->id;
+        return intval($this->id);
     }
 
     /**

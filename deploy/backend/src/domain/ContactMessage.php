@@ -40,7 +40,7 @@ final class ContactMessage {
      * @return int The ID of the Contact Message.
      */
     public function id() {
-        return $this->id;
+        return intval($this->id);
     }
 
     /**
