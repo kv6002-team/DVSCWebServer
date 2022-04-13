@@ -106,7 +106,7 @@ class GarageConsultants {
      * @param bool $passwordResetRequired Whether the new User must reset
      *   their password before being allowed to make any further API requests.
      */
-    public function createGarageConsultant(
+    public function addGarageConsultant(
             $emailAddress,
             $password,
             $passwordResetRequired
