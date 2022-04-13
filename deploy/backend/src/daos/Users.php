@@ -27,11 +27,11 @@ class Users {
      */
     public function getUser($type, $id) {
         switch ($type) {
-            case "garage-consultant":
+            case domain\GarageConsultant::USER_TYPE:
                 $dao = new daos\GarageConsultants($this->db);
                 return $dao->getGarageConsultant($id);
 
-            case "garage":
+            case domain\Garage::USER_TYPE:
                 $dao = new daos\Garages($this->db);
                 return $dao->getGarage($id);
     
@@ -50,11 +50,11 @@ class Users {
      */
     public function getUserByUsername($type, $username) {
         switch ($type) {
-            case "garage-consultant":
+            case domain\GarageConsultant::USER_TYPE:
                 $dao = new daos\GarageConsultants($this->db);
                 return $dao->getGarageConsultantByUsername($username);
 
-            case "garage":
+            case domain\Garage::USER_TYPE:
                 $dao = new daos\Garages($this->db);
                 return $dao->getGarageByUsername($username);
     
@@ -69,6 +69,29 @@ class Users {
      * @return array<string> A list of the supported types of user, as strings.
      */
     public function getSupportedUserTypes() {
-        return ["garage-consultant", "garage"];
+        return [
+            domain\GarageConsultant::USER_TYPE,
+            domain\Garage::USER_TYPE
+        ];
+    }
+
+    /**
+     * Change the password of the given user to the given hashed password.
+     * 
+     * @param User $user The user to change the password for.
+     * @param string $newPassword The hashed password to set for that user.
+     */
+    public function changePassword($user, $newPassword) {
+        $this->db->execute(
+            "UPDATE User SET"
+            ."   password = :password,"
+            ."   passwordResetRequired = false"
+            ." WHERE id = :id",
+            [
+                "id" => $user->id(),
+                "password" => $newPassword
+            ]
+        );
+        $this->db->execute("COMMIT");
     }
 }

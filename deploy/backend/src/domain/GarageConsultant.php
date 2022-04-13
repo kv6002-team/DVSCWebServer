@@ -10,6 +10,10 @@ use kv6002\domain\User;
  * @author William Taylor (19009576)
  */
 final class GarageConsultant extends User {
+    const USER_TYPE = "garage-consultant";
+
+    private $emailAddress;
+
     /**
      * Create a new garage consultant.
      * 
@@ -27,6 +31,7 @@ final class GarageConsultant extends User {
             $passwordResetRequired
     ) {
         parent::__construct($password, $passwordResetRequired);
+        $this->type = GarageConsultant::USER_TYPE;
 
         $this->emailAddress = $emailAddress;
     }

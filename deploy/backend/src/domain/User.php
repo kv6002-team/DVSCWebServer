@@ -15,6 +15,8 @@ abstract class User {
 
     private $password;
     private $passwordResetRequired;
+    
+    protected $type;
 
     /**
      * Create a new user.
@@ -26,6 +28,7 @@ abstract class User {
     public function __construct($password, $passwordResetRequired) {
         $this->password = $password;
         $this->passwordResetRequired = $passwordResetRequired;
+        $this->type = "unknown"; // Subclasses must fill this in
     }
 
     /**
@@ -35,6 +38,15 @@ abstract class User {
      */
     public function id() {
         return intval($this->id);
+    }
+
+    /**
+     * Get the type of the User.
+     * 
+     * @return string The type of the User.
+     */
+    public function type() {
+        return $this->type;
     }
 
     /**

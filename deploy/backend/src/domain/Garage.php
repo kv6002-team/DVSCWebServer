@@ -10,6 +10,8 @@ use kv6002\domain\User;
  * @author William Taylor (19009576)
  */
 final class Garage extends User {
+    const USER_TYPE = "garage";
+
     private $vts;
     private $name;
     private $ownerName;
@@ -53,6 +55,7 @@ final class Garage extends User {
             $passwordResetRequired
     ) {
         parent::__construct($password, $passwordResetRequired);
+        $this->type = GarageConsultant::USER_TYPE;
 
         $this->vts = $vts;
         $this->name = $name;

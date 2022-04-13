@@ -70,6 +70,9 @@ $router->registerGlobalError(
 $router->register("/api/ping", new resources\Ping());
 
 $router->register("/api/auth", new resources\Authenticate($db, $authenticator));
+$router->register("/api/change-password",
+    new resources\PasswordReset($db, $authenticator)
+);
 
 $garageConsultantsRes = new resources\GarageConsultants($db);
 $router->register("/api/garage-consultants", $garageConsultantsRes);

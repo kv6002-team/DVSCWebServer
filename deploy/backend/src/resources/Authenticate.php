@@ -18,8 +18,8 @@ use kv6002\daos;
  * @author William Taylor (19009576)
  */
 class Authenticate extends BasicResource implements WithMetadata {
-    private static $TYPES_NOT_GIVEN_ERR_STR = "Account type not given";
-    private static $TYPES_INVALID_ERR_STR = "Account type invalid";
+    private static $TYPES_NOT_GIVEN_ERR_STR = "Account types not given";
+    private static $TYPES_INVALID_ERR_STR = "Account types invalid";
     private static $CREDS_NOT_GIVEN_ERR_STR = "Username or password not given";
     private static $AUTH_INVALID_ERR_STR = "Username or password incorrect";
 
@@ -32,8 +32,8 @@ class Authenticate extends BasicResource implements WithMetadata {
 
         // Define action
         $contentBuilder = Dispatcher::funcToPipeOf([
-            // Try to get the credentials
             function ($request) use ($dao) {
+                // Try to get the credentials
                 $credentialsStrEncoded = $request->authValue();
                 if ($credentialsStrEncoded === null) {
                     throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
@@ -79,7 +79,7 @@ class Authenticate extends BasicResource implements WithMetadata {
                 ];
             },
             function ($request, $types, $username, $password) use ($dao) {
-                // Try each user type in turn
+                // Try each user type in turn.
                 foreach ($types as $type) {
                     $user = $dao->getUserByUsername($type, $username);
                     if ($user !== null) break; // If one is found, use it.
@@ -94,10 +94,12 @@ class Authenticate extends BasicResource implements WithMetadata {
                     throw new HTTPError(401, self::$AUTH_INVALID_ERR_STR);
                 }
 
-                // Construct a JWT from the user.
+                // Construct a JWT from the user for general use.
                 $jwt = [
                     "token_type" => "bearer",
-                    "token" => $this->authenticator->standardAuthToken($user)
+                    "token" => $this->authenticator->standardAuthToken(
+                        $user, ["general"]
+                    )
                 ];
                 return [$request, $jwt];
             },

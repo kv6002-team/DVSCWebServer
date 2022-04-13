@@ -1,0 +1,606 @@
+diff --git a/deploy/backend/index.php b/deploy/backend/index.php
+index 31b546e..29deef3 100644
+--- a/deploy/backend/index.php
++++ b/deploy/backend/index.php
+@@ -70,6 +70,9 @@ $router->registerGlobalError(
+ $router->register("/api/ping", new resources\Ping());
+ 
+ $router->register("/api/auth", new resources\Authenticate($db, $authenticator));
++$router->register("/api/change-password",
++    new resources\PasswordReset($db, $authenticator)
++);
+ 
+ $garageConsultantsRes = new resources\GarageConsultants($db);
+ $router->register("/api/garage-consultants", $garageConsultantsRes);
+diff --git a/deploy/backend/lib/util/Util.php b/deploy/backend/lib/util/Util.php
+index 952bcee..005b16b 100644
+--- a/deploy/backend/lib/util/Util.php
++++ b/deploy/backend/lib/util/Util.php
+@@ -263,6 +263,46 @@ class Util {
+         return $ret;
+     }
+ 
++    // The next two are derived from: https://stackoverflow.com/a/39877269
++
++    /**
++     * Return true if the given function returns true for any element in the
++     * array, or false otherwise.
++     * 
++     * @param mixed $obj The array/object whose elements are to be checked.
++     * @param callable $fn The function that is given each element of the array
++     *   in turn.
++     * @return bool If the function returns true for any item in the array,
++     *   return true. Otherwise, return false.
++     */
++    public static function any($obj, $fn) {
++        foreach ($obj as $key => $value) {
++            if($fn($value)) {
++                return true;
++            }
++        }
++        return false;
++    }
++
++    /**
++     * Return true if the given function returns true for every element in the
++     * array, or false otherwise.
++     * 
++     * @param mixed $obj The array/object whose elements are to be checked.
++     * @param callable $fn The function that is given each element of the array
++     *   in turn.
++     * @return bool If the function returns true for every item in the array,
++     *   return true. Otherwise, return false.
++     */
++    public static function every($obj, $fn) {
++        foreach ($obj as $key => $value) {
++            if(!$fn($value)) {
++                return false;
++            }
++        }
++        return true;
++    }
++
+     /* Strings
+     -------------------------------------------------- */
+ 
+diff --git a/deploy/backend/src/daos/Users.php b/deploy/backend/src/daos/Users.php
+index 301fe3d..f67c756 100644
+--- a/deploy/backend/src/daos/Users.php
++++ b/deploy/backend/src/daos/Users.php
+@@ -27,11 +27,11 @@ class Users {
+      */
+     public function getUser($type, $id) {
+         switch ($type) {
+-            case "garage-consultant":
++            case domain\GarageConsultant::USER_TYPE:
+                 $dao = new daos\GarageConsultants($this->db);
+                 return $dao->getGarageConsultant($id);
+ 
+-            case "garage":
++            case domain\Garage::USER_TYPE:
+                 $dao = new daos\Garages($this->db);
+                 return $dao->getGarage($id);
+     
+@@ -50,11 +50,11 @@ class Users {
+      */
+     public function getUserByUsername($type, $username) {
+         switch ($type) {
+-            case "garage-consultant":
++            case domain\GarageConsultant::USER_TYPE:
+                 $dao = new daos\GarageConsultants($this->db);
+                 return $dao->getGarageConsultantByUsername($username);
+ 
+-            case "garage":
++            case domain\Garage::USER_TYPE:
+                 $dao = new daos\Garages($this->db);
+                 return $dao->getGarageByUsername($username);
+     
+@@ -69,6 +69,29 @@ class Users {
+      * @return array<string> A list of the supported types of user, as strings.
+      */
+     public function getSupportedUserTypes() {
+-        return ["garage-consultant", "garage"];
++        return [
++            domain\GarageConsultant::USER_TYPE,
++            domain\Garage::USER_TYPE
++        ];
++    }
++
++    /**
++     * Change the password of the given user to the given hashed password.
++     * 
++     * @param User $user The user to change the password for.
++     * @param string $newPassword The hashed password to set for that user.
++     */
++    public function changePassword($user, $newPassword) {
++        $this->db->execute(
++            "UPDATE User SET"
++            ."   password = :password,"
++            ."   passwordResetRequired = false"
++            ." WHERE id = :id",
++            [
++                "id" => $user->id(),
++                "password" => $newPassword
++            ]
++        );
++        $this->db->execute("COMMIT");
+     }
+ }
+diff --git a/deploy/backend/src/domain/Garage.php b/deploy/backend/src/domain/Garage.php
+index 7ee404b..64983fa 100644
+--- a/deploy/backend/src/domain/Garage.php
++++ b/deploy/backend/src/domain/Garage.php
+@@ -10,6 +10,8 @@ use kv6002\domain\User;
+  * @author William Taylor (19009576)
+  */
+ final class Garage extends User {
++    const USER_TYPE = "garage";
++
+     private $vts;
+     private $name;
+     private $ownerName;
+@@ -53,6 +55,7 @@ final class Garage extends User {
+             $passwordResetRequired
+     ) {
+         parent::__construct($password, $passwordResetRequired);
++        $this->type = GarageConsultant::USER_TYPE;
+ 
+         $this->vts = $vts;
+         $this->name = $name;
+diff --git a/deploy/backend/src/domain/GarageConsultant.php b/deploy/backend/src/domain/GarageConsultant.php
+index 825d4ef..ec4681f 100644
+--- a/deploy/backend/src/domain/GarageConsultant.php
++++ b/deploy/backend/src/domain/GarageConsultant.php
+@@ -10,6 +10,10 @@ use kv6002\domain\User;
+  * @author William Taylor (19009576)
+  */
+ final class GarageConsultant extends User {
++    const USER_TYPE = "garage-consultant";
++
++    private $emailAddress;
++
+     /**
+      * Create a new garage consultant.
+      * 
+@@ -27,6 +31,7 @@ final class GarageConsultant extends User {
+             $passwordResetRequired
+     ) {
+         parent::__construct($password, $passwordResetRequired);
++        $this->type = GarageConsultant::USER_TYPE;
+ 
+         $this->emailAddress = $emailAddress;
+     }
+diff --git a/deploy/backend/src/domain/User.php b/deploy/backend/src/domain/User.php
+index 9124793..8e1ba2d 100644
+--- a/deploy/backend/src/domain/User.php
++++ b/deploy/backend/src/domain/User.php
+@@ -15,6 +15,8 @@ abstract class User {
+ 
+     private $password;
+     private $passwordResetRequired;
++    
++    protected $type;
+ 
+     /**
+      * Create a new user.
+@@ -26,6 +28,7 @@ abstract class User {
+     public function __construct($password, $passwordResetRequired) {
+         $this->password = $password;
+         $this->passwordResetRequired = $passwordResetRequired;
++        $this->type = "unknown"; // Subclasses must fill this in
+     }
+ 
+     /**
+@@ -37,6 +40,15 @@ abstract class User {
+         return intval($this->id);
+     }
+ 
++    /**
++     * Get the type of the User.
++     * 
++     * @return string The type of the User.
++     */
++    public function type() {
++        return $this->type;
++    }
++
+     /**
+      * Get the username of the User.
+      * 
+diff --git a/deploy/backend/src/resources/Authenticate.php b/deploy/backend/src/resources/Authenticate.php
+index dc3f3be..a92d9cd 100644
+--- a/deploy/backend/src/resources/Authenticate.php
++++ b/deploy/backend/src/resources/Authenticate.php
+@@ -18,8 +18,8 @@ use kv6002\daos;
+  * @author William Taylor (19009576)
+  */
+ class Authenticate extends BasicResource implements WithMetadata {
+-    private static $TYPES_NOT_GIVEN_ERR_STR = "Account type not given";
+-    private static $TYPES_INVALID_ERR_STR = "Account type invalid";
++    private static $TYPES_NOT_GIVEN_ERR_STR = "Account types not given";
++    private static $TYPES_INVALID_ERR_STR = "Account types invalid";
+     private static $CREDS_NOT_GIVEN_ERR_STR = "Username or password not given";
+     private static $AUTH_INVALID_ERR_STR = "Username or password incorrect";
+ 
+@@ -32,8 +32,8 @@ class Authenticate extends BasicResource implements WithMetadata {
+ 
+         // Define action
+         $contentBuilder = Dispatcher::funcToPipeOf([
+-            // Try to get the credentials
+             function ($request) use ($dao) {
++                // Try to get the credentials
+                 $credentialsStrEncoded = $request->authValue();
+                 if ($credentialsStrEncoded === null) {
+                     throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
+@@ -79,7 +79,7 @@ class Authenticate extends BasicResource implements WithMetadata {
+                 ];
+             },
+             function ($request, $types, $username, $password) use ($dao) {
+-                // Try each user type in turn
++                // Try each user type in turn.
+                 foreach ($types as $type) {
+                     $user = $dao->getUserByUsername($type, $username);
+                     if ($user !== null) break; // If one is found, use it.
+@@ -94,10 +94,12 @@ class Authenticate extends BasicResource implements WithMetadata {
+                     throw new HTTPError(401, self::$AUTH_INVALID_ERR_STR);
+                 }
+ 
+-                // Construct a JWT from the user.
++                // Construct a JWT from the user for general use.
+                 $jwt = [
+                     "token_type" => "bearer",
+-                    "token" => $this->authenticator->standardAuthToken($user)
++                    "token" => $this->authenticator->standardAuthToken(
++                        $user, ["general"]
++                    )
+                 ];
+                 return [$request, $jwt];
+             },
+diff --git a/deploy/backend/src/standard/JWTAuthenticator.php b/deploy/backend/src/standard/JWTAuthenticator.php
+index 23b3068..ea698f2 100644
+--- a/deploy/backend/src/standard/JWTAuthenticator.php
++++ b/deploy/backend/src/standard/JWTAuthenticator.php
+@@ -1,11 +1,12 @@
+ <?php
+ namespace kv6002\standard;
+ 
+-use router\exceptions\HTTPError;
+-
++use util\Util;
+ use time\Timestamp;
+ use time\Duration;
+ 
++use router\exceptions\HTTPError;
++
+ use firebase\jwt\JWT;
+ use firebase\jwt\Key;
+ use firebase\jwt\BeforeValidException;
+@@ -29,6 +30,8 @@ class JWTAuthenticator {
+      * 
+      * @param string $jwtSecret The JTW secret key, used to verify the token's
+      *   signature.
++     * @param string $issuer The full URL to the endpoint that issues tokens.
++     * @param Database $db The database to get users from.
+      */
+     public function __construct($jwtSecret, $issuer, $db) {
+         $this->jwtSecret = $jwtSecret;
+@@ -36,62 +39,225 @@ class JWTAuthenticator {
+         $this->dao = new daos\Users($db);
+     }
+ 
++    /* Token Creation
++    -------------------------------------------------- */
++
+     /**
+      * Generate and return an auth JWT for the given user.
+      * 
+      * @param User $user The user to generate an auth JWT for.
++     * @param array<string> $authorisations A list of strings stating the
++     *   purposes for which this token will be valid. Which purposes are
++     *   available depends on the resources using this authenticator.
++     * 
+      * @return string An encoded JWT suitable for use on a live system.
+      */
+-    public function standardAuthToken($user) {
++    public function standardAuthToken($user, $authorisations) {
+         return $this->createToken(
+             $user,
++            $authorisations,
+             Timestamp::now(),
+             Duration::of(1, Duration::DAY)
+         );
+     }
+ 
+     /**
+-     * Check if the request contains a valid auth token, and include the user
+-     * for that token in the return value.
++     * Generate and return an auth JWT for the given user that lasts a short
++     * amount of time.
++     * 
++     * This kind of token is intended to be used for ephemeral tokens for
++     * specific purposes (`authorisations` list values).
++     * 
++     * @param User $user The user to generate an auth JWT for.
++     * @param array<string> $authorisations A list of strings stating the
++     *   purposes for which this token will be valid. Which purposes are
++     *   available depends on the resources using this authenticator.
++     * 
++     * @return string An encoded JWT suitable for use on a live system.
++     */
++    public function shortAuthToken($user, $authorisations) {
++        return $this->createToken(
++            $user,
++            $authorisations,
++            Timestamp::now(),
++            Duration::of(10, Duration::MINUTE)
++        );
++    }
++
++    /* Token Verification
++    -------------------------------------------------- */
++
++    /* Token Extraction
++    -------------------- */
++
++    /**
++     * Return a function that checks if the request contains a valid auth token,
++     * and that includes the user and authorisations for that token in the
++     * return value.
++     * 
++     * The user is a `domain\User` object.
++     * 
++     * The authorisations list is an array of strings stating the purposes for
++     * which the token is valid. What strings are valid purposes is determined
++     * by the resources using this auth system.
+      * 
+      * @param Request $request The request to check for authentication and 
+      *   authorisation.
+-     * @return array<mixed> An array of [$request, $user].
+-     * @throws HTTPError 401 (Unauthorised) if the request is not authorised.
++     * 
++     * @return array<mixed> An array of [$request, $user, $authorisations],
++     *   where $user will be null and $authorisations will be the empty array if
++     *   no token was sent.
++     * 
++     * @throws HTTPError 401 (Unauthorised) if the auth token is invalid in
++     *   unacceptable ways (eg. type given but token not, not issued by this
++     *   website, otherwise forged, expired, etc.).
+      */
+-    public function __invoke($request) {
+-        $authType = $request->authType();
+-        if ($authType === null) {
+-            throw new HTTPError(401, "No authorisation token sent");
+-
+-        } elseif ($authType !== "Bearer") {
+-            throw new HTTPError(401,
+-                "Authorisation scheme not supported: '$authType'"
+-            );
+-        }
++    public function auth() {
++        return function ($request) {
++            // Check if a token was sent
++            $authType = $request->authType();
++            if ($authType === null) {
++                $user = null;
++                $authorisations = [];
+ 
+-        $encodedToken = $request->authValue();
+-        try {
+-            $token = JWT::decode(
+-                $encodedToken,
+-                new Key($this->jwtSecret, "HS256")
+-            );
++            } else {
++                // Check auth type
++                if ($authType !== "bearer") {
++                    throw new HTTPError(401,
++                        "Authorisation scheme not supported: '$authType'"
++                    );
++                }
+ 
+-        } catch (BeforeValidException $e) {
+-            throw new HTTPError(401,
+-                "Auth token not yet valid (this is likely due to an incorrectly"
+-                ." set clock)"
+-            );
++                // Decode
++                $encodedToken = $request->authValue();
++                try {
++                    $token = JWT::decode(
++                        $encodedToken,
++                        new Key($this->jwtSecret, "HS256")
++                    );
++
++                } catch (BeforeValidException $e) {
++                    throw new HTTPError(401,
++                        "Auth token not yet valid (this is likely due to an"
++                        ." incorrectly set clock)"
++                    );
+ 
+-        } catch (ExpiredException $e) {
+-            throw new HTTPError(401, "Auth token expired");
++                } catch (ExpiredException $e) {
++                    throw new HTTPError(401, "Auth token expired");
+ 
+-        } catch (SignatureInvalidException $e) {
+-            throw new HTTPError(401, "Auth token signature invalid");
++                } catch (SignatureInvalidException $e) {
++                    throw new HTTPError(401, "Auth token signature invalid");
++                }
++
++                // Validate and extract authorisations
++                if (!property_exists($token, "authorisations")) {
++                    throw new HTTPError(401,
++                        "Auth token must contain authorisation list"
++                    );
++                }
++                $authorisations = $token->authorisations;
++                if (!is_array($authorisations)) {
++                    throw new HTTPError(401,
++                        "`authorisation` property of auth token must be a list"
++                    );
++                }
++
++                // Validate and extract user
++                if (!property_exists($token, "usertype")) {
++                    throw new HTTPError(401,
++                        "Auth token must contain user type"
++                    );
++                }
++                if (!property_exists($token, "id")) {
++                    throw new HTTPError(401,
++                        "Auth token must contain user ID"
++                    );
++                }
++                $user = $this->dao->getUser($token->usertype, $token->id);
++                if ($user === null) {
++                    throw new HTTPError(401,
++                        "User given in auth token no longer exists"
++                    );
++                }
++            }
++
++            // Return everything
++            return [$request, $user, $authorisations];
++        };
++    }
++
++    /* Optional Token Validation
++    -------------------- */
++
++    /**
++     * Require authentication (ie. a user in the token).
++     * 
++     * If a user ID is given, require the authenticated user to have that ID
++     * (uses strict comparison).
++     * 
++     * @param mixed $id The ID of the required user.
++     * 
++     * @return array<mixed> Passes on what auth() returns.
++     * 
++     * @throws HTTPError 401 (Unauthorised) if the auth token was not given, or
++     *   if the authenticated user is not allowed for this resource.
++     */
++    public function requireAuthentication($id = null) {
++        return function ($request, $user, $authorisations) use ($id) {
++            if ($user === null) {
++                throw new HTTPError(401, "Authentication not given");
++            }
++
++            if ($id !== null && $user->id() !== $id) {
++                throw new HTTPError(401,
++                    "User not authorised to take that action"
++                );
++            }
++
++            return [$request, $user, $authorisations];
++        };
++    }
++
++    /**
++     * Require authentication (ie. an authorisation entry in the token that
++     * matches at least one of the given set of authorisations).
++     * 
++     * @param array<string> $validAuthorisations The list of valid
++     *   authorisations. At least one of these must be contained in the list of
++     *   authorisations in the token.
++     * 
++     * @return callable (Request, User, array<string>)->array<mixed> A callable
++     *   that takes what auth() returns, checks that the authorisations in the
++     *   token includes at least one of the given set of authorisations and
++     *   throws a HTTPError 403 (Forbidden) if not, then returns the parameters
++     *   it was given.
++     */
++    public function requireAuthorisation($validAuthorisations) {
++        if (!is_array($validAuthorisations)) {
++            $validAuthorisations = [$validAuthorisations];
+         }
+ 
+-        $user = $this->getUser($token->id);
+-        return [$request, $user];
++        return function ($request, $user, $authorisations)
++                use ($validAuthorisations)
++        {
++            if ($authorisations === null) {
++                throw new HTTPError(403, "Authorisation not given");
++            }
++
++            $hasValidAuthorisations = Util::any(
++                $validAuthorisations,
++                function ($validAuthorisation) use ($authorisations) {
++                    return in_array($validAuthorisation, $authorisations);
++                }
++            );
++            if (!$hasValidAuthorisations) {
++                throw new HTTPError(403,
++                    "Authorisation not valid for this resource"
++                );
++            }
++
++            return [$request, $user, $authorisations];
++        };
+     }
+ 
+     /* Utils
+@@ -101,6 +267,9 @@ class JWTAuthenticator {
+      * Encode an auth JWT for the given user.
+      * 
+      * @param User $user The user to generate an auth JWT for.
++     * @param array<string> $authorisations A list of strings stating the
++     *   purposes for which this token will be valid. Which purposes are
++     *   available depends on the resources using this authenticator.
+      * @param Timestamp $issueTimestamp The 'generation time' of the token. May
+      *   or may not be the current time.
+      * @param Duration $validDuration The duration after the 'generation time'
+@@ -111,14 +280,25 @@ class JWTAuthenticator {
+      * @see standardAuthToken() for the correct way of making an auth token for
+      *   the application.
+      */
+-    private function createToken($user, $issueTimestamp, $validDuration) {
++    private function createToken(
++            $user,
++            $authorisations,
++            $issueTimestamp,
++            $validDuration
++    ) {
+         return JWT::encode(
+             [
+-                // Data
+-                "id" => $user->id(),
+-                "username" => $user->username(),
++                // Authentication Data
++                "id" => $user !== null ? $user->id() : null,
++                "usertype" => $user !== null ? $user->type() : null,
++                "username" => $user !== null ? $user->username() : null,
+ 
+-                // Metadata
++                // Authorisation Data
++                "authorisations" => is_array($authorisations) ?
++                    $authorisations :
++                    [$authorisations],
++
++                // JWT Metadata
+                 "iss" => $this->issuer,
+                 "iat" => $issueTimestamp->get(),
+                 "nbf" => $issueTimestamp->get(),
+@@ -128,20 +308,4 @@ class JWTAuthenticator {
+             "HS256"
+         );
+     }
+-
+-    /**
+-     * Return the User with the given ID, or throw a 401 HTTPError if the user
+-     * does not exist.
+-     * 
+-     * @param int $userID The ID of the user to get.
+-     * @return User The user with that ID.
+-     * @throws HTTPError If there is no user with that ID.
+-     */
+-    private function getUser($userID) {
+-        $user = $this->dao->getUser($userID);
+-        if ($user === null) {
+-            throw new HTTPError(401, "User given in auth token does not exist");
+-        }
+-        return $user;
+-    }
+ }
