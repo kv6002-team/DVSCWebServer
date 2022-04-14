@@ -71,9 +71,23 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                             "Must provide a non-empty emailAddress parameter"
                         );
                     }
-                    if (str_contains($username, ":")) {
+                    // Must not contain a colon
+                    if (!preg_match(
+                        "/^"                   // From start of string
+                        ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
+                        ."[A-Za-z0-9_-]+"      // First '.'-delimited segment
+                        ."(\.[A-Za-z0-9_-]+)*" // Other '.'-delimited segments
+                        ."@"                   // @ symbol
+                        ."(?=.{1,128})"        // After @ must be 1-128 chars
+                        ."[A-Za-z0-9]{1,}"     // Bottom level domain name
+                        ."(\.[A-Za-z0-9-]+)*"  // Intermediate domain names
+                        ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
+                        ."$/"                  // To end of string
+                        ."u",                  // FLAGS: Use Unicode matching
+                        $username
+                    )) {
                         throw new HTTPError(422,
-                            "emailAddress must not contain a colon"
+                            "emailAddress is not a valid email address"
                         );
                     }
 

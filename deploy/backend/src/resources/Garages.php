@@ -87,6 +87,25 @@ class Garages extends BasicResource {
                     $password = $requiredPrivateParam("password");
 
                     // Validate
+                    if (!preg_match(
+                        "/^"                   // From start of string
+                        ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
+                        ."[A-Za-z0-9_-]+"      // First '.'-delimited segment
+                        ."(\.[A-Za-z0-9_-]+)*" // Other '.'-delimited segments
+                        ."@"                   // @ symbol
+                        ."(?=.{1,128})"        // After @ must be 1-128 chars
+                        ."[A-Za-z0-9]{1,}"     // Bottom level domain name
+                        ."(\.[A-Za-z0-9-]+)*"  // Intermediate domain names
+                        ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
+                        ."$/"                  // To end of string
+                        ."u",                  // FLAGS: Use Unicode matching
+                        $garageData["emailAddress"]
+                    )) {
+                        throw new HTTPError(422,
+                            "emailAddress is not a valid email address"
+                        );
+                    }
+
                     try {
                         $garageData["paidUntil"] = DateTime::parse(
                             $garageData["paidUntil"]
@@ -98,7 +117,7 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    if (str_contains($username, ":")) {
+                    if (str_contains($garageData["vts"], ":")) {
                         throw new HTTPError(422,
                             "VTS number must not contain a colon"
                         );
