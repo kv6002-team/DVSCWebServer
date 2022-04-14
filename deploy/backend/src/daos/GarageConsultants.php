@@ -101,10 +101,12 @@ class GarageConsultants {
     /**
      * Add a Garage Consultant to the database.
      * 
-     * @param string $emailAddress The email address for the new consultant.
-     * @param string $password The hashed password for the new consultant.
+     * @param string $emailAddress The email address for the consultant.
+     * @param string $password The hashed password for the consultant.
      * @param bool $passwordResetRequired Whether the new User must reset
      *   their password before being allowed to make any further API requests.
+     * 
+     * @return int The ID of the added consultant.
      */
     public function addGarageConsultant(
             $emailAddress,
@@ -136,6 +138,8 @@ class GarageConsultants {
             ]
         );
         $this->db->execute("COMMIT");
+
+        return $id;
     }
 
     /**

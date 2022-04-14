@@ -101,8 +101,9 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                     return [$request, $username, $password];
                 },
                 function ($request, $emailAddress, $password) use ($dao) {
+                    $garageConsultantID = null; // Should never be returned
                     try {
-                        $dao->addGarageConsultant(
+                        $garageConsultantID = $dao->addGarageConsultant(
                             $emailAddress,
                             password_hash($password, PASSWORD_DEFAULT),
                             false
@@ -114,9 +115,14 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         );
                     }
 
-                    return [$request];
+                    return [$request, $garageConsultantID];
                 },
-                new NoContentBuilder()
+                JSONBuilder::typeSelector(
+                    function ($request, $garageConsultantID) {
+                        $request->setExpectedResponseStatusCode(201);
+                        return ["id" => $garageConsultantID];
+                    }
+                )
             ]),
 
             "update" => Dispatcher::funcToPipeOf([

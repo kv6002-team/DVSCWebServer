@@ -234,17 +234,20 @@ class Garages{
 
     
     /**
-     * Add Garage to ther database
+     * Add a Garage to the database.
      * 
-     * @param string $vts The VTS number for the Garage
-     * @param string $name The name of the Garage
-     * @param string $ownerName The name of the owner of the Garage
-     * @param string $emailAddress The email address of the Garage
-     * @param string $telephoneNumber The telephone number of the Garage
-     * @param string $paidUntil The date of which the garage has paid until
-     * @param string $password The hashed password for the new consultant.
+     * @param string $vts The VTS number for the Garage.
+     * @param string $name The name for the Garage.
+     * @param string $ownerName The name of the owner for the Garage.
+     * @param string $emailAddress The email address for the Garage.
+     * @param string $telephoneNumber The telephone number for the Garage.
+     * @param DateTimeImmutable $paidUntil The date up to which the Garage has
+     *   paid fees.
+     * @param string $password The hashed password for the Garage.
      * @param bool $passwordResetRequired Whether the new User must reset
+     *   their password before being allowed to make any further API requests.
      * 
+     * @return int The ID of the added garage.
      */
     public function createGarage(
             $vts,
@@ -298,5 +301,7 @@ class Garages{
             ]
         );
         $this->db->execute("COMMIT");
+
+        return $id;
     }
 }

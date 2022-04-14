@@ -143,8 +143,9 @@ class Garages extends BasicResource {
                         $garageData,
                         $password
                 ) use ($dao) {
+                    $garageID = null; // Should never be returned
                     try {
-                        $dao->createGarage(
+                        $garageID = $dao->createGarage(
                             ...$garageData,
                             ...[
                                 password_hash($password, PASSWORD_DEFAULT),
@@ -153,16 +154,19 @@ class Garages extends BasicResource {
                         );
                     } catch (DatabaseError $e) {
                         throw new HTTPError(409,
-                            "A garage with that VTS number is already "+
-                            "registered"
+                            "A garage with that VTS number is already "
+                            ."registered"
                         );
                     }
 
-                    return [$request];
+                    return [$request, $garageID];
                 },
-
-                // Return Success
-                new NoContentBuilder()
+                JSONBuilder::typeSelector(
+                    function ($request, $garageID) {
+                        $request->setExpectedResponseStatusCode(201);
+                        return ["id" => $garageID];
+                    }
+                )
             ]),
 
             "cors_preflight" => Dispatcher::funcToPipeOf([

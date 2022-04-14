@@ -124,10 +124,10 @@ final class Garage extends User {
     public function instruments() {
         return $this->instruments;
     }
-    
+
     /* Implement User
     -------------------- */
-    
+
     /**
      * The email for this Garage.
      * 

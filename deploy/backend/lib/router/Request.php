@@ -20,14 +20,17 @@ class Request {
     private $endpointScheme;
 
     // The inputs and selected outputs
-    private $params;
-    private $privateParams; // 'private' because they can be encrypted (HTTPS)
-    private $endpointParams; // from the URL, eg. /api/endpoint/1523
+    private $endpointParams; // from the URL, eg. /api/resource/1523
+    private $params;         // from query parameters, eg. /api/resource?id=1523
+    private $privateParams;  // see: https://blog.httpwatch.com/2009/02/20/how-secure-are-query-strings-over-https/
     private $body;
     private $fragment;
 
     // Headers
     private $headers;
+
+    // Expected response code
+    private $expectedResponseStatusCode;
 
     /* Constructors
     -------------------------------------------------- */
@@ -43,7 +46,7 @@ class Request {
      * @param array<string,string> $privateParams (Optional) The requested
      *   private parameters for the resource. These are those passed in the body
      *   as url-encoded form data.
-     * @param mixed $body The body for this request.
+     * @param mixed $body (Optional) The body for this request.
      * @param string $fragment (Optional) The requested fragment of the
      *   resource.
      * @param array<string,string> $headers (Optional) The headers sent with
@@ -52,29 +55,33 @@ class Request {
     public function __construct(
             $method,
             $endpoint,
-            $endpointScheme = null,
+
             $params = null,
             $privateParams = null,
-            $endpointParams = null,
             $body = null,
             $fragment = null,
+
             $headers = null
     ) {
         if ($params === null) $params = [];
         if ($privateParams === null) $privateParams = [];
-        if ($endpointParams === null) $endpointParams = [];
         if ($headers === null) $headers = [];
 
         $this->method = $method;
         $this->endpoint = $endpoint;
 
-        $this->endpointScheme = $endpointScheme;
+        // We don't know these yet. They'll be set using setEndpointScheme().
+        $this->endpointScheme = null;
+        $this->endpointParams = [];
+
         $this->params = $params;
         $this->privateParams = $privateParams;
-        $this->endpointParams = $endpointParams;
         $this->body = $body;
         $this->fragment = $fragment;
+
         $this->headers = $headers;
+
+        $this->expectedResponseStatusCode = 200; // OK
     }
 
     /**
@@ -126,10 +133,8 @@ class Request {
             $method,
             $endpoint,
 
-            null, // endpointScheme - we don't know yet
             $params,
             $privateParams,
-            null, // endpointParams - we don't know yet
             $body,
             $fragment,
 
@@ -211,6 +216,16 @@ class Request {
         return true;
     }
 
+    /**
+     * Set the status code this request is expected to return, barring any
+     * further errors before the response is constructed.
+     * 
+     * @param int $code The status code this request is expected to return.
+     */
+    public function setExpectedResponseStatusCode($code) {
+        $this->expectedResponseStatusCode = $code;
+    }
+
     /* Getters
     -------------------------------------------------- */
 
@@ -230,6 +245,17 @@ class Request {
      */
     public function endpoint() {
         return $this->endpoint;
+    }
+
+    /**
+     * Return the endpoint scheme being used.
+     * 
+     * This determines how the endpoint is parsed for in-URL parameters.
+     * 
+     * @return string The endpoint scheme in use.
+     */
+    public function endpointScheme() {
+        return $this->endpointScheme;
     }
 
     /**
@@ -449,12 +475,15 @@ class Request {
     -------------------------------------------------- */
 
     /**
-     * Return the expected response status code for this request, ie. 200 OK.
+     * Return the expected response status code for this request.
      * 
-     * @return int 200 (OK).
+     * This is 200 (OK) by default, but may be changed during request handling.
+     * See setExpectedResponseStatusCode().
+     * 
+     * @return int The expected response code for this request.
      */
     public function expectedResponseStatusCode() {
-        return 200; // OK
+        return $this->expectedResponseStatusCode;
     }
 
     /* Utils
