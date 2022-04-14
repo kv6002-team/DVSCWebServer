@@ -36,6 +36,9 @@ final class GarageConsultant extends User {
         $this->emailAddress = $emailAddress;
     }
 
+    /* Implement User
+    -------------------- */
+
     /**
      * Get the email address for this Garage Consultant.
      * 
@@ -45,9 +48,11 @@ final class GarageConsultant extends User {
         return $this->emailAddress;
     }
 
-    /* Implement User
-    -------------------- */
-    
+    /**
+     * The username for this Garage Consultant, which is the email address.
+     * 
+     * @return string The email address for this Garage Consultant.
+     */
     public function username() {
         return $this->emailAddress;
     }

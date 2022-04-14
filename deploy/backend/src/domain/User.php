@@ -66,6 +66,16 @@ abstract class User {
     }
 
     /**
+     * Get the email address of the User.
+     * 
+     * This is the address to direct password reset request verification emails
+     * to.
+     * 
+     * @return string The email address of the User.
+     */
+    public abstract function emailAddress();
+
+    /**
      * Get whether the User must change their password before being allowed to
      * make any further API requests.
      * 
