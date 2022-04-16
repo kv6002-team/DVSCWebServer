@@ -15,6 +15,8 @@ abstract class User {
 
     private $password;
     private $passwordResetRequired;
+    
+    protected $type;
 
     /**
      * Create a new user.
@@ -26,6 +28,7 @@ abstract class User {
     public function __construct($password, $passwordResetRequired) {
         $this->password = $password;
         $this->passwordResetRequired = $passwordResetRequired;
+        $this->type = "unknown"; // Subclasses must fill this in
     }
 
     /**
@@ -34,7 +37,16 @@ abstract class User {
      * @return int The ID of the User.
      */
     public function id() {
-        return $this->id;
+        return intval($this->id);
+    }
+
+    /**
+     * Get the type of the User.
+     * 
+     * @return string The type of the User.
+     */
+    public function type() {
+        return $this->type;
     }
 
     /**
@@ -52,6 +64,16 @@ abstract class User {
     public function password() {
         return $this->password;
     }
+
+    /**
+     * Get the email address of the User.
+     * 
+     * This is the address to direct password reset request verification emails
+     * to.
+     * 
+     * @return string The email address of the User.
+     */
+    public abstract function emailAddress();
 
     /**
      * Get whether the User must change their password before being allowed to

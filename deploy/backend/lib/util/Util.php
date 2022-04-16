@@ -263,6 +263,46 @@ class Util {
         return $ret;
     }
 
+    // The next two are derived from: https://stackoverflow.com/a/39877269
+
+    /**
+     * Return true if the given function returns true for any element in the
+     * array, or false otherwise.
+     * 
+     * @param mixed $obj The array/object whose elements are to be checked.
+     * @param callable $fn The function that is given each element of the array
+     *   in turn.
+     * @return bool If the function returns true for any item in the array,
+     *   return true. Otherwise, return false.
+     */
+    public static function any($obj, $fn) {
+        foreach ($obj as $key => $value) {
+            if($fn($value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true if the given function returns true for every element in the
+     * array, or false otherwise.
+     * 
+     * @param mixed $obj The array/object whose elements are to be checked.
+     * @param callable $fn The function that is given each element of the array
+     *   in turn.
+     * @return bool If the function returns true for every item in the array,
+     *   return true. Otherwise, return false.
+     */
+    public static function every($obj, $fn) {
+        foreach ($obj as $key => $value) {
+            if(!$fn($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /* Strings
     -------------------------------------------------- */
 

@@ -10,6 +10,8 @@ use kv6002\domain\User;
  * @author William Taylor (19009576)
  */
 final class Garage extends User {
+    const USER_TYPE = "garage";
+
     private $vts;
     private $name;
     private $ownerName;
@@ -53,6 +55,7 @@ final class Garage extends User {
             $passwordResetRequired
     ) {
         parent::__construct($password, $passwordResetRequired);
+        $this->type = GarageConsultant::USER_TYPE;
 
         $this->vts = $vts;
         $this->name = $name;
@@ -91,16 +94,7 @@ final class Garage extends User {
         return $this->ownerName;
     }
 
-    /**
-     * The email for this Garage.
-     * 
-     * This is the address used to send reminder emails to, among other things.
-     * 
-     * @return string The email for this Garage.
-     */
-    public function emailAddress() {
-        return $this->emailAddress;
-    }
+    // Email address: See bottom of class.
 
     /**
      * Get the telephone number for this Garage.
@@ -130,10 +124,26 @@ final class Garage extends User {
     public function instruments() {
         return $this->instruments;
     }
-    
+
     /* Implement User
     -------------------- */
-    
+
+    /**
+     * The email for this Garage.
+     * 
+     * This is the address used to send reminder emails to, among other things.
+     * 
+     * @return string The email for this Garage.
+     */
+    public function emailAddress() {
+        return $this->emailAddress;
+    }
+
+    /**
+     * The username for this Garage, which is the VTS number.
+     * 
+     * @return string The VTS number for this Garage.
+     */
     public function username() {
         return $this->vts;
     }

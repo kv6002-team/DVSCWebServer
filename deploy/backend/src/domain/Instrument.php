@@ -78,7 +78,7 @@ final class Instrument {
      * @return int The ID of the Instrument.
      */
     public function id() {
-        return $this->id;
+        return intval($this->id);
     }
 
     /**

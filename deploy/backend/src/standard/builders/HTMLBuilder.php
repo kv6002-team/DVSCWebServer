@@ -38,10 +38,13 @@ class HTMLBuilder implements Builder {
      * @return Response The response (valid or error) to return to the client.
      */
     public function __invoke($request, ...$args) {
-        $code = $request->expectedResponseStatusCode();
-
         $builderFn = $this->builderFn; // PHP <=5.6
         $content = $builderFn($request, ...$args);
+
+        // Get the expected response code after the builder is called so that
+        // we respect what the builder sets it to (if possible for that kind of
+        // request object).
+        $code = $request->expectedResponseStatusCode();
 
         $page = new Page($this->pathfinder);
         if (is_array($content) && isset($content["content"])) {
