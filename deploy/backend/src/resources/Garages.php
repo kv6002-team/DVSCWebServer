@@ -168,6 +168,125 @@ class Garages extends BasicResource {
                 )
             ]),
 
+            "update" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    // Utility
+                    $requiredPrivateParam = function ($name) use ($request) {
+                        $value = $request->privateParam($name);
+                        if ($value === null) {
+                            throw new HTTPError(422,
+                                "Must provide the $name parameter"
+                            );
+                        }
+                        return $value;
+                    };
+
+                    // Extract
+                    $id = $request->endpointParam("id");
+                    $garageData = [
+                        "vts" => $requiredPrivateParam("vts"),
+                        "name" => $requiredPrivateParam("name"),
+                        "ownerName" => $requiredPrivateParam("ownerName"),
+                        "emailAddress" => $requiredPrivateParam("emailAddress"),
+                        "telephoneNumber" => $requiredPrivateParam(
+                            "telephoneNumber"
+                        ),
+                        "paidUntil" => $requiredPrivateParam("paidUntil")
+                    ];
+
+                    // Validate
+                    if (!preg_match(
+                        "/^"                   // From start of string
+                        ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
+                        ."[A-Za-z0-9_-]+"      // First '.'-delimited segment
+                        ."(\.[A-Za-z0-9_-]+)*" // Other '.'-delimited segments
+                        ."@"                   // @ symbol
+                        ."(?=.{1,128})"        // After @ must be 1-128 chars
+                        ."[A-Za-z0-9]"         // First char of domain name
+                        ."[A-Za-z0-9-]*"       // Bottom level domain name
+                        ."(\.[A-Za-z0-9-]+)*"  // Intermediate domain names
+                        ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
+                        ."$/"                  // To end of string
+                        ."u",                  // FLAGS: Use Unicode matching
+                        $garageData["emailAddress"]
+                    )) {
+                        throw new HTTPError(422,
+                            "emailAddress is not a valid email address"
+                        );
+                    }
+
+                    try {
+                        $garageData["paidUntil"] = DateTime::parse(
+                            $garageData["paidUntil"]
+                        );
+                    } catch (Exception $e) {
+                        throw new HTTPError(422,
+                            "Must provide paidUntil in a correct format (eg."
+                            ." YYYY-MM-DD HH:MM:SS)"
+                        );
+                    }
+
+                    if (str_contains($garageData["vts"], ":")) {
+                        throw new HTTPError(422,
+                            "VTS number must not contain a colon"
+                        );
+                    }
+
+                    // Return
+                    return [
+                        $request,
+                        $id,
+                        $garageData
+                    ];
+                },
+                function ($request, $id, $garageData) {
+                    try {
+                        $this->dao->update(
+                            self::USER_TYPE,
+                            $id,
+                            $garageData["vts"],
+                            $garageData["name"],
+                            $garageData["ownerName"],
+                            $garageData["emailAddress"],
+                            $garageData["telephoneNumber"],
+                            $garageData["paidUntil"]
+                        );
+                    } catch (DatabaseError $e) {
+                        var_dump($e);
+                        throw new HTTPError(404,
+                            "No garage with that ID exists."
+                        );
+                    }
+
+                    return [$request];
+                },
+                new NoContentBuilder()
+            ]),
+
+            "remove" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    $id = $request->endpointParam("id");
+                    if ($id === null) {
+                        throw new HTTPError(422,
+                            "Must provide an id parameter"
+                        );
+                    }
+                    return [$request, $id];
+                },
+                function ($request, $id) {
+                    try {
+                        $this->dao->remove(self::USER_TYPE, $id);
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(404,
+                            "No garage with that ID exists."
+                        );
+                    }
+
+                    return [$request];
+                },
+                new NoContentBuilder()
+            ]),
+
             "cors_preflight" => Dispatcher::funcToPipeOf([
                 function ($request) {
                     $origin = $request->header("Origin");
@@ -233,6 +352,9 @@ class Garages extends BasicResource {
             ),
 
             "POST" => $getAction("create"),
+            "PATCH" => $getAction("update"),
+            "DELETE" => $getAction("remove"),
+            
             "OPTIONS" => $getAction("cors_preflight")
         ]);
     }
