@@ -235,7 +235,7 @@ class Garages{
     /**
      * Add a Garage to the database.
      * 
-     * @param int $id The ID of for the Garage User.
+     * @param int $id The ID of the Garage User.
      * @param string $vts The VTS number for the Garage.
      * @param string $name The name for the Garage.
      * @param string $ownerName The name of the owner for the Garage.
@@ -273,6 +273,48 @@ class Garages{
             ."   :telephoneNumber,"
             ."   :paidUntil"
             ." )",
+            [
+                "id" => $id,
+                "vts" => $vts,
+                "name" => $name,
+                "ownerName" => $ownerName,
+                "emailAddress" => $emailAddress,
+                "telephoneNumber" => $telephoneNumber,
+                "paidUntil" => standard\DateTime::format($paidUntil)
+            ]
+        );
+    }
+
+    /**
+     * Remove a Garage from the database.
+     * 
+     * @param int $id is the ID of the Garage User.
+     */
+    public function remove($id) {
+        $this->db->execute(
+            "DELETE FROM Garage WHERE id = :id",
+            ["id" => $id]
+        );
+    }
+    
+    public function update(
+            $id,
+            $vts,
+            $name,
+            $ownerName,
+            $emailAddress,
+            $telephoneNumber,
+            $paidUntil
+    ) {
+        $this->db->execute(
+            "UPDATE Garage SET"
+            ."   vts = :vts,"
+            ."   name = :name,"
+            ."   ownerName = :ownerName,"
+            ."   emailAddress = :emailAddress,"
+            ."   telephoneNumber = :telephoneNumber,"
+            ."   paidUntil = :paidUntil" 
+            ." WHERE id = :id",
             [
                 "id" => $id,
                 "vts" => $vts,
