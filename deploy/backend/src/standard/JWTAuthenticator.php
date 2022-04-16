@@ -173,7 +173,7 @@ class JWTAuthenticator {
                         "Auth token must contain user ID"
                     );
                 }
-                $user = $this->dao->getUser($token->usertype, $token->id);
+                $user = $this->dao->get($token->usertype, $token->id);
                 if ($user === null) {
                     throw new HTTPError(401,
                         "User given in auth token no longer exists"

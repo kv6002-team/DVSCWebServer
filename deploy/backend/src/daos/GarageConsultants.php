@@ -24,7 +24,7 @@ class GarageConsultants {
      * @param int $id The ID of the consultant to fetch.
      * @return GarageConsultant A GarageConsultant object for that consultant.
      */
-    public function getGarageConsultant($id) {
+    public function get($id) {
         return $this->db->fetch(
             "SELECT DISTINCT GarageConsultant.id,"
             ."   emailAddress,"
@@ -52,7 +52,7 @@ class GarageConsultants {
      *   fetch.
      * @return GarageConsultant A GarageConsultant object for that consultant.
      */
-    public function getGarageConsultantByUsername($username) {
+    public function getByUsername($username) {
         return $this->db->fetch(
             "SELECT DISTINCT GarageConsultant.id,"
             ."   emailAddress,"
@@ -79,7 +79,7 @@ class GarageConsultants {
      *   fetch.
      * @return GarageConsultant A GarageConsultant object for that consultant.
      */
-    public function getGarageConsultants() {
+    public function getAll() {
         return $this->db->fetchAll(
             "SELECT DISTINCT GarageConsultant.id,"
             ."   emailAddress,"
@@ -102,30 +102,9 @@ class GarageConsultants {
      * Add a Garage Consultant to the database.
      * 
      * @param string $emailAddress The email address for the consultant.
-     * @param string $password The hashed password for the consultant.
-     * @param bool $passwordResetRequired Whether the new User must reset
-     *   their password before being allowed to make any further API requests.
-     * 
-     * @return int The ID of the added consultant.
+     * @throws DatabaseError If any kind of database error occurs.
      */
-    public function addGarageConsultant(
-            $emailAddress,
-            $password,
-            $passwordResetRequired
-    ) {
-        $this->db->execute(
-            "INSERT INTO User (password, passwordResetRequired)"
-            ." VALUES ("
-            ."   :password,"
-            ."   :passwordResetRequired"
-            ." )",
-            [
-                "password" => $password,
-                "passwordResetRequired" => $passwordResetRequired
-            ]
-        );
-        $id = $this->db->fetch("SELECT max(id) as maxID FROM User")->maxID;
-
+    public function add($id, $emailAddress) {
         $this->db->execute(
             "INSERT INTO GarageConsultant (id, emailAddress)"
             ." VALUES ("
@@ -137,9 +116,6 @@ class GarageConsultants {
                 "emailAddress" => $emailAddress
             ]
         );
-        $this->db->execute("COMMIT");
-
-        return $id;
     }
 
     /**
@@ -147,28 +123,10 @@ class GarageConsultants {
      * 
      * @param int $id The ID of the consultant to update.
      * @param string $emailAddress The new email address for the consultant.
-     * @param string $password The new hashed password for the consultant.
-     * @param bool $passwordResetRequired Whether the User must reset their
-     *   password before being allowed to make any further API requests.
+     * 
+     * @throws DatabaseError If any kind of database error occurs.
      */
-    public function updateGarageConsultant(
-            $id,
-            $emailAddress,
-            $password,
-            $passwordResetRequired
-    ) {
-        $this->db->execute(
-            "UPDATE User SET"
-            ."   password = :password,"
-            ."   passwordResetRequired = :passwordResetRequired"
-            ." WHERE id = :id",
-            [
-                "id" => $id,
-                "password" => $password,
-                "passwordResetRequired" => $passwordResetRequired
-            ]
-        );
-
+    public function update($id, $emailAddress) {
         $this->db->execute(
             "UPDATE GarageConsultant SET"
             ."   emailAddress = :emailAddress"
@@ -178,24 +136,19 @@ class GarageConsultants {
                 "emailAddress" => $emailAddress
             ]
         );
-
-        $this->db->execute("COMMIT");
     }
 
     /**
-     * Delete a consultant from the database.
+     * Remove a Garage Consultant from the database.
      * 
      * @param int $id The ID of the consultant to remove.
+     * 
+     * @throws DatabaseError If any kind of database error occurs.
      */
-    public function removeGarageConsultant($id) {
+    public function remove($id) {
         $this->db->execute(
             "DELETE FROM GarageConsultant WHERE id = :id",
             ["id" => $id]
         );
-        $this->db->execute(
-            "DELETE FROM User WHERE id = :id",
-            ["id" => $id]
-        );
-        $this->db->execute("COMMIT");
     }
 }

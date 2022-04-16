@@ -10,6 +10,7 @@ use kv6002\standard\builders\JSONBuilder;
 use kv6002\standard\builders\NoContentBuilder;
 use kv6002\standard\DateTime;
 
+use kv6002\domain;
 use kv6002\daos;
 use kv6002\views;
 
@@ -19,32 +20,33 @@ use kv6002\views;
  * @author Callum
  */
 class Garages extends BasicResource {
-    public function __construct($db) {
-        $dao = new daos\Garages($db);
+    private const USER_TYPE = domain\Garage::USER_TYPE;
 
+    private $dao;
+    private $view;
+
+    public function __construct($db) {
+        $this->dao = new daos\Garages($db);
         $this->view = new views\GaragesJSON();
 
         $actions = [
             "get_all_simple" => Dispatcher::funcToPipeOf([
-                function($request) use ($dao){
-                    return [
-                        $request,
-                        $dao->getGarages()
-                    ];
+                function ($request) {
+                    return [$request, $this->dao->getAll(self::USER_TYPE)];
                 },
                 JSONBuilder::typeSelector(
-                    function($request, $garages){
+                    function ($request, $garages){
                         return $this->view->simpleGarages($garages);
                     }
                 )
             ]),
 
             "get_one_full" => Dispatcher::funcToPipeOf([
-                function($request){
+                function ($request) {
                     return [$request, $request->endpointParam("id")];
                 },
-                function($request, $id) use ($dao){
-                    $garage = $dao->getGarage($id);
+                function ($request, $id) {
+                    $garage = $this->dao->get(self::USER_TYPE, $id);
                     if ($garage === null) {
                         throw new HTTPError(404,
                             "Requested Garage does not exist"
@@ -94,7 +96,8 @@ class Garages extends BasicResource {
                         ."(\.[A-Za-z0-9_-]+)*" // Other '.'-delimited segments
                         ."@"                   // @ symbol
                         ."(?=.{1,128})"        // After @ must be 1-128 chars
-                        ."[A-Za-z0-9]{1,}"     // Bottom level domain name
+                        ."[A-Za-z0-9]"         // First char of domain name
+                        ."[A-Za-z0-9-]*"       // Bottom level domain name
                         ."(\.[A-Za-z0-9-]+)*"  // Intermediate domain names
                         ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
                         ."$/"                  // To end of string
@@ -138,19 +141,15 @@ class Garages extends BasicResource {
                 },
 
                 // Process Request
-                function (
-                        $request,
-                        $garageData,
-                        $password
-                ) use ($dao) {
-                    $garageID = null; // Should never be returned
+                function ($request, $garageData, $password) {
                     try {
-                        $garageID = $dao->createGarage(
-                            ...$garageData,
+                        $garage = $this->dao->add(
+                            ...[self::USER_TYPE],
                             ...[
                                 password_hash($password, PASSWORD_DEFAULT),
                                 false
-                            ]
+                            ],
+                            ...$garageData
                         );
                     } catch (DatabaseError $e) {
                         throw new HTTPError(409,
@@ -159,12 +158,12 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    return [$request, $garageID];
+                    return [$request, $garage];
                 },
                 JSONBuilder::typeSelector(
-                    function ($request, $garageID) {
+                    function ($request, $garage) {
                         $request->setExpectedResponseStatusCode(201);
-                        return ["id" => $garageID];
+                        return ["id" => $garage->id()];
                     }
                 )
             ]),

@@ -13,6 +13,7 @@ use router\Request;
 use router\resource\WithMetadata;
 use router\resource\MetadataUtils;
 
+use kv6002\domain;
 use kv6002\daos;
 use kv6002\views;
 
@@ -22,19 +23,20 @@ use kv6002\views;
  * @author William Taylor (19009576)
  */
 class GarageConsultants extends BasicResource implements WithMetadata {
-    public function __construct($db) {
-        $dao = new daos\GarageConsultants($db);
+    private const USER_TYPE = domain\GarageConsultant::USER_TYPE;
 
+    private $dao;
+    private $view;
+
+    public function __construct($db) {
+        $this->dao = new daos\Users($db);
         $this->view = new views\GarageConsultantsJSON();
 
         // Which actions can we take?
         $actions = [
             "get_all" => Dispatcher::funcToPipeOf([
-                function ($request) use ($dao) {
-                    return [
-                        $request,
-                        $dao->getGarageConsultants()
-                    ];
+                function ($request) {
+                    return [$request, $this->dao->getAll(self::USER_TYPE)];
                 },
                 JSONBuilder::typeSelector(
                     function ($request, $consultants) {
@@ -47,8 +49,8 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                 function ($request) {
                     return [$request, $request->endpointParam("id")];
                 },
-                function ($request, $id) use ($dao) {
-                    $consultant = $dao->getGarageConsultant($id);
+                function ($request, $id) {
+                    $consultant = $this->dao->get(self::USER_TYPE, $id);
                     if ($consultant === null) {
                         throw new HTTPError(404,
                             "Requested garage consultant does not exist"
@@ -79,7 +81,8 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         ."(\.[A-Za-z0-9_-]+)*" // Other '.'-delimited segments
                         ."@"                   // @ symbol
                         ."(?=.{1,128})"        // After @ must be 1-128 chars
-                        ."[A-Za-z0-9]{1,}"     // Bottom level domain name
+                        ."[A-Za-z0-9]"         // First char of domain name
+                        ."[A-Za-z0-9-]*"       // Bottom level domain name
                         ."(\.[A-Za-z0-9-]+)*"  // Intermediate domain names
                         ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
                         ."$/"                  // To end of string
@@ -100,13 +103,13 @@ class GarageConsultants extends BasicResource implements WithMetadata {
 
                     return [$request, $username, $password];
                 },
-                function ($request, $emailAddress, $password) use ($dao) {
-                    $garageConsultantID = null; // Should never be returned
+                function ($request, $emailAddress, $password) {
                     try {
-                        $garageConsultantID = $dao->addGarageConsultant(
-                            $emailAddress,
+                        $garageConsultant = $this->dao->add(
+                            self::USER_TYPE,
                             password_hash($password, PASSWORD_DEFAULT),
-                            false
+                            false,
+                            $emailAddress
                         );
                     } catch (DatabaseError $e) {
                         throw new HTTPError(409,
@@ -115,12 +118,12 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         );
                     }
 
-                    return [$request, $garageConsultantID];
+                    return [$request, $garageConsultant];
                 },
                 JSONBuilder::typeSelector(
-                    function ($request, $garageConsultantID) {
+                    function ($request, $garageConsultant) {
                         $request->setExpectedResponseStatusCode(201);
-                        return ["id" => $garageConsultantID];
+                        return ["id" => $garageConsultant->id()];
                     }
                 )
             ]),
@@ -146,23 +149,11 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         );
                     }
 
-                    $password = $request->privateParam("password");
-                    if ($password === null || $password === "") {
-                        throw new HTTPError(422,
-                            "Must provide a non-empty password parameter"
-                        );
-                    }
-
-                    return [$request, $id, $username, $password];
+                    return [$request, $id, $username];
                 },
-                function ($request, $id, $emailAddress, $password) use ($dao) {
+                function ($request, $id, $emailAddress) {
                     try {
-                        $dao->updateGarageConsultant(
-                            $id,
-                            $emailAddress,
-                            password_hash($password, PASSWORD_DEFAULT),
-                            false
-                        );
+                        $this->dao->update(self::USER_TYPE, $id, $emailAddress);
                     } catch (DatabaseError $e) {
                         throw new HTTPError(404,
                             "No garage consultant with that ID exists."
@@ -184,9 +175,9 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                     }
                     return [$request, $id];
                 },
-                function ($request, $id) use ($dao) {
+                function ($request, $id) {
                     try {
-                        $dao->removeGarageConsultant($id);
+                        $this->dao->remove(self::USER_TYPE, $id);
                     } catch (DatabaseError $e) {
                         throw new HTTPError(404,
                             "No garage consultant with that ID exists."

@@ -28,7 +28,7 @@ class Garages{
      * @return Garage A Garage object for that garage, including the list of
      *   Instruments that Garage manages.
      */
-    public function getGarage($id) {
+    public function get($id) {
         // Some of these could throw InvalidArgumentException (parse
         // ourCheckStatus) or Exception (parse DateTime). These will be caught
         // by the global error handler and a 500 error emitted.
@@ -93,14 +93,13 @@ class Garages{
     } 
 
     /**
-     * Return a Garage Consultant object for the consultant in the database with
-     * the given username (email address).
+     * Return a Garage object for the garage in the database with the given
+     * username (VTS number).
      * 
-     * @param string $username The username (email address) of the consultant to
-     *   fetch.
-     * @return GarageConsultant A GarageConsultant object for that consultant.
+     * @param string $username The username (VTS number) of the garage to fetch.
+     * @return Garage A Garage object for that garage.
      */
-    public function getGarageByUsername($username) {
+    public function getByUsername($username) {
         // Some of these could throw InvalidArgumentException (parse
         // ourCheckStatus) or Exception (parse DateTime). These will be caught
         // by the global error handler and a 500 error emitted.
@@ -168,9 +167,10 @@ class Garages{
     /**
      * Return all Garages in the database.
      * 
-     * @return Garage A Garage object for that Garage.
+     * @return array<Garage> A list of Garage object containing every garage in
+     *   the database.
      */
-    public function getGarages() {
+    public function getAll() {
         // Some of these could throw InvalidArgumentException (parse
         // ourCheckStatus) or Exception (parse DateTime). These will be caught
         // by the global error handler and a 500 error emitted.
@@ -232,10 +232,10 @@ class Garages{
         );
     }
 
-    
     /**
      * Add a Garage to the database.
      * 
+     * @param int $id The ID of for the Garage User.
      * @param string $vts The VTS number for the Garage.
      * @param string $name The name for the Garage.
      * @param string $ownerName The name of the owner for the Garage.
@@ -243,35 +243,18 @@ class Garages{
      * @param string $telephoneNumber The telephone number for the Garage.
      * @param DateTimeImmutable $paidUntil The date up to which the Garage has
      *   paid fees.
-     * @param string $password The hashed password for the Garage.
-     * @param bool $passwordResetRequired Whether the new User must reset
-     *   their password before being allowed to make any further API requests.
      * 
-     * @return int The ID of the added garage.
+     * @throws DatabaseError If any kind of database error occurs.
      */
-    public function createGarage(
+    public function add(
+            $id,
             $vts,
             $name,
             $ownerName,
             $emailAddress,
             $telephoneNumber,
-            $paidUntil,
-            $password,
-            $passwordResetRequired
+            $paidUntil
     ) {
-        $this->db->execute(
-            "INSERT INTO User (password, passwordResetRequired)"
-            ." VALUES ("
-            ."   :password,"
-            ."   :passwordResetRequired"
-            ." )",
-            [
-                "password" => $password,
-                "passwordResetRequired" => $passwordResetRequired    
-            ]
-        );
-        $id = $this->db->fetch("SELECT max(id) as maxID FROM User")->maxID;
-
         $this->db->execute(
             "INSERT INTO Garage ("
             ."   id,"
@@ -300,8 +283,5 @@ class Garages{
                 "paidUntil" => standard\DateTime::format($paidUntil)
             ]
         );
-        $this->db->execute("COMMIT");
-
-        return $id;
     }
 }

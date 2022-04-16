@@ -24,16 +24,16 @@ class PasswordReset extends BasicResource {
     private static $USERNAME_NOT_GIVEN_ERR_STR = "Username not given";
 
     private $authenticator;
+    private $dao;
 
     public function __construct($db, $authenticator) {
         $this->authenticator = $authenticator;
-        
-        $dao = new daos\Users($db);
+        $this->dao = new daos\Users($db);
 
         // Which actions can we take?
         $actions = [
             "send_verification" => Dispatcher::funcToPipeOf([
-                function ($request) use ($dao) {
+                function ($request) {
                     // Try to get the username a change is being requested for
                     $username = $request->privateParam("username");
                     if ($username === "") {
@@ -52,7 +52,8 @@ class PasswordReset extends BasicResource {
 
                     $types = explode(",", $typesStr);
                     foreach ($types as $type) {
-                        $supportedUserTypes = $dao->getSupportedUserTypes();
+                        $supportedUserTypes =
+                            $this->dao->getSupportedUserTypes();
                         if (!in_array($type, $supportedUserTypes, true)) {
                             throw new HTTPError(401,
                                 self::$TYPES_INVALID_ERR_STR
@@ -63,10 +64,10 @@ class PasswordReset extends BasicResource {
                     // Return everything
                     return [$request, $types, $username];
                 },
-                function ($request, $types, $username) use ($dao) {
+                function ($request, $types, $username) {
                     // Try each user type in turn.
                     foreach ($types as $type) {
-                        $user = $dao->getUserByUsername($type, $username);
+                        $user = $this->dao->getByUsername($type, $username);
                         if ($user !== null) break; // If one is found, use it.
                     }
 
@@ -111,8 +112,8 @@ class PasswordReset extends BasicResource {
                     }
                     return [$request, $user, $newPassword];
                 },
-                function ($request, $user, $newPassword) use ($dao) {
-                    $dao->changePassword(
+                function ($request, $user, $newPassword) {
+                    $this->dao->changePassword(
                         $user,
                         password_hash($newPassword, PASSWORD_DEFAULT)
                     );
