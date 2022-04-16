@@ -100,11 +100,9 @@ class Authenticate extends BasicResource implements WithMetadata {
                     "token_type" => "bearer",
                     "token" => $this->authenticator->standardAuthToken(
                         $user,
-                        [
-                            $user->passwordResetRequired() ?
-                                "password_reset__password_auth" :
-                                "general"
-                        ]
+                        $user->passwordResetRequired() ?
+                            ["password_reset__password_auth"] :
+                            ["general", $user->type()]
                     )
                 ];
                 return [$request, $jwt];

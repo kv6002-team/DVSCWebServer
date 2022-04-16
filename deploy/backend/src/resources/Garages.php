@@ -25,7 +25,7 @@ class Garages extends BasicResource {
     private $dao; // Cat
     private $view;
 
-    public function __construct($db) {
+    public function __construct($db, $authenticator) {
         $this->dao = new daos\Users($db);
         $this->view = new views\GaragesJSON();
 

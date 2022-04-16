@@ -28,7 +28,7 @@ class GarageConsultants extends BasicResource implements WithMetadata {
     private $dao;
     private $view;
 
-    public function __construct($db) {
+    public function __construct($db, $authenticator) {
         $this->dao = new daos\Users($db);
         $this->view = new views\GarageConsultantsJSON();
 
