@@ -22,7 +22,7 @@ use kv6002\views;
 class Garages extends BasicResource {
     private const USER_TYPE = domain\Garage::USER_TYPE;
 
-    private $dao;
+    private $dao; // Cat
     private $view;
 
     public function __construct($db) {
