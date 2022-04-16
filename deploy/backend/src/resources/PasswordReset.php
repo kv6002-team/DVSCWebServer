@@ -1,6 +1,8 @@
 <?php
 namespace kv6002\resources;
 
+use util\Util;
+
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
@@ -80,16 +82,16 @@ class PasswordReset extends BasicResource {
                         );
                     }
 
-                    // FIXME: Just give the token back directly for now.
-                    // Eventually, send it in a link in an email to the email
-                    // registered for that user.
+                    // FIXME: Just give the token back directly for now (no
+                    //        security). Eventually, send it in a link in an
+                    //        email to the email addr registered for that user.
 
                     // Construct a JWT for that user for specialised use
                     // (account verification only).
                     $jwt = [
                         "token_type" => "bearer",
                         "token" => $this->authenticator->standardAuthToken(
-                            $user, ["account_verification"]
+                            $user, ["password_reset__email_auth"]
                         )
                     ];
                     return [$request, $jwt];
@@ -102,8 +104,11 @@ class PasswordReset extends BasicResource {
             ]),
 
             "change_password" => Dispatcher::funcToPipeOf([
+                $authenticator->requireAuthentication(),
                 $authenticator->requireAuthorisation([
-                    "general", "account_verification"
+                    "password_reset__password_auth",
+                    "password_reset__email_auth",
+                    "general"
                 ]),
                 function ($request, $user) {
                     $newPassword = $request->privateParam("newPassword");
@@ -131,21 +136,34 @@ class PasswordReset extends BasicResource {
                     $actions,
                     function ($request, $user, $authorisations) {
                         if (
-                            // Token not sent, or not authenticated
+                            // Token not sent or not authenticated
                             $user === null ||
 
-                            // Token not sent
+                            // Token not sent or not authorised
                             $authorisations === null ||
-
-                            // Not authorised
-                            !(
-                            in_array("account_verification", $authorisations) ||
-                            in_array("general", $authorisations)
+                            !Util::any(
+                                [
+                                    "password_reset__password_auth",
+                                    "password_reset__email_auth",
+                                    "general"
+                                ],
+                                function ($validAuthorisation)
+                                        use (&$authorisations)
+                                {
+                                    return in_array(
+                                        $validAuthorisation,
+                                        $authorisations
+                                    );
+                                }
                             )
                         ) {
-                            // Not authenticated/authorised, only requesting it
+                            // Not authenticated/authorised, so try to get a
+                            // password_reset__email_auth token.
                             return "send_verification";
                         }
+
+                        // Otherwise, is authendicated and authorised for a
+                        // password change.
                         return "change_password";
                     }
                 ),

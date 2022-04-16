@@ -61,7 +61,7 @@ class Garages extends BasicResource {
                 )
             ]),
 
-            "create" => Dispatcher::funcToPipeOf([
+            "add" => Dispatcher::funcToPipeOf([
                 // Extract and Validate Input
                 function ($request) {
                     // Utility
@@ -86,7 +86,6 @@ class Garages extends BasicResource {
                         ),
                         "paidUntil" => $requiredPrivateParam("paidUntil")
                     ];
-                    $password = $requiredPrivateParam("password");
 
                     // Validate
                     if (!preg_match(
@@ -126,28 +125,19 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    if ($password === "") {
-                        throw new HTTPError(422,
-                            "Must provide a non-empty password"
-                        );
-                    }
-
                     // Return
-                    return [
-                        $request,
-                        $garageData,
-                        $password
-                    ];
+                    return [$request, $garageData];
                 },
 
                 // Process Request
-                function ($request, $garageData, $password) {
+                function ($request, $garageData) {
                     try {
+                        $defaultPass = (new DateTime())->format("dmy");
                         $garage = $this->dao->add(
                             ...[self::USER_TYPE],
                             ...[
-                                password_hash($password, PASSWORD_DEFAULT),
-                                false
+                                password_hash($defaultPass, PASSWORD_DEFAULT),
+                                true
                             ],
                             ...$garageData
                         );
@@ -351,7 +341,7 @@ class Garages extends BasicResource {
                 }
             ),
 
-            "POST" => $getAction("create"),
+            "POST" => $getAction("add"),
             "PATCH" => $getAction("update"),
             "DELETE" => $getAction("remove"),
             

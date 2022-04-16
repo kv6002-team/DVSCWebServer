@@ -67,8 +67,8 @@ class GarageConsultants extends BasicResource implements WithMetadata {
 
             "add" => Dispatcher::funcToPipeOf([
                 function ($request) {
-                    $username = $request->privateParam("emailAddress");
-                    if ($username === null || $username === "") {
+                    $emailAddress = $request->privateParam("emailAddress");
+                    if ($emailAddress === null || $emailAddress === "") {
                         throw new HTTPError(422,
                             "Must provide a non-empty emailAddress parameter"
                         );
@@ -87,28 +87,22 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
                         ."$/"                  // To end of string
                         ."u",                  // FLAGS: Use Unicode matching
-                        $username
+                        $emailAddress
                     )) {
                         throw new HTTPError(422,
                             "emailAddress is not a valid email address"
                         );
                     }
 
-                    $password = $request->privateParam("password");
-                    if ($password === null || $password === "") {
-                        throw new HTTPError(422,
-                            "Must provide a non-empty password parameter"
-                        );
-                    }
-
-                    return [$request, $username, $password];
+                    return [$request, $emailAddress];
                 },
-                function ($request, $emailAddress, $password) {
+                function ($request, $emailAddress) {
                     try {
+                        $defaultPass = (new DateTime())->format("dmy");
                         $garageConsultant = $this->dao->add(
                             self::USER_TYPE,
-                            password_hash($password, PASSWORD_DEFAULT),
-                            false,
+                            password_hash($defaultPass, PASSWORD_DEFAULT),
+                            true,
                             $emailAddress
                         );
                     } catch (DatabaseError $e) {

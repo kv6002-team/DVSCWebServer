@@ -94,11 +94,17 @@ class Authenticate extends BasicResource implements WithMetadata {
                     throw new HTTPError(401, self::$AUTH_INVALID_ERR_STR);
                 }
 
-                // Construct a JWT from the user for general use.
+                // Construct a JWT for that user. For general use if they don't
+                // require a password reset, for password reset only if they do.
                 $jwt = [
                     "token_type" => "bearer",
                     "token" => $this->authenticator->standardAuthToken(
-                        $user, ["general"]
+                        $user,
+                        [
+                            $user->passwordResetRequired() ?
+                                "password_reset__password_auth" :
+                                "general"
+                        ]
                     )
                 ];
                 return [$request, $jwt];
