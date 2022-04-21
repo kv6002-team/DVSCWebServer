@@ -20,25 +20,38 @@ export default function App() {
   const localStoragePrefix = "DISSystemAssignment";
 
   const pages = {
-    "/": { name: "Home", content: Home },
-  };
+    "/": {
+      name: "Home",
+      content: Home,
+      nav: true,
+      auth: false
+    },
 
-  const navItems = mapObj(pages, (_, pageInfo) => pageInfo.name);
-  const routes = mapObj(pages, (_, pageInfo) => pageInfo.content);
-  routes["*"] = NotFound;
+    "*": {
+      name: "Not Found",
+      content: NotFound,
+      nav: false,
+      auth: false
+    }
+  };
 
   return (
     <BrowserRouter basename={basename}>
       <AuthProvider localStoragePrefix={localStoragePrefix}>
-        <Page approot={approot} navItems={navItems}>
+        <Page approot={approot} pages={pages}>
           <Routes>
-            {mapObj(routes, (path, Content, i) => (
-              <Route
-                key={i}
-                path={path}
-                element={<Content approot={approot} />}
-              />
-            ), false)}
+            {mapObj(
+              pages,
+              (path, pageInfo, i) => {
+                const Content = pageInfo.content;
+                return <Route
+                  key={i}
+                  path={path}
+                  element={<Content approot={approot} />}
+                />;
+              },
+              false
+            )}
           </Routes>
         </Page>
       </AuthProvider>

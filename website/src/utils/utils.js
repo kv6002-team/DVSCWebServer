@@ -1,5 +1,5 @@
 /**
- * Return a new object with the values at each key mapped using mapFn(value).
+ * Return a new object with the values at each key mapped using fn(key, value).
  * 
  * @param {Object} obj The object to map.
  * @param {Function} fn The mapping function.
@@ -16,6 +16,33 @@ export function mapObj(obj, fn, reassociate = true) {
             ret[key] = val;
         } else {
             ret.push(val);
+        }
+
+        i++;
+    }
+    return ret;
+}
+
+/**
+ * Return a new object with the values at each key filtered using
+ * fn(key, value).
+ * 
+ * @param {Object} obj The object to filter.
+ * @param {Function} fn The filtering function.
+ * @param {boolean} reassociate If given and false, instead of returning a new
+ *   object, return a new array containing only the mapped values (the
+ *   keys (property names) of the given object are lost).
+ */
+ export function filterObj(obj, fn, reassociate = true) {
+    let i = 0;
+    const ret = reassociate ? {} : [];
+    for (const key in obj) {
+        if (fn(key, obj[key], i)) {
+            if (reassociate) {
+                ret[key] = obj[key];
+            } else {
+                ret.push(obj[key]);
+            }
         }
 
         i++;
