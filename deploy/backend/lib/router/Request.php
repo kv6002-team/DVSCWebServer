@@ -93,6 +93,7 @@ class Request {
         $url = parse_url($_SERVER["REQUEST_URI"]);
         $headers = getallheaders();
         $body = file_get_contents("php://input");
+        if ($body === "") $body = null;
 
         $endpoint = rtrim($url["path"], "/");
         $params = isset($url["query"]) ? self::parseQueryStr($url["query"]) : [];
@@ -113,7 +114,10 @@ class Request {
                 break;
 
             default:
-                if (
+                if ($body === null) {
+                    $privateParams = [];
+
+                } else if (
                         isset($_SERVER["CONTENT_TYPE"]) &&
                         $_SERVER["CONTENT_TYPE"] === self::$BASIC_FORM_TYPE
                 ) {
