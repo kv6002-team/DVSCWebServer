@@ -22,7 +22,6 @@ class Instruments{
     }
 
     public function add(
-            $id,
             $garageID,
             $name,
             $serialNumber,
@@ -32,7 +31,6 @@ class Instruments{
     ) {
         $this->db->execute(
             "INSERT INTO Instrument ("
-            ."   id,"
             ."   garageID,"
             ."   name,"
             ."   serialNumber,"
@@ -40,22 +38,52 @@ class Instruments{
             ."   ourCheckStatus,"
             ."   ourCheckDate"
             ." ) VALUES ("
-            ."   :id,"
             ."   :garageID,"
             ."   :name,"
             ."   :serialNumber,"
             ."   :officialCheckExpiryDate,"
             ."   :ourCheckStatus,"
-            ."   :outCheckDate"
+            ."   :ourCheckDate"
             ." )",
             [
-                "id" => $id,
                 "garageID" => $garageID,
                 "name" => $name,
                 "serialNumber" => $serialNumber,
                 "officialCheckExpiryDate" => standard\DateTime::format($officialCheckExpiryDate),
                 "ourCheckStatus" => $ourCheckStatus,
                 "ourCheckDate" => standard\DateTime::format($ourCheckDate)
+            ]
+        );
+
+        // Commit
+        $this->db->execute("COMMIT");
+
+        return $this->db->fetch(
+            "SELECT name,"
+            ."   serialNumber,"
+            ."   officialCheckExpiryDate,"
+            ."   ourCheckStatus,"
+            ."   ourCheckDate"
+            ." FROM Instrument"
+            ." WHERE id = ("
+            ."   SELECT max(id)"
+            ."   FROM Instrument"
+            ." )",
+            null,
+            domain\Instrument::class,
+            null,
+            [
+                new Field("name"),
+                new Field("serialNumber"),
+
+                new Field("officialCheckExpiryDate",
+                    [standard\DateTime::class, "parse"]),
+
+                new Field("ourCheckStatus",
+                    [domain\Instrument::class, "parseOurCheckStatus"]),
+
+                new Field("ourCheckDate",
+                    [standard\DateTime::class, "parse"])
             ]
         );
     }
@@ -65,5 +93,6 @@ class Instruments{
             "DELETE FROM Instrument WHERE id = :id",
             ["id" => $id]
         );
+        $this->db->execute("COMMIT");
     }
 }
