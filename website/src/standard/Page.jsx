@@ -5,9 +5,6 @@ import Footer from './Footer';
 
 import { optionalEntries, optionalJoin } from '../utils/utils';
 
-import { Container } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-
 import './Page.css';
 
 /**
@@ -31,9 +28,7 @@ export default class Page extends react.Component {
           className: optionalJoin(" ", ["page", this.props.className])
       })}>
         <Navigation approot={this.props.approot} pages={this.props.pages} />
-        <Container>
-          {this.props.children}
-        </Container>
+        {this.props.children}
         <Footer approot={this.props.approot} />
       </div>
     );

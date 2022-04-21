@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 /**
