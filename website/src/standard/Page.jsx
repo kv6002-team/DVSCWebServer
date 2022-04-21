@@ -5,6 +5,9 @@ import Footer from './Footer';
 
 import { optionalEntries, optionalJoin } from '../utils/utils';
 
+import { Container } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 /**
  * Renders the standardised page layout for the site.
  * 
@@ -26,7 +29,9 @@ export default class Page extends react.Component {
           className: optionalJoin(" ", ["app", this.props.className])
       })}>
         <Navigation approot={this.props.approot} items={this.props.navItems} />
-        {this.props.children}
+        <Container>
+          {this.props.children}
+        </Container>
         <Footer approot={this.props.approot} />
       </div>
     );

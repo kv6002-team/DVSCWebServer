@@ -1,6 +1,6 @@
 import react from 'react';
 
-import './Login.css';
+import { Form, Row, Col, Button } from 'react-bootstrap';
 
 /**
  * Displays username/password-based login controls.
@@ -29,25 +29,21 @@ export default class Login extends react.Component {
 
   render() {
     return (
-      <div className="login">
-        <label>
-          <input
-            type="text"
-            placeholder="Username"
-            value={this.state.username}
-            onChange={(e) => this.setUsername(e.target.value)}
-          />
-        </label>
-        <label>
-          <input
-            type="password"
-            placeholder="Password"
-            value={this.state.password}
-            onChange={(e) => this.setPassword(e.target.value)}
-          />
-        </label>
-        <button onClick={this.login}>Login</button>
-      </div>
+      <Form>
+        <Row className="align-items-center">
+          <Col sm={5}>
+            <Form.Control type="email" placeholder="you@your-garage.com" />
+          </Col>
+          <Col sm={5}>
+            <Form.Control type="password" placeholder="password" />
+          </Col>
+          <Col sm={2}>
+            <Button variant="primary" type="submit" onClick={this.login}>
+              Login
+            </Button>
+          </Col>
+        </Row>
+      </Form>
     );
   }
 

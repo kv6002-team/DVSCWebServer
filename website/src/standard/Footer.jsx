@@ -1,6 +1,8 @@
 import react from 'react';
+import { Link } from 'react-router-dom';
 
-import { optionalEntries } from '../utils/utils';
+import { Container, Row, Col } from 'react-bootstrap';
+import './Footer.css';
 
 /**
  * Renders the standardised footer for the site.
@@ -12,11 +14,22 @@ import { optionalEntries } from '../utils/utils';
 export default class Footer extends react.Component {
   render() {
     return (
-      <footer {...optionalEntries({
-          id: this.props.id,
-          className: this.props.className
-      })}>
-        <p>Copyright &copy; Donaldsons' Vehicle Specialist Consultancy.</p>
+      <footer>
+        <Container>
+          <Row className="p-2">
+            <Col sm={1}></Col>
+            <Col sm={2}>
+              <p><strong>Email</strong>: contact@dvsc.services</p>
+              <p><strong>Phone</strong>: 1234 567 8910</p>
+            </Col>
+            <Col sm={2}>
+              <Link to="/legal/privacy-policy">Privacy Policy</Link>
+            </Col>
+          </Row>
+          <Row className="p-2 text-center darken">
+            <p>Copyright &copy; Donaldsons' Vehicle Specialist Consultancy.</p>
+          </Row>
+        </Container>
       </footer>
     );
   }

@@ -1,9 +1,10 @@
 import react from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom'
 
 import { AuthManager } from '../utils/components/Authentication';
 
-import { mapObj, optionalEntries } from '../utils/utils';
+import { Container, Navbar, Nav } from 'react-bootstrap';
+import { mapObj } from '../utils/utils';
 
 /**
  * Renders the standardised navigation for the site.
@@ -22,21 +23,22 @@ import { mapObj, optionalEntries } from '../utils/utils';
 export default class Navigation extends react.Component {
   render() {
     return (
-      <nav {...optionalEntries({
-          id: this.props.id,
-          className: this.props.className
-      })}>
-        <ul>
-          {mapObj(this.props.items, (path, name, i) => (
-            <li key={i}><Link className="button" to={path}>{name}</Link></li>
-          ), false)}
-        </ul>
-
-        <AuthManager
-          endpoint={this.props.approot + "/api/auth"}
-          localStoragePrefix={this.props.localStoragePrefix}
-        />
-      </nav>
+      <Navbar>
+        <Container>
+          {/* "Link" in brand component since just redirect is needed */}
+          <Navbar.Brand as={Link} to='/'>DVSC</Navbar.Brand>
+          <Nav>
+            {/* "NavLink" here since "active" class styling is needed */}
+            {mapObj(this.props.items, (path, name, i) => (
+              <Nav.Link as={NavLink} to={path}>{name}</Nav.Link>
+            ), false)}
+            <AuthManager
+              endpoint={this.props.approot + "/api/auth"}
+              localStoragePrefix={this.props.localStoragePrefix}
+            />
+          </Nav>
+        </Container>
+      </Navbar>
     );
   }
 }
