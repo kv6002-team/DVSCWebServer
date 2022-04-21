@@ -15,7 +15,7 @@ export default class Home extends react.Component {
   render() {
     return (
       <Main header="Donaldsons' Vehicle Specialist Consultancy">
-        Hello
+        Privacy Policy
       </Main>
     );
   }

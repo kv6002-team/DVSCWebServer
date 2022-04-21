@@ -5,6 +5,7 @@ import Page from './standard/Page';
 import { AuthProvider } from './utils/components/Authentication';
 
 import Home from './pages/Home';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -24,6 +25,13 @@ export default function App() {
       name: "Home",
       content: Home,
       nav: true,
+      auth: false
+    },
+
+    "/legal/privacy-policy": {
+      name: "Privacy Policy",
+      content: PrivacyPolicy,
+      nav: false,
       auth: false
     },
 
