@@ -19,11 +19,11 @@ export default class Footer extends react.Component {
         <Container>
           <Row className="p-2">
             <Col sm={1}></Col>
-            <Col sm={2}>
+            <Col sm={3}>
               <p><strong>Email</strong>: contact@dvsc.services</p>
               <p><strong>Phone</strong>: 1234 567 8910</p>
             </Col>
-            <Col sm={2}>
+            <Col sm={3}>
               <Link to="/legal/privacy-policy">Privacy Policy</Link>
             </Col>
           </Row>
