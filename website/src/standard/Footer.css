@@ -1,5 +1,8 @@
+.footer-spacing {
+    height: 1em;
+}
 footer {
-    margin-top: 1em;
+    margin-top: auto;
     padding: 1em 0;
     color: var(--main);
     background-color: var(--main-cont);

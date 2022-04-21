@@ -13,7 +13,8 @@ import './Footer.css';
  */
 export default class Footer extends react.Component {
   render() {
-    return (
+    return [
+      <div className="footer-spacing"></div>,
       <footer>
         <Container>
           <Row className="p-2">
@@ -31,6 +32,6 @@ export default class Footer extends react.Component {
           </Row>
         </Container>
       </footer>
-    );
+    ];
   }
 }

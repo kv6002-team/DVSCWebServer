@@ -8,6 +8,8 @@ import { optionalEntries, optionalJoin } from '../utils/utils';
 import { Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import './Page.css';
+
 /**
  * Renders the standardised page layout for the site.
  * 
@@ -26,7 +28,7 @@ export default class Page extends react.Component {
     return (
       <div {...optionalEntries({
           id: this.props.id,
-          className: optionalJoin(" ", ["app", this.props.className])
+          className: optionalJoin(" ", ["page", this.props.className])
       })}>
         <Navigation approot={this.props.approot} items={this.props.navItems} />
         <Container>
