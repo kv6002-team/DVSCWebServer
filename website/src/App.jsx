@@ -5,6 +5,7 @@ import Page from './standard/Page';
 import { AuthProvider } from './utils/components/Authentication';
 
 import Home from './pages/Home';
+import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 
@@ -25,6 +26,13 @@ export default function App() {
     "/": {
       name: "Home",
       content: Home,
+      nav: true,
+      auth: false
+    },
+
+    "/contact-us": {
+      name: "Contact Us",
+      content: ContactUs,
       nav: true,
       auth: false
     },
