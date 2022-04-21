@@ -7,7 +7,7 @@ import './Home.css';
 import coverImage from '../media/Portrait_Placeholder.png';
 
 /**
- * The home page - shows a random paper with a nice layout.
+ * The home page.
  * 
  * @extends {react.Component<APIConsumer>}
  * 
@@ -31,7 +31,7 @@ export default class Home extends react.Component {
                 ></Image>
               </Col>
               <Col sm={6}>
-                About Us
+                About Us. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra nec massa quis ultricies. Suspendisse maximus efficitur magna, in pulvinar nisi. Curabitur vestibulum libero a diam ullamcorper, eget sodales ex lobortis. Cras eget odio et elit vulputate imperdiet. Duis maximus rhoncus turpis non auctor. Integer eu ultrices ipsum. Suspendisse id pulvinar tellus, et molestie dolor. Vestibulum orci felis, tristique quis nisi eget, volutpat placerat elit. Phasellus eu nulla eget leo tempor eleifend. Mauris ut vulputate orci. Curabitur fringilla odio vel metus ultrices, a viverra tellus gravida. Aliquam sed ipsum nec eros hendrerit efficitur et vitae lacus. Vestibulum rhoncus nec erat sed varius. Quisque mollis vestibulum ex, nec euismod leo. Pellentesque mollis lorem vitae auctor varius. 
               </Col>
             </Row>
           </Container>
@@ -47,7 +47,7 @@ export default class Home extends react.Component {
               ></Image>
             </Col>
             <Col lg={4}>
-              More stuff about us
+              More stuff about us. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra nec massa quis ultricies. Suspendisse maximus efficitur magna, in pulvinar nisi. Curabitur vestibulum libero a diam ullamcorper, eget sodales ex lobortis. Cras eget odio et elit vulputate imperdiet. Duis maximus rhoncus turpis non auctor. Integer eu ultrices ipsum. Suspendisse id pulvinar tellus, et molestie dolor. Vestibulum orci felis, tristique quis nisi eget, volutpat placerat elit. Phasellus eu nulla eget leo tempor eleifend. Mauris ut vulputate orci. Curabitur fringilla odio vel metus ultrices, a viverra tellus gravida. Aliquam sed ipsum nec eros hendrerit efficitur et vitae lacus. Vestibulum rhoncus nec erat sed varius. Quisque mollis vestibulum ex, nec euismod leo. Pellentesque mollis lorem vitae auctor varius. 
             </Col>
             <Col lg={2}>
               <Image
@@ -57,7 +57,7 @@ export default class Home extends react.Component {
               ></Image>
             </Col>
             <Col lg={4}>
-              More stuff about us
+              More stuff about us. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra nec massa quis ultricies. Suspendisse maximus efficitur magna, in pulvinar nisi. Curabitur vestibulum libero a diam ullamcorper, eget sodales ex lobortis. Cras eget odio et elit vulputate imperdiet. Duis maximus rhoncus turpis non auctor. Integer eu ultrices ipsum. Suspendisse id pulvinar tellus, et molestie dolor. Vestibulum orci felis, tristique quis nisi eget, volutpat placerat elit. Phasellus eu nulla eget leo tempor eleifend. Mauris ut vulputate orci. Curabitur fringilla odio vel metus ultrices, a viverra tellus gravida. Aliquam sed ipsum nec eros hendrerit efficitur et vitae lacus. Vestibulum rhoncus nec erat sed varius. Quisque mollis vestibulum ex, nec euismod leo. Pellentesque mollis lorem vitae auctor varius. 
             </Col>
           </Row>
         </Container>
