@@ -19,9 +19,12 @@ export default class Main extends react.Component {
           id: this.props.id,
           className: this.props.className
       })}>
-        <header>
-          <h1>{this.props.header}</h1>
-        </header>
+        {this.props.header != null ?
+          <header>
+            <h1>{this.props.header}</h1>
+          </header> :
+          null
+        }
 
         {this.props.children}
       </main>
