@@ -11,7 +11,7 @@ import './Home.css';
  * 
  * @author William Taylor (19009576)
  */
-export default class Home extends react.Component {
+export default class PrivacyPolicy extends react.Component {
   render() {
     return (
       <Main header="Donaldsons' Vehicle Specialist Consultancy">
