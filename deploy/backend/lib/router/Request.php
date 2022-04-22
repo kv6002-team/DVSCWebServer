@@ -119,16 +119,17 @@ class Request {
 
                 } else if (
                         isset($_SERVER["CONTENT_TYPE"]) &&
-                        $_SERVER["CONTENT_TYPE"] === self::$BASIC_FORM_TYPE
+                        explode(";", $_SERVER["CONTENT_TYPE"], 2)[0]
+                            === self::$BASIC_FORM_TYPE
                 ) {
                     $privateParams = self::parseQueryStr($body);
 
                 } else {
-                    // A self::$MULTIPART_FORM_TYPE parser is too complex to
-                    // implement here. This effectively makes multipart form
-                    // data ignored by Request.
+                    // A multi-part form parser is too complex to implement
+                    // here. This effectively makes multipart form data ignored
+                    // by Request.
                     // FIXME: This should be fixed at some point, but isn't
-                    //        required for this assignment.
+                    //        required for this project.
                     $privateParams = [];
                 }
         }
