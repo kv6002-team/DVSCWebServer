@@ -201,13 +201,16 @@ export class Manager extends react.Component {
    * @param {string} password The password the user entered.
    */
   login = (username, password) => {
-    const authBody = new FormData();
-    authBody.append('username', username);
-    authBody.append('password', password);
+    const headers = {
+      "Authorization": "basic " + btoa(`${username}:${password}`)
+    };
 
-    fetchJSON("POST", this.props.endpoint, null, authBody)
+    const supplementaryInfo = new FormData();
+    supplementaryInfo.append('types', 'garage');
+
+    fetchJSON("POST", this.props.endpoint, headers, supplementaryInfo)
       .then(({token}) => this.props.auth.setToken(token))
-      .catch(this.props.auth.setError)
+      .catch(this.props.auth.setError);
   };
 
   /**

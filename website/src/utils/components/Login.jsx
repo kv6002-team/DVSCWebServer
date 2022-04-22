@@ -33,8 +33,8 @@ export default class Login extends react.Component {
         <Row className="align-items-center">
           <Col sm={5}>
             <Form.Control
-              type="email"
-              placeholder="you@your-garage.com"
+              type="text"
+              placeholder="VTS Number"
               value={this.state.username}
               onChange={(e) => this.setUsername(e.target.value)}
             />
@@ -42,7 +42,7 @@ export default class Login extends react.Component {
           <Col sm={5}>
             <Form.Control
               type="password"
-              placeholder="password"
+              placeholder="Password"
               value={this.state.password}
               onChange={(e) => this.setPassword(e.target.value)}
             />
