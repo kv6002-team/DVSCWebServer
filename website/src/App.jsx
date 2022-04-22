@@ -19,8 +19,8 @@ import './App.css';
  * @returns {import('react').ReactElement} The root element of the app.
  */
 export default function App() {
-  const approot = ""; // Server root
-  const basename = approot + "";
+  const approot = "";
+  const basename = "";
   const localStoragePrefix = "DISSystemAssignment";
 
   const pages = {

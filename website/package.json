@@ -1,5 +1,5 @@
 {
-  "name": "website",
+  "name": "dvsc",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "BUILD_PATH='../deploy/frontend' react-scripts build",
+    "build": "rm -r ../deploy/static && BUILD_PATH='../deploy/frontend' react-scripts build && mv ../deploy/frontend/static ../deploy/static",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

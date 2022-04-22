@@ -2,6 +2,7 @@
 # --------------------
 
 deploy/frontend
+deploy/static
 
 # IDE files
 # --------------------
