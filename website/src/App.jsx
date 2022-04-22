@@ -6,6 +6,7 @@ import { AuthProvider } from './utils/components/Authentication';
 
 import Home from './pages/Home';
 import ContactUs from './pages/ContactUs';
+import UpdateInstrument from './pages/UpdateInstrument';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 
@@ -35,6 +36,13 @@ export default function App() {
       content: ContactUs,
       nav: true,
       auth: false
+    },
+
+    "/update-instrument": {
+      name: "Update Instrument",
+      content: UpdateInstrument,
+      nav: true,
+      auth: true
     },
 
     "/legal/privacy-policy": {
