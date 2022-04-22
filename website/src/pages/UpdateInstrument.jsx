@@ -42,7 +42,6 @@ class UpdateInstrument extends react.Component {
                   <Form.Select
                     onChange={(e) => this.setInstrument(e.target.value)}
                   >
-                    <option>Select an instrument to update</option>
                     {mapObj(this.state.instruments, (_, instrument, i) => (
                       <option key={i} value={instrument.id}>{instrument.name}</option>
                     ), false)}
@@ -69,24 +68,15 @@ class UpdateInstrument extends react.Component {
     );
   }
 
-  // Based on: https://stackoverflow.com/a/12409344
-  formatDateOnly = (date) => {
-    const yyyy = date.getFullYear();
-    let mm = date.getMonth() + 1; // Months start at 0!
-    let dd = date.getDate();
-
-    if (dd < 10) dd = '0' + dd;
-    if (mm < 10) mm = '0' + mm;
-
-    return yyyy+"-"+mm+"-"+dd;
-  }
-
-  setInstrument = (instrumentID) => this.setState({
-    instrument: instrumentID,
-    newExpiryDate: this.formatDateOnly(
-      new Date(this.state.instruments[instrumentID].officialCheckExpiryDate)
+  newInstrumentStateFor = (instruments, selectedID) => ({
+    instrument: selectedID,
+    newExpiryDate: this.formatDate(
+      new Date(instruments[selectedID].officialCheckExpiryDate)
     )
   });
+  setInstrument = (instrumentID) => this.setState(
+    this.newInstrumentStateFor(this.state.instruments, instrumentID)
+  );
   setNewExpiryDate = (newExpiryDate) => this.setState({
     newExpiryDate: newExpiryDate
   });
@@ -100,9 +90,24 @@ class UpdateInstrument extends react.Component {
         this.props.approot + "/api/garages/"+this.props.auth.token.decoded.id,
         this.getHeaders()
     )
-      .then((garage) => this.setState({
-        instruments: this.assignAllByID({}, garage.instruments)
-      }))
+      .then((garage) => {
+        // Derive the additional state for the first instrument, if there is one
+        let additionalState = {};
+        if (garage.instruments.length > 0) {
+          additionalState = this.newInstrumentStateFor(
+            garage.instruments,
+            garage.instruments[0].id
+          );
+        }
+
+        // Set the state
+        this.setState(Object.assign(
+          {
+            instruments: this.assignAllByID({}, garage.instruments)
+          },
+          additionalState
+        ));
+      })
       .catch((error) => {
         this.props.handleIfAuthError(error);
         this.setState({ instruments: error });
@@ -136,7 +141,7 @@ class UpdateInstrument extends react.Component {
    * Fetch the reading list when this component is mounted if the user is
    * already logged in.
    */
-   componentDidMount() {
+  componentDidMount() {
     /* If you reload the page this component is on, during the initial mount of
      * the whole page, this component's mount won't have the token, because (by
      * definition of a *context* provider) this component is part of the subtree
@@ -159,11 +164,36 @@ class UpdateInstrument extends react.Component {
   /**
    * @returns The headers needed for this component's fetches.
    */
-   getHeaders = () => {
+  getHeaders = () => {
     return {
       "Authorization": "bearer " + this.props.auth.token
     }
   };
+
+  // Based on: https://stackoverflow.com/a/12409344
+  formatDate = (date) => {
+    const yyyy = date.getFullYear();
+    let mm = date.getMonth() + 1; // Months start at 0!
+    let dd = date.getDate();
+
+    if (mm < 10) mm = '0' + mm;
+    if (dd < 10) dd = '0' + dd;
+
+    return yyyy+"-"+mm+"-"+dd;
+  }
+
+  // Based on: https://stackoverflow.com/a/19346876 and the above
+  formatTime = (date) => {
+    let hh = date.getHours();
+    let mm = date.getMinutes();
+    let ss = date.getSeconds();
+
+    if (hh < 10) hh = '0' + hh;
+    if (mm < 10) mm = '0' + mm;
+    if (ss < 10) ss = '0' + ss;
+
+    return this.formatDate() +" "+ hh+"-"+mm+"-"+ss;
+  }
 
   /**
    * Return a copy of the target object, plus all given objects assigned to
@@ -174,7 +204,7 @@ class UpdateInstrument extends react.Component {
    * @returns {object} A copy of the target object with all given objects
    *   assigned by their IDs.
    */
-   assignAllByID(target, objs) {
+  assignAllByID(target, objs) {
     return objs.reduce((accum, obj) => {
       accum[obj.id] = obj;
       return accum;
