@@ -185,6 +185,13 @@ class Garages extends BasicResource {
                     ];
 
                     // Validate
+                    if ($id === null) {
+                        throw new HTTPError(422,
+                            "Cannot update the whole collection of garages"
+                            ." (did you mean to `PATCH /api/garages/:id`?)"
+                        );
+                    }
+
                     if (!preg_match(
                         "/^"                   // From start of string
                         ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
@@ -242,7 +249,6 @@ class Garages extends BasicResource {
                             $garageData["paidUntil"]
                         );
                     } catch (DatabaseError $e) {
-                        var_dump($e);
                         throw new HTTPError(404,
                             "No garage with that ID exists."
                         );
