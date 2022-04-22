@@ -1,5 +1,7 @@
 import react from 'react';
 
+import { Form, Col, Button } from 'react-bootstrap';
+
 /**
  * Displays a logout button.
  * 
@@ -15,9 +17,13 @@ import react from 'react';
 export default class Login extends react.Component {
   render() {
     return (
-      <div className="logout">
-        <button onClick={this.props.onLogout}>Logout</button>
-      </div>
+      <Form>
+        <Col sm={2}>
+          <Button variant="primary" type="submit" onClick={this.onLogout}>
+            Logout
+          </Button>
+        </Col>
+      </Form>
     );
   }
 }
