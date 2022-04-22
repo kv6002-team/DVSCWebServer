@@ -23,6 +23,28 @@ function send_email($email_object){
   }
 }
 
+/**
+ * Sends an email to a set recipient that contains contact us submission form content
+ * $content expects Array(
+ *                        "email_address" => "test@example.com",
+ *                        "phone_number" => "1234567890",
+ *                        "email_subject" => "Hello, I need help with XYZ"
+ *                        "message_content" => "I need some assistance with a big problem im having, send your best looking man please"
+ *                        )
+ */
+function send_contact_form_submission_email($recipient_email, $content){
+  $email_subject = CONTACT_US_CONFIG['subject'] . " " . $content['email_subject'];
+  $phone_number = $content['phone_number'];
+  $email_address = $content['email_address'];
+  $email_content = $content['message_content'];
+
+  $email_content .= "\n" . "Phone Number: $phone_number";
+  $email_content .= "\n" . "Email Address: $email_address";
+
+  $email_object = generate_email_object($recipient_email, EMAIL_SENDER_NAME, $email_content, $email_subject, false);
+  send_email($email_object);
+}
+
 function send_password_reset_email($recipient_email, $recipient_name, $password_reset_link){
   $subject = COMPANY_NAME_SHORT . " | Password Reset";
 
