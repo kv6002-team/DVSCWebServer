@@ -1,7 +1,7 @@
 import react from 'react';
 import { Link, NavLink } from 'react-router-dom'
 
-import { AuthManager } from '../utils/components/Authentication';
+import { AuthManager, makeAuthConsumer } from '../utils/components/Authentication';
 
 import { Container, Navbar, Nav } from 'react-bootstrap';
 import { mapObj, filterObj } from '../utils/utils';
@@ -20,7 +20,7 @@ import { mapObj, filterObj } from '../utils/utils';
  * 
  * @author William Taylor (19009576)
  */
-export default class Navigation extends react.Component {
+class Navigation extends react.Component {
   render() {
     return (
       <Navbar>
@@ -35,8 +35,8 @@ export default class Navigation extends react.Component {
                 (_, pageInfo) => (
                   pageInfo.nav &&
                   (
-                    !pageInfo.auth || // If it's not auth-requiring anyway
-                    false    // Or if it is and we're authed
+                    !pageInfo.auth ||             // If it's not auth-requiring
+                    this.props.auth.token != null // Or if we're authed
                   )
                 )
               ),
@@ -57,3 +57,4 @@ export default class Navigation extends react.Component {
     );
   }
 }
+export default makeAuthConsumer(Navigation);

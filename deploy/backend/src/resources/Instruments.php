@@ -20,14 +20,13 @@ use kv6002\views;
  * @author Callum
  */
 class Instruments extends BasicResource {
-    
     private $dao;
 
     public function __construct($db) {
         $this->dao = new daos\Instruments($db);
 
         $actions = [
-            "create" => Dispatcher::funcToPipeOf([
+            "add" => Dispatcher::funcToPipeOf([
                 // Extract and validate input
                 function ($request) {
                     // Utility
@@ -60,7 +59,7 @@ class Instruments extends BasicResource {
                             "serialNumber is not a valid serial number"
                         );
                     }
-                    
+
                     try {
                         $instrumentData["officialCheckExpiryDate"] = DateTime::parse(
                             $instrumentData["officialCheckExpiryDate"]
@@ -72,7 +71,7 @@ class Instruments extends BasicResource {
                         );
                     }
 
-                    if($instrumentData["officialCheckExpiryDate"] < new DateTime('today midnight')) {
+                    if ($instrumentData["officialCheckExpiryDate"] < new DateTime('today midnight')) {
                         throw new HTTPError(422,
                             "Must provide a date from tomorrow for officialCheckExpiryDate"
                         );
@@ -89,7 +88,7 @@ class Instruments extends BasicResource {
                         );
                     }
 
-                    if($instrumentData["ourCheckDate"] < new DateTime('yesterday midnight')) {
+                    if ($instrumentData["ourCheckDate"] < new DateTime('yesterday midnight')) {
                         throw new HTTPError(422,
                             "Must provide a date from today for ourCheckDate"
                         );
@@ -109,7 +108,6 @@ class Instruments extends BasicResource {
                             ...$instrumentData
                         );
                     } catch (DatabaseError $e) {
-                        
                         throw new HTTPError(409,
                             "An instrument with that serial number already"
                             ." exists"
@@ -126,10 +124,102 @@ class Instruments extends BasicResource {
                 )
             ]),
 
+            "update" => Dispatcher::funcToPipeOf([
+                // Extract and validate input
+                function ($request) {
+                    // Utility
+                    $requiredPrivateParam = function ($name) use ($request) {
+                        $value = $request->privateParam($name);
+                        if ($value === null) {
+                            throw new HTTPError(422,
+                                "Must provide the $name parameter"
+                            );
+                        }
+                        return $value;
+                    };
+
+                    // Extract
+                    $id = $request->endpointParam("id");
+                    $instrumentData = [
+                        "name" => $requiredPrivateParam("name"),
+                        "officialCheckExpiryDate" => $requiredPrivateParam("officialCheckExpiryDate"),
+                        "ourCheckStatus" => $requiredPrivateParam("ourCheckStatus"),
+                        "ourCheckDate" => $requiredPrivateParam("ourCheckDate")
+                    ];
+
+                    // Validate
+                    if ($id === null) {
+                        throw new HTTPError(422,
+                            "Cannot update the whole collection of instruments"
+                            ." (did you mean to `PATCH /api/instruments/:id`?)"
+                        );
+                    }
+
+                    try {
+                        $instrumentData["officialCheckExpiryDate"] = DateTime::parse(
+                            $instrumentData["officialCheckExpiryDate"]
+                        );
+                    } catch (Exception $e) {
+                        throw new HTTPError(422,
+                            "Must provide officialCheckExpiryDate in a correct format"
+                            ."(eg. YYYY-MM-DD HH:MM:SS)"
+                        );
+                    }
+
+                    if ($instrumentData["officialCheckExpiryDate"] < new DateTime('today midnight')) {
+                        throw new HTTPError(422,
+                            "Must provide a date from tomorrow for officialCheckExpiryDate"
+                        );
+                    }
+
+                    try {
+                        $instrumentData["ourCheckDate"] = DateTime::parse(
+                            $instrumentData["ourCheckDate"]
+                        );
+                    } catch (Exception $e) {
+                        throw new HTTPError(422,
+                            "Must provide ourCheckDate in a correct format"
+                            ."(eg. YYYY-MM-DD HH:MM:SS)"
+                        );
+                    }
+
+                    if ($instrumentData["ourCheckDate"] < new DateTime('yesterday midnight')) {
+                        throw new HTTPError(422,
+                            "Must provide a date from today for ourCheckDate"
+                        );
+                    }
+
+                    // Return
+                    return [
+                        $request,
+                        $id,
+                        $instrumentData
+                    ];
+                },
+
+                // Process Request
+                function ($request, $id, $instrumentData) {
+                    try {
+                        $this->dao->update(
+                            ...[$id],
+                            ...$instrumentData
+                        );
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(409,
+                            "An instrument with that serial number already"
+                            ." exists"
+                        );
+                    }
+
+                    return [$request];
+                },
+                new NoContentBuilder()
+            ]),
+
             "remove" => Dispatcher::funcToPipeOf([
                 function ($request) {
                     $id = $request->endpointParam("id");
-                    if($id === null) {
+                    if ($id === null) {
                         throw new HTTPError(422,
                             "Must provide an id parameter"
                         );
@@ -144,7 +234,7 @@ class Instruments extends BasicResource {
                             "No instrument with that ID exists."
                         );  
                     }
-                
+
                     return [$request];
                 },
                 new NoContentBuilder()
@@ -205,10 +295,10 @@ class Instruments extends BasicResource {
         // Compose (Always add CORS headers)
         $headers = ["Access-Control-Allow-Origin" => "*"];
         parent::__construct([
-
-            "POST" => $getAction("create"),
+            "POST" => $getAction("add"),
+            "PATCH" => $getAction("update"),
             "DELETE" => $getAction("remove"),
-            
+
             "OPTIONS" => $getAction("cors_preflight")
         ]);
     }

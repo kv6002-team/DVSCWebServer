@@ -1,3 +1,9 @@
+# Build files/directories
+# --------------------
+
+deploy/frontend
+deploy/static
+
 # IDE files
 # --------------------
 

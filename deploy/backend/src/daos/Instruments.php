@@ -21,6 +21,9 @@ class Instruments{
         $this->db = $db;
     }
 
+    /**
+     * 
+     */
     public function add(
             $garageID,
             $name,
@@ -29,6 +32,7 @@ class Instruments{
             $ourCheckStatus,
             $ourCheckDate
     ) {
+        // Add
         $this->db->execute(
             "INSERT INTO Instrument ("
             ."   garageID,"
@@ -58,6 +62,7 @@ class Instruments{
         // Commit
         $this->db->execute("COMMIT");
 
+        // Return the created object
         return $this->db->fetch(
             "SELECT id,"
             ."   name,"
@@ -89,6 +94,40 @@ class Instruments{
         );
     }
 
+    /**
+     * 
+     */
+    public function update(
+            $id,
+            $name,
+            $officialCheckExpiryDate,
+            $ourCheckStatus,
+            $ourCheckDate
+    ) {
+        // Update
+        $this->db->execute(
+            "UPDATE Instrument SET"
+            ."   name = :name,"
+            ."   officialCheckExpiryDate = :officialCheckExpiryDate,"
+            ."   ourCheckStatus = :ourCheckStatus,"
+            ."   ourCheckDate = :ourCheckDate"
+            ." WHERE id = :id",
+            [
+                "id" => $id,
+                "name" => $name,
+                "officialCheckExpiryDate" => standard\DateTime::format($officialCheckExpiryDate),
+                "ourCheckStatus" => $ourCheckStatus,
+                "ourCheckDate" => standard\DateTime::format($ourCheckDate)
+            ]
+        );
+
+        // Commit
+        $this->db->execute("COMMIT");
+    }
+
+    /**
+     * 
+     */
     public function remove($id){
         $this->db->execute(
             "DELETE FROM Instrument WHERE id = :id",

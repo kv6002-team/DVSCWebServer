@@ -1,5 +1,5 @@
 {
-  "name": "website",
+  "name": "dvsc",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,6 +7,7 @@
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^13.5.0",
     "bootstrap": "^5.1.3",
+    "jwt-decode": "^3.1.2",
     "react": "^18.0.0",
     "react-bootstrap": "^2.3.0",
     "react-dom": "^18.0.0",
@@ -17,7 +18,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "rm -r ../deploy/static && BUILD_PATH='../deploy/frontend' react-scripts build && mv ../deploy/frontend/static ../deploy/static",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

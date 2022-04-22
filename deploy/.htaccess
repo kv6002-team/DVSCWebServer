@@ -1,8 +1,8 @@
 RewriteEngine on
 
 RewriteRule ^static/(.*)$ - [S=4]
-RewriteRule backend/index.php - [S=3]
-RewriteRule frontend/index.html - [S=2]
+RewriteRule ^backend/index.php - [S=3]
+RewriteRule ^frontend/index.html - [S=2]
 RewriteRule ^api(/.*)?$ backend/index.php [L]
 RewriteRule ^(.*)$ frontend/index.html
 
