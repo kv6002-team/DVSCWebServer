@@ -5,6 +5,7 @@ use dispatcher\Dispatcher;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
 use kv6002\standard\builders\JSONBuilder;
+use kv6002\standard\builders\NoContentBuilder;
 
 use router\Request;
 use router\resource\WithMetadata;
@@ -30,97 +31,147 @@ class Authenticate extends BasicResource implements WithMetadata {
         $this->authenticator = $authenticator;
         $this->dao = new daos\Users($db);
 
-        // Define action
-        $contentBuilder = Dispatcher::funcToPipeOf([
-            function ($request) {
-                // Try to get the credentials
-                $credentialsStrEncoded = $request->authValue();
-                if ($credentialsStrEncoded === null) {
-                    throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
-                }
-
-                $credentialsStr = base64_decode($credentialsStrEncoded, true);
-                if ($credentialsStr === false) {
-                    throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
-                }
-
-                list($username, $password) = array_merge(
-                    explode(":", $credentialsStr, 2),
-                    [null] // Make sure that password contains a value
-                );
-                if (
-                    $username === "" ||
-                    $password === "" ||
-                    $password === null
-                ) {
-                    throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
-                }
-
-                // Try to get the types
-                $typesStr = $request->privateParam("types");
-                if ($typesStr === null || $typesStr === "") {
-                    throw new HTTPError(401, self::$TYPES_NOT_GIVEN_ERR_STR);
-                }
-
-                $types = explode(",", $typesStr);
-                foreach ($types as $type) {
-                    $supportedUserTypes = $this->dao->getSupportedUserTypes();
-                    if (!in_array($type, $supportedUserTypes, true)) {
-                        throw new HTTPError(401, self::$TYPES_INVALID_ERR_STR);
+        // Define actions
+        $actions = [
+            "auth" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    // Try to get the credentials
+                    $credentialsStrEncoded = $request->authValue();
+                    if ($credentialsStrEncoded === null) {
+                        throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
                     }
-                }
 
-                // Return everything
-                return [
-                    $request,
-                    $types,
-                    $username,
-                    $password
-                ];
-            },
-            function ($request, $types, $username, $password) {
-                // Try each user type in turn.
-                foreach ($types as $type) {
-                    $user = $this->dao->getByUsername($type, $username);
-                    if ($user !== null) break; // If one is found, use it.
-                }
+                    $credentialsStr = base64_decode($credentialsStrEncoded, true);
+                    if ($credentialsStr === false) {
+                        throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
+                    }
 
-                // If the user does not exist as any of the given types, or
-                // auth fails, then return an error.
-                if (
-                        $user === null ||
-                        !password_verify($password, $user->password())
-                ) {
-                    throw new HTTPError(401, self::$AUTH_INVALID_ERR_STR);
-                }
+                    list($username, $password) = array_merge(
+                        explode(":", $credentialsStr, 2),
+                        [null] // Make sure that password contains a value
+                    );
+                    if (
+                        $username === "" ||
+                        $password === "" ||
+                        $password === null
+                    ) {
+                        throw new HTTPError(401, self::$CREDS_NOT_GIVEN_ERR_STR);
+                    }
 
-                // Construct a JWT for that user. For general use if they don't
-                // require a password reset, for password reset only if they do.
-                $jwt = [
-                    "token_type" => "bearer",
-                    "token" => $this->authenticator->standardAuthToken(
-                        $user,
-                        $user->passwordResetRequired() ?
-                            ["password_reset__password_auth"] :
-                            ["general", $user->type()]
-                    )
-                ];
-                return [$request, $jwt];
-            },
-            JSONBuilder::typeSelector(
-                function ($request, $jwt) {
-                    return $jwt;
-                }
-            )
-        ]);
+                    // Try to get the types
+                    $typesStr = $request->privateParam("types");
+                    if ($typesStr === null || $typesStr === "") {
+                        throw new HTTPError(401, self::$TYPES_NOT_GIVEN_ERR_STR);
+                    }
 
-        // Compose (Always add CORS headers)
-        $headers = ["Access-Control-Allow-Origin" => "*"];
-        parent::__construct([
-            "POST" => Dispatcher::funcToPipeOf([
-                $contentBuilder,
-                BasicResource::addHeaders($headers)
+                    $types = explode(",", $typesStr);
+                    foreach ($types as $type) {
+                        $supportedUserTypes = $this->dao->getSupportedUserTypes();
+                        if (!in_array($type, $supportedUserTypes, true)) {
+                            throw new HTTPError(401, self::$TYPES_INVALID_ERR_STR);
+                        }
+                    }
+
+                    // Return everything
+                    return [
+                        $request,
+                        $types,
+                        $username,
+                        $password
+                    ];
+                },
+                function ($request, $types, $username, $password) {
+                    // Try each user type in turn.
+                    foreach ($types as $type) {
+                        $user = $this->dao->getByUsername($type, $username);
+                        if ($user !== null) break; // If one is found, use it.
+                    }
+
+                    // If the user does not exist as any of the given types, or
+                    // auth fails, then return an error.
+                    if (
+                            $user === null ||
+                            !password_verify($password, $user->password())
+                    ) {
+                        throw new HTTPError(401, self::$AUTH_INVALID_ERR_STR);
+                    }
+
+                    // Construct a JWT for that user. For general use if they don't
+                    // require a password reset, for password reset only if they do.
+                    $jwt = [
+                        "token_type" => "bearer",
+                        "token" => $this->authenticator->standardAuthToken(
+                            $user,
+                            $user->passwordResetRequired() ?
+                                ["password_reset__password_auth"] :
+                                ["general", $user->type()]
+                        )
+                    ];
+                    return [$request, $jwt];
+                },
+                JSONBuilder::typeSelector(
+                    function ($request, $jwt) {
+                        return $jwt;
+                    }
+                )
+            ]),
+
+            "cors_preflight" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    $origin = $request->header("Origin");
+                    $corsMethod =
+                        $request->header("Access-Control-Request-Method");
+
+                    if ($origin === null || $corsMethod === null) {
+                        throw new HTTPError(405,
+                            "OPTIONS is only supported for CORS preflight"
+                            ." requests"
+                        );
+                    }
+
+                    return [$request];
+                },
+                new NoContentBuilder()
             ])
+        ];
+
+        /**
+         * Get the given action, as put through a common pipeline.
+         * 
+         * 'Bottleneck' all actions to into a middle pipeline that adds headers,
+         * ie.
+         *   method ---\                              /--- action
+         *              \                            /
+         *     method ---+-- getAction() pipeline --+--- action
+         *              /                            \
+         *   method ---/                              \--- action
+         */
+        $getAction = function ($actionKey) use ($actions) {
+            return Dispatcher::funcToPipeOf([
+                Dispatcher::funcToKeyOf($actions, $actionKey),
+                function ($response) {
+                    $headers = [
+                        "Access-Control-Allow-Origin" => "*",
+                        "Access-Control-Allow-Methods" =>
+                            // Put this in the invocation pipeline to calculate
+                            // the headers only after the parent class has been
+                            // initialised.
+                            implode(", ", $this->getSupportedMethods()),
+                        "Access-Control-Allow-Headers" => "Authorization"
+                    ];
+
+                    // PHP 5.6 doesn't support `C::func()()` (double-call)
+                    // syntax.
+                    $addHeadersFn = BasicResource::addHeaders($headers);
+                    return $addHeadersFn($response);
+                }
+            ]);
+        };
+
+        // Compose
+        parent::__construct([
+            "POST" => $getAction("auth"),
+            "OPTIONS" => $getAction("cors_preflight")
         ]);
     }
 
