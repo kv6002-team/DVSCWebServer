@@ -4,6 +4,7 @@ import Login from "./Login";
 import Logout from "./Logout";
 
 import { fetchJSON } from "../fetch";
+import jwtDecode from "jwt-decode";
 
 /**
  * The authentication react context.
@@ -51,12 +52,21 @@ export class AuthProvider extends react.Component {
    * @param {string|null} token A valid JWT, or null to clear the token.
    */
   setToken = (token) => {
+    let fullToken = null;
     if (token != null) {
+      fullToken = {
+        encoded: token,
+        decoded: jwtDecode(token)
+      };
       localStorage.setItem(this.localStorageKey, token);
     } else {
       localStorage.removeItem(this.localStorageKey);
     }
-    this.setState({ token: token, error: null });
+
+    this.setState({
+      token: fullToken,
+      error: null
+    });
   }
 
   /**
@@ -167,7 +177,7 @@ export const makeAuthConsumer = (Component) => (
  *   in the body, and return a 200 (OK) JSON response that includes a valid auth
  *   token as a string. The response must meet the following schema:
  *     {
- *       "token": <token>
+ *       "token": <base64_encoded_token_string>
  *     }
  * 
  * @extends {react.Component<OwnProps & AuthConsumer>}
