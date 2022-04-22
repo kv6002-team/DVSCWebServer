@@ -69,11 +69,27 @@ class UpdateInstrument extends react.Component {
     );
   }
 
+  // Based on: https://stackoverflow.com/a/12409344
+  formatDateOnly = (date) => {
+    const yyyy = date.getFullYear();
+    let mm = date.getMonth() + 1; // Months start at 0!
+    let dd = date.getDate();
+
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = '0' + mm;
+
+    return yyyy+"-"+mm+"-"+dd;
+  }
+
   setInstrument = (instrumentID) => this.setState({
     instrument: instrumentID,
-    newExpiryDate: this.state.instruments[instrumentID].officialCheckExpiryDate
+    newExpiryDate: this.formatDateOnly(
+      new Date(this.state.instruments[instrumentID].officialCheckExpiryDate)
+    )
   });
-  setNewExpiryDate = (newExpiryDate) => this.setState({ newExpiryDate: newExpiryDate });
+  setNewExpiryDate = (newExpiryDate) => this.setState({
+    newExpiryDate: newExpiryDate
+  });
 
   /**
    * Load the list.
