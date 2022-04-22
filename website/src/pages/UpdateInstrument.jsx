@@ -19,7 +19,7 @@ class UpdateInstrument extends react.Component {
     super(props);
 
     this.state = {
-      instruments: [],
+      instruments: {},
 
       instrument: "",
       newExpiryDate: "",
@@ -106,20 +106,21 @@ class UpdateInstrument extends react.Component {
         this.getHeaders()
     )
       .then((garage) => {
+        // Map instruments from their own IDs, ie. {<id>: {id: <id>, ... }, ...}
+        const mappedInstruments = this.assignAllByID({}, garage.instruments);
+
         // Derive the additional state for the first instrument, if there is one
         let additionalState = {};
         if (garage.instruments.length > 0) {
           additionalState = this.newInstrumentStateFor(
-            garage.instruments,
+            mappedInstruments,
             garage.instruments[0].id
           );
         }
 
         // Set the state
         this.setState(Object.assign(
-          {
-            instruments: this.assignAllByID({}, garage.instruments)
-          },
+          { instruments: mappedInstruments },
           additionalState
         ));
       })
