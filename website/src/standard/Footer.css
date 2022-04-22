@@ -1,0 +1,12 @@
+.footer-spacing {
+    height: 1em;
+}
+footer {
+    margin-top: auto;
+    padding: 1em 0;
+}
+
+.block-emphasis {
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
