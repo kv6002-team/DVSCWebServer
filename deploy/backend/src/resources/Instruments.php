@@ -109,7 +109,7 @@ class Instruments extends BasicResource {
                             ...$instrumentData
                         );
                     } catch (DatabaseError $e) {
-                        var_dump($e);
+                        
                         throw new HTTPError(409,
                             "An instrument with that serial number already"
                             ." exists"

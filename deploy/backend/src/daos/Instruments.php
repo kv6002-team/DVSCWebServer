@@ -59,7 +59,8 @@ class Instruments{
         $this->db->execute("COMMIT");
 
         return $this->db->fetch(
-            "SELECT name,"
+            "SELECT id,"
+            ."   name,"
             ."   serialNumber,"
             ."   officialCheckExpiryDate,"
             ."   ourCheckStatus,"
