@@ -30,6 +30,7 @@ export default class ContactUs extends react.Component {
         <Container>
           <h1>Contact Us</h1>
           <p className="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla laoreet tellus velit, at efficitur magna malesuada fermentum. Proin interdum tristique ultrices. Morbi maximus ex in mi ultricies pretium tincidunt id.</p>
+
           <Form>
             <Form.Group className="mb-3" controlId="contactEmail">
               <Form.Label>Your Contact Email Address</Form.Label>
@@ -79,7 +80,7 @@ export default class ContactUs extends react.Component {
       </Main>
     );
   }
-  
+
   setEmail = (email) => this.setState({ email: email });
   setPhone = (phone) => this.setState({ phone: phone });
   setSubject = (subject) => this.setState({ subject: subject });
