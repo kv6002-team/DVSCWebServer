@@ -1,4 +1,7 @@
 <?php
+/**
+ * @author Scott Donaldson
+ */
 namespace Email;
 
 use SendGrid\Mail\Mail;
@@ -20,6 +23,17 @@ function send_email($email_object){
   }
 }
 
+function send_password_reset_email($recipient_email, $recipient_name, $password_reset_link){
+  $subject = COMPANY_NAME_SHORT . " | Password Reset";
+
+  $content = "<h1>Password Reset</h1>";
+  $content .= "<span>If you did not request this password reset, please ignore it.</span>";
+  $content .= "<a href='$password_reset_link'></a>";
+
+  $email_object = generate_email_object($recipient_email, $recipient_name, $content, $subject, false);
+  send_email($email_object);
+}
+
 
 /**
  * Generates the email object for the sendgrid email manager to send
@@ -35,7 +49,7 @@ function generate_email_obj($email_object){
   $email->addContent("text/html", $email_object['email_content']);
 
   if($email_object['include_attachment']){
-    $attachment = getAttachment();
+    $attachment = get_attachment();
     $email->addAttachment(
       $attachment['encoded_file'],
       $attachment['type'],
@@ -65,7 +79,7 @@ function send_emails($email_objects){
 }
 
 // Gets a local checklist file as an attatchment and returns the encoded file as an object.
-function getAttachment(){
+function get_attachment(){
   $encoded_attatchment = base64_encode(file_get_contents('./attachments/Checklist.docx'));
   return Array(
     "encoded_file" => $encoded_attatchment,
@@ -74,7 +88,7 @@ function getAttachment(){
   );
 }
 
-function test_emails(){
+function test_email(){
   send_emails(Array(TEST_DATA));
 }
 ?>
