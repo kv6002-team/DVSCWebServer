@@ -2,7 +2,7 @@ import react from 'react';
 
 import { makeAuthConsumer } from "../utils/components/Authentication";
 import Main from '../standard/Main';
-import { Container, Form, Row, Col, Button } from 'react-bootstrap';
+import { Container, Form, Row, Col, Button, Alert } from 'react-bootstrap';
 
 import { fetchJSON } from '../utils/fetch';
 import { mapObj } from '../utils/utils';
@@ -22,7 +22,9 @@ class UpdateInstrument extends react.Component {
       instruments: [],
 
       instrument: "",
-      newExpiryDate: ""
+      newExpiryDate: "",
+
+      updateSuccessful: null
     };
   }
 
@@ -32,6 +34,19 @@ class UpdateInstrument extends react.Component {
         <Container>
           <h1>Update Instrument Due Date</h1>
           <p className="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla laoreet tellus velit, at efficitur magna malesuada fermentum. Proin interdum tristique ultrices. Morbi maximus ex in mi ultricies pretium tincidunt id.</p>
+
+          {this.state.updateSuccessful !== null ?
+            (this.state.updateSuccessful === true ? (
+              <Alert variant="success" dismissible>
+                <p>Instrument due date updated successfully.</p>
+              </Alert>
+            ) : (
+              <Alert variant="danger" dismissible>
+                <p>Attempting to update the instrument due date failed.</p>
+                <p>{this.state.updateError.explanation}</p>
+              </Alert>
+            )) : null
+          }
 
           <Form>
             <Row>
@@ -118,7 +133,31 @@ class UpdateInstrument extends react.Component {
    * Update instrument
    */
   updateInstrument = () => {
-    //
+    // Cannot update a non-existant instrument
+    if (this.state.instrument == null) return;
+
+    const selectedInstrument = this.state.instruments[this.state.instrument];
+
+    const body = new URLSearchParams(
+      Object.assign({}, selectedInstrument, {
+        officialCheckExpiryDate:
+          this.formatBoth(new Date(this.state.newExpiryDate))
+      })
+    );
+
+    fetchJSON(
+        "PATCH",
+        this.props.approot + "/api/instruments/"+selectedInstrument.id,
+        this.getHeaders(),
+        body
+    )
+      .then(() => {
+        this.setState({ updateSuccessful: true });
+      })
+      .catch((error) => {
+        this.props.handleIfAuthError(error);
+        this.setState({ updateSuccessful: false, updateError: error });
+      });
   }
 
   /**
@@ -166,7 +205,7 @@ class UpdateInstrument extends react.Component {
    */
   getHeaders = () => {
     return {
-      "Authorization": "bearer " + this.props.auth.token
+      "Authorization": "bearer " + this.props.auth.token.encoded
     }
   };
 
@@ -192,8 +231,10 @@ class UpdateInstrument extends react.Component {
     if (mm < 10) mm = '0' + mm;
     if (ss < 10) ss = '0' + ss;
 
-    return this.formatDate() +" "+ hh+"-"+mm+"-"+ss;
+    return hh+":"+mm+":"+ss;
   }
+
+  formatBoth = (date) => this.formatDate(date) +" "+ this.formatTime(date);
 
   /**
    * Return a copy of the target object, plus all given objects assigned to
