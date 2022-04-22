@@ -3,7 +3,6 @@ import react from 'react';
 import Main from '../standard/Main';
 
 import { Container, Form, Button } from 'react-bootstrap';
-import './Home.css';
 
 /**
  * The contact us page.

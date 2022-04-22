@@ -2,8 +2,6 @@ import react from 'react';
 
 import Main from '../standard/Main';
 
-import './Home.css';
-
 /**
  * The privacy policy page.
  * 
