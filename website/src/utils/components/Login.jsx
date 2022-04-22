@@ -32,13 +32,23 @@ export default class Login extends react.Component {
       <Form>
         <Row className="align-items-center">
           <Col sm={5}>
-            <Form.Control type="email" placeholder="you@your-garage.com" />
+            <Form.Control
+              type="email"
+              placeholder="you@your-garage.com"
+              value={this.state.username}
+              onChange={(e) => this.setUsername(e.target.value)}
+            />
           </Col>
           <Col sm={5}>
-            <Form.Control type="password" placeholder="password" />
+            <Form.Control
+              type="password"
+              placeholder="password"
+              value={this.state.password}
+              onChange={(e) => this.setPassword(e.target.value)}
+            />
           </Col>
           <Col sm={2}>
-            <Button variant="primary" type="submit" onClick={this.login}>
+            <Button variant="primary" onClick={this.login}>
               Login
             </Button>
           </Col>

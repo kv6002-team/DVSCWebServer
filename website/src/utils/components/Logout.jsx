@@ -14,12 +14,12 @@ import { Form, Col, Button } from 'react-bootstrap';
  * 
  * @author William Taylor (19009576)
  */
-export default class Login extends react.Component {
+export default class Logout extends react.Component {
   render() {
     return (
       <Form>
         <Col sm={2}>
-          <Button variant="primary" type="submit" onClick={this.onLogout}>
+          <Button variant="primary" onClick={this.props.onLogout}>
             Logout
           </Button>
         </Col>
