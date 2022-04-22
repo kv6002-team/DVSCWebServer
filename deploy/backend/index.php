@@ -84,6 +84,7 @@ $router->register("/api/garages/:id<int>", $garageRes);
 
 $instrumentRes = new resources\Instruments($db);
 $router->register("/api/instruments", $instrumentRes);
+$router->register("/api/instruments/:id<int>", $instrumentRes);
 
 /* Dispatch Request
 -------------------------------------------------- */
