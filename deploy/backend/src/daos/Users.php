@@ -112,12 +112,7 @@ class Users {
      * @throws UnsupportedUserTypeError If the given user type is unrecognised.
      * @throws DatabaseError If any kind of database error occurs.
      */
-    public function add(
-        $type,
-        $password,
-        $passwordResetRequired,
-        ...$args
-    ) {
+    public function add($type, $password, $passwordResetRequired, ...$args) {
         $dao = $this->getDAOFor($type);
 
         // Add user part

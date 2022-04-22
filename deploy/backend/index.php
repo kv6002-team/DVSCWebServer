@@ -74,11 +74,11 @@ $router->register("/api/change-password",
     new resources\PasswordReset($db, $authenticator)
 );
 
-$garageConsultantsRes = new resources\GarageConsultants($db);
+$garageConsultantsRes = new resources\GarageConsultants($db, $authenticator);
 $router->register("/api/garage-consultants", $garageConsultantsRes);
 $router->register("/api/garage-consultants/:id<int>", $garageConsultantsRes);
 
-$garageRes = new resources\Garages($db);
+$garageRes = new resources\Garages($db, $authenticator);
 $router->register("/api/garages", $garageRes);
 $router->register("/api/garages/:id<int>", $garageRes);
 
