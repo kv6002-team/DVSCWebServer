@@ -2,7 +2,7 @@ import react from 'react';
 
 import { makeAuthConsumer } from "../utils/components/Authentication";
 import Main from '../standard/Main';
-import { Container, Form, Button } from 'react-bootstrap';
+import { Container, Form, Row, Col, Button } from 'react-bootstrap';
 
 import { fetchJSON } from '../utils/fetch';
 import { mapObj } from '../utils/utils';
@@ -34,30 +34,35 @@ class UpdateInstrument extends react.Component {
           <p className="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla laoreet tellus velit, at efficitur magna malesuada fermentum. Proin interdum tristique ultrices. Morbi maximus ex in mi ultricies pretium tincidunt id.</p>
 
           <Form>
-            <Form.Group className="mb-3" controlId="contactSubject">
-              <Form.Label></Form.Label>
-              <Form.Select
-                onChange={(e) => this.setInstrument(e.target.value)}
-              >
-                <option>Select an instrument to update</option>
-                {mapObj(this.state.instruments, (_, instrument, i) => (
-                  <option key={i} value={instrument.id}>{instrument.name}</option>
-                ), false)}
-              </Form.Select>
-            </Form.Group>
+            <Row>
+              <Col lg={3}></Col>
+              <Col lg={6}>
+                <Form.Group className="mb-3" controlId="contactSubject">
+                  <Form.Label></Form.Label>
+                  <Form.Select
+                    onChange={(e) => this.setInstrument(e.target.value)}
+                  >
+                    <option>Select an instrument to update</option>
+                    {mapObj(this.state.instruments, (_, instrument, i) => (
+                      <option key={i} value={instrument.id}>{instrument.name}</option>
+                    ), false)}
+                  </Form.Select>
+                </Form.Group>
 
-            <Form.Group className="mb-3" controlId="contactMessage">
-              <Form.Label>Next Check Due Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={this.state.newExpiryDate}
-                onChange={(e) => this.setNewExpiryDate(e.target.value)}
-              />
-            </Form.Group>
+                <Form.Group className="mb-3" controlId="contactMessage">
+                  <Form.Label>Next Check Due Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={this.state.newExpiryDate}
+                    onChange={(e) => this.setNewExpiryDate(e.target.value)}
+                  />
+                </Form.Group>
 
-            <Button variant="primary" onClick={this.updateInstrument}>
-              Update
-            </Button>
+                <Button variant="primary" onClick={this.updateInstrument}>
+                  Update
+                </Button>
+              </Col>
+            </Row>
           </Form>
         </Container>
       </Main>
