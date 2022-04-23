@@ -19,7 +19,9 @@ class EmailDispatcher {
   }
 
   public function send_emails(){
-    
+    foreach($this->emails_list as $email){
+      $email->send();
+    }
   }
 
 }
