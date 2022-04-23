@@ -14,6 +14,17 @@ use kv6002\daos;
 class EventLog {
     private $db;
 
+    public const LOGIN_EVENT = "login";
+    public const MESSAGE_EVENT = "message";
+    public const DATA_CREATED_EVENT = "data-created";
+    public const DATA_UPDATED_EVENT = "data-updated";
+    public const DATA_DELETED_EVENT = "data-deleted";
+    public const CONNECTION_EVENT = "connection";
+
+    public const INFO_LEVEL = "info";
+    public const WARN_LEVEL = "warn";
+    public const CRITICAL_LEVEL = "critical";
+
     public function __construct($db) {
         $this->db = $db;
     }
