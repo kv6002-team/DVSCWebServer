@@ -31,8 +31,8 @@ class EmailDispatcher {
     $content .= "<span>If you did not request this password reset, please ignore it.</span>";
     $content .= "<a href='$reset_link'></a>";
   
-    $email_object = new Email($recipient_email, $recipient_name, $content, $subject, false);
-    send_email($email_object);
+    $email = new Email($recipient_email, $recipient_name, $content, $subject, false);
+    $email->send();
   }
 
   public function send_contactus_email($recipient_email = null, $contact_form){
