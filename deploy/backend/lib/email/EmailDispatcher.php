@@ -24,8 +24,15 @@ class EmailDispatcher {
     }
   }
 
-  public function send_reset_email($recipient_email, $reset_link){
+  public function send_reset_email($recipient_email, $recipient_name, $reset_link){
+    $subject = COMPANY_NAME_SHORT . " | Password Reset";
 
+    $content = "<h1>Password Reset</h1>";
+    $content .= "<span>If you did not request this password reset, please ignore it.</span>";
+    $content .= "<a href='$reset_link'></a>";
+  
+    $email_object = new Email($recipient_email, $recipient_name, $content, $subject, false);
+    send_email($email_object);
   }
 
   public function send_contactus_email($recipient_email = null, $contact_form){
