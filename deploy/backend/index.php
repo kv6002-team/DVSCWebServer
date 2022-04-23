@@ -86,6 +86,8 @@ $instrumentRes = new resources\Instruments($db);
 $router->register("/api/instruments", $instrumentRes);
 $router->register("/api/instruments/:id<int>", $instrumentRes);
 
+$router->register("/api/send-emails", new resources\Emails($db));
+
 /* Dispatch Request
 -------------------------------------------------- */
 

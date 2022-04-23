@@ -413,6 +413,27 @@ class Util {
         return $attrs;
     }
 
+    /**
+     * Convert the given JSON string to an object tree.
+     * 
+     * Throw an exception if a decoding error is encountered.
+     * 
+     * @param string $jsonStr The string to convert.
+     * @return string The converted string.
+     */
+    public static function toJSON($jsonStr) {
+        return json_decode(
+            $jsonStr,
+            null,
+            512,
+            (
+                JSON_INVALID_UTF8_SUBSTITUTE |
+                JSON_OBJECT_AS_ARRAY |
+                JSON_THROW_ON_ERROR
+            )
+        );
+    }
+
     /* Functions and Callables
     -------------------------------------------------- */
 

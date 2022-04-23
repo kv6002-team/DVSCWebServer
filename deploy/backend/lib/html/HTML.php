@@ -689,6 +689,31 @@ final class HTML {
         ]);
     }
 
+    /**
+     * Create a table from the given data.
+     * 
+     * @param array<string,string> $attrs (Optional) The attributes to give the
+     *   table element (<tr>, <th> and <td> elements will be created without any
+     *   attributes).
+     * @param array<mixed> $headers An array of items to use as the column
+     *   headers. Accepts anything trHeader() accepts. Can be null (no header
+     *   row).
+     * @param array<mixed> $data An array of arrays or objects to create the
+     *   table from. Accepts an array of anything tr() accepts (so likely an
+     *   array of arrays).
+     * 
+     * @return Element The created <table> Element.
+     */
+    public static function rawTable($attrs, $headerRow, $rows = null) {
+        list($attrs, $headerRow, $rows) =
+            Util::optionalFirstParam($attrs, $headerRow, $rows);
+
+        return self::spaced("table", $attrs, [
+            $headerRow !== null ? $headerRow : "",
+            $rows !== null ? $rows : "",
+        ]);
+    }
+
     /* Forms
     -------------------- */
 
