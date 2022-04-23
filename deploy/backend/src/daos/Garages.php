@@ -304,7 +304,8 @@ class Garages{
             $ownerName,
             $emailAddress,
             $telephoneNumber,
-            $paidUntil
+            $paidUntil,
+            $instruments = null
     ) {
         $this->db->execute(
             "UPDATE Garage SET"
@@ -325,5 +326,9 @@ class Garages{
                 "paidUntil" => standard\DateTime::format($paidUntil)
             ]
         );
+    }
+
+    
+
     }
 }
