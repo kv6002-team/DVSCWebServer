@@ -13,6 +13,7 @@ use kv6002\standard\DateTime;
 use kv6002\domain;
 use kv6002\daos;
 use kv6002\views;
+use kv6002\validators;
 
 /**
  * provide a list of garages
@@ -24,10 +25,12 @@ class Garages extends BasicResource {
 
     private $dao; // Cat
     private $view;
+    private $validator;
 
     public function __construct($db, $authenticator) {
         $this->dao = new daos\Users($db);
         $this->view = new views\GaragesJSON();
+        $this->validator = new validators\Garage();
 
         $actions = [
             "get_all_simple" => Dispatcher::funcToPipeOf([
@@ -74,6 +77,8 @@ class Garages extends BasicResource {
                         }
                         return $value;
                     };
+                    
+                
 
                     // Extract
                     $garageData = [
@@ -88,42 +93,9 @@ class Garages extends BasicResource {
                     ];
 
                     // Validate
-                    if (!preg_match(
-                        "/^"                   // From start of string
-                        ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
-                        ."[A-Za-z0-9_-]+"      // First '.'-delimited segment
-                        ."(\.[A-Za-z0-9_-]+)*" // Other '.'-delimited segments
-                        ."@"                   // @ symbol
-                        ."(?=.{1,128})"        // After @ must be 1-128 chars
-                        ."[A-Za-z0-9]"         // First char of domain name
-                        ."[A-Za-z0-9-]*"       // Bottom level domain name
-                        ."(\.[A-Za-z0-9-]+)*"  // Intermediate domain names
-                        ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
-                        ."$/"                  // To end of string
-                        ."u",                  // FLAGS: Use Unicode matching
-                        $garageData["emailAddress"]
-                    )) {
-                        throw new HTTPError(422,
-                            "emailAddress is not a valid email address"
-                        );
-                    }
-
-                    try {
-                        $garageData["paidUntil"] = DateTime::parse(
-                            $garageData["paidUntil"]
-                        );
-                    } catch (Exception $e) {
-                        throw new HTTPError(422,
-                            "Must provide paidUntil in a correct format (eg."
-                            ." YYYY-MM-DD HH:MM:SS)"
-                        );
-                    }
-
-                    if (str_contains($garageData["vts"], ":")) {
-                        throw new HTTPError(422,
-                            "VTS number must not contain a colon"
-                        );
-                    }
+                    $garageData = $this->validator->validate(
+                        ...$garageData;
+                    )
 
                     // Return
                     return [$request, $garageData];
@@ -192,42 +164,9 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    if (!preg_match(
-                        "/^"                   // From start of string
-                        ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
-                        ."[A-Za-z0-9_-]+"      // First '.'-delimited segment
-                        ."(\.[A-Za-z0-9_-]+)*" // Other '.'-delimited segments
-                        ."@"                   // @ symbol
-                        ."(?=.{1,128})"        // After @ must be 1-128 chars
-                        ."[A-Za-z0-9]"         // First char of domain name
-                        ."[A-Za-z0-9-]*"       // Bottom level domain name
-                        ."(\.[A-Za-z0-9-]+)*"  // Intermediate domain names
-                        ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
-                        ."$/"                  // To end of string
-                        ."u",                  // FLAGS: Use Unicode matching
-                        $garageData["emailAddress"]
-                    )) {
-                        throw new HTTPError(422,
-                            "emailAddress is not a valid email address"
-                        );
-                    }
-
-                    try {
-                        $garageData["paidUntil"] = DateTime::parse(
-                            $garageData["paidUntil"]
-                        );
-                    } catch (Exception $e) {
-                        throw new HTTPError(422,
-                            "Must provide paidUntil in a correct format (eg."
-                            ." YYYY-MM-DD HH:MM:SS)"
-                        );
-                    }
-
-                    if (str_contains($garageData["vts"], ":")) {
-                        throw new HTTPError(422,
-                            "VTS number must not contain a colon"
-                        );
-                    }
+                    $garageData =  $this->validator->validate(
+                        ...$garageData
+                    )
 
                     // Return
                     return [
@@ -253,7 +192,6 @@ class Garages extends BasicResource {
                             "No garage with that ID exists."
                         );
                     }
-
                     return [$request];
                 },
                 new NoContentBuilder()

@@ -135,4 +135,4 @@ class Instruments{
         );
         $this->db->execute("COMMIT");
     }
-}
+} 
