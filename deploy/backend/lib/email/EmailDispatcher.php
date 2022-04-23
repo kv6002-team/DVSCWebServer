@@ -58,8 +58,8 @@ class EmailDispatcher {
     $email->send();
   }
 
-  public function send_unique_email(){
-
+  public function send_unique_email($email){
+    $email->send();
   }
 
 }
