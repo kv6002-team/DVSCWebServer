@@ -3,6 +3,7 @@ namespace kv6002\resources;
 
 use util\Util;
 use html\HTML;
+use email\EmailDispatcher;
 
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
@@ -11,8 +12,11 @@ use kv6002\standard\builders\JSONBuilder;
 use kv6002\standard\builders\NoContentBuilder;
 use kv6002\standard\DateTime;
 
+use kv6002\domain;
 use kv6002\daos;
 use kv6002\views;
+
+require_once __DIR__ . "/../../lib/email/DispatcherObject.php";
 
 /**
  * 
@@ -21,7 +25,7 @@ use kv6002\views;
  */
 class Emails extends BasicResource {
     public function __construct($db) {
-        $dao = new daos\Garages($db);
+        $dao = new daos\Users($db);
 
         $actions = [
             "send_garage_emails" => Dispatcher::funcToPipeOf([
@@ -49,23 +53,47 @@ class Emails extends BasicResource {
                         $garageIDs[] = $garageID;
                     }
 
-                    $allGarages = $dao->getGarages();
+                    $allGarages = $dao->getAll(domain\Garage::USER_TYPE);
                     $requestedGarages = Util::filterValues(
                         $allGarages,
                         function ($garage) use ($garageIDs) {
-                            return in_array($garage->id(), $garageIDs);
+                            return (
+                                in_array($garage->id(), $garageIDs) &&
+                                count($garage->instruments()) > 0
+                            );
                         },
                         false
                     );
-                    $formattedEmails = $this->formatEmails($requestedGarages);
-                        //Send Emails
-                    return [
-                        $request, $formattedEmails
-                    ];
+                    $dispatcherObjects = Util::mapValues(
+                        $requestedGarages,
+                        function ($garage) {
+                            return \email\generate_dispatcher_object(
+                                $garage->emailAddress(),
+                                $garage->name(),
+                                Util::mapValues(
+                                    $garage->instruments(),
+                                    function ($instrument) {
+                                        return [
+                                            "instrument_name" => $instrument->name(),
+                                            "instrument_serial_number" => $instrument->serialNumber(),
+                                            "instrument_expiry_date" => $instrument->officialCheckExpiryDate()
+                                        ];
+                                    },
+                                    false
+                                )
+                            );
+                        },
+                        false
+                    );
+                    
+                    $emailDispatcher = new EmailDispatcher($dispatcherObjects);
+                    $emailDispatcher->send_emails();
+
+                    return [$request];
                 },
                 JSONBuilder::typeSelector(
-                    function ($request, $formattedEmails) {
-                        return $formattedEmails;
+                    function ($request) {
+                        return [];
                     }
                 )
             ])
@@ -109,44 +137,5 @@ class Emails extends BasicResource {
         parent::__construct([
             "POST" => $getAction("send_garage_emails")
         ]);
-    }
-
-    public function formatEmails($requestedGarages) {
-        return Util::mapValues(
-            $requestedGarages, 
-            function ($garage) {
-                return [
-                    "to" => [
-                        ["address" => $garage->emailAddress()]
-                    ],
-                    "msg" => [
-                        "subject" => "DVSC tools servicing - monthly reminder",
-                        "html" => HTML::rawTable(
-                            HTML::trHeader([
-                                "Instrument Name", 
-                                "Serial Number", 
-                                "Expiry Date"
-                            ]),
-                            Util::mapValues(
-                                $garage->instruments(),
-                                function ($instrument) {
-                                    $aMonthAway = (new \DateTime())->add(new \DateInterval("P1M"));
-                                    $style = (
-                                        $instrument->officialCheckExpiryDate() < $aMonthAway
-                                    ) ? ["style" => "color: red"] : [];
-                                    return HTML::tr($style, [
-                                        $instrument->name(), 
-                                        $instrument->serialNumber(),
-                                        DateTime::format($instrument->officialCheckExpiryDate())
-                                    ]);  
-                                }
-                            )
-                        )->toString(),
-                        "attachments" => []
-                    ]
-                ];
-            }, 
-            false
-        );
     }
 }

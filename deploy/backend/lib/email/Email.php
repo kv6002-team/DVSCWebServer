@@ -2,11 +2,11 @@
 /**
  * @author Scott Donaldson
  */
-namespace Email;
+namespace email;
 
 use SendGrid\Mail\Mail;
 
-require_once './sendgrid-api/sendgrid-php.php';
+require_once 'sendgrid-api/sendgrid-php.php';
 require_once 'EmailConfig.php';
 
 /**
@@ -102,7 +102,7 @@ function send_emails($email_objects){
 
 // Gets a local checklist file as an attatchment and returns the encoded file as an object.
 function get_attachment(){
-  $encoded_attatchment = base64_encode(file_get_contents('./attachments/Checklist.docx'));
+  $encoded_attatchment = base64_encode(file_get_contents(__DIR__ . '/attachments/Checklist.docx'));
   return Array(
     "encoded_file" => $encoded_attatchment,
     "type" => "application/word",

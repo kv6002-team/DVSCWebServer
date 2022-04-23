@@ -2,13 +2,16 @@
 /**
  * @author Scott Donaldson
  */
-namespace Email;
+namespace email;
+include_once 'EmailContent.php';
+include_once 'EmailObject.php';
 include_once 'Email.php';
 
 class EmailDispatcher {
   protected $emails_list;
 
   public function __construct($dispatcher_objects){
+    $this->emails_list = [];
     foreach($dispatcher_objects as $garage_info){
       $email_content = generate_email_content($garage_info['recipient_name'],$garage_info['garage_instruments']);
       $email_object = generate_email_object(
@@ -16,7 +19,7 @@ class EmailDispatcher {
         $garage_info['recipient_name'],
         $email_content
       );
-      array_push($emails_list, $email_object);
+      array_push($this->emails_list, $email_object);
     }
   }
 

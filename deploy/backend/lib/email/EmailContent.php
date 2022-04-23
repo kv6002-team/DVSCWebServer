@@ -2,7 +2,7 @@
 /**
  * @author Scott Donaldson
  */
-namespace Email;
+namespace email;
 
 include_once 'EmailConfig.php';
 
@@ -13,7 +13,7 @@ include_once 'EmailConfig.php';
 function generate_email_content($garage_name, $instruments_array = Array()){
   $output = get_email_header($garage_name);
   $output .= generate_instrument_table($instruments_array);
-  $output .+ get_email_footer();
+  $output .= get_email_footer();
 }
 /**
  * Expects: Array(

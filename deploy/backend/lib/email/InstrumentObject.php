@@ -2,7 +2,7 @@
 /**
  * @author Scott Donaldson
  */
-namespace Email;
+namespace email;
 
 function generate_instrument_object(
   $instrument_name,

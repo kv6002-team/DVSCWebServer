@@ -2,7 +2,7 @@
 /**
  * @author Scott Donaldson
  */
-namespace Email;
+namespace email;
 
 function generate_dispatcher_object(
   $recipient_email,
