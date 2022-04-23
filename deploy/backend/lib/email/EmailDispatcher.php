@@ -24,5 +24,36 @@ class EmailDispatcher {
     }
   }
 
+  public function send_reset_email($recipient_email, $reset_link){
+
+  }
+
+  public function send_contactus_email($recipient_email = null, $contact_form){
+
+    $contact_form = $contact_form->get_details();
+
+    if(is_null($recipient_email)) $recipient_email = CONTACT_US_CONFIG['fallback_recipient'];
+
+    $email_subject = CONTACT_US_CONFIG['subject'] . " " . $contact_form['email_subject'];
+
+    $email_content  = $contact_form['message_content'];
+    $email_content .= "\n" . "Phone Number : " . $contact_form['phone_number'];
+    $email_content .= "\n" . "Email Address : " . $contact_form['email_address'];
+    
+    $email = new Email(
+      $recipient_email,
+      EMAIL_SENDER_NAME,
+      $email_content,
+      $email_subject,
+      false
+    );
+
+    $email->send();
+  }
+
+  public function send_unique_email(){
+
+  }
+
 }
 ?>

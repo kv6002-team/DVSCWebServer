@@ -4,8 +4,6 @@
  */
 namespace email;
 
-use DateTime;
-
 include_once 'EmailConfig.php';
 
 
