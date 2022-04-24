@@ -28,7 +28,8 @@ class Instruments extends BasicResource {
     public function __construct($db) {
         $this->dao = new daos\Instruments($db);
         $this->loggerDAO = new daos\EventLog($db);
-        $this->validator = new validators\Instrument();
+        $this->instrumentValidator = new validators\Instrument();
+        $this->garageValidator = new validators\Garage();
 
         $actions = [
             "add" => Dispatcher::funcToPipeOf([
@@ -56,8 +57,28 @@ class Instruments extends BasicResource {
                     ];
 
                     // Validate
-                    $instrumentData = $this->validator->validate(
-                        ...$instrumentData
+                    $instrumentData["garageID"] = $this->garageValidator->validateGarageID(
+                        $instrumentData["garageID"]
+                    );
+
+                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName(
+                        $instrumentData["name"]    
+                    );
+
+                    $instrumentData["serialNumber"] = $this->instrumentValidator->validateSerialNumber(
+                        $instrumentData["serialNumber"]
+                    );
+
+                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate(
+                        $instrumentData["officialCheckExpiryDate"]
+                    );
+
+                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus(
+                        $instrumentData["ourCheckStatus"]
+                    );
+
+                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate(
+                        $instrumentData["ourCheckDate"]
                     );
 
                     // Return
@@ -117,7 +138,6 @@ class Instruments extends BasicResource {
                     $id = $request->endpointParam("id");
                     $instrumentData = [
                         "name" => $requiredPrivateParam("name"),
-                        "serialNumber" => $requiredPrivateParam("serialNumber"),
                         "officialCheckExpiryDate" => $requiredPrivateParam("officialCheckExpiryDate"),
                         "ourCheckStatus" => $requiredPrivateParam("ourCheckStatus"),
                         "ourCheckDate" => $requiredPrivateParam("ourCheckDate")
@@ -130,9 +150,22 @@ class Instruments extends BasicResource {
                             ." (did you mean to `PATCH /api/instruments/:id`?)"
                         );
                     }
+                    $id = $this->instrumentValidator->validateInstrumentID($id);
 
-                    $instrumentData = $this->validator->validate(
-                        ...$instrumentData
+                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName(
+                        $instrumentData["name"]    
+                    );
+
+                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialExpiryDate(
+                        $instrumentData["officialCheckExpiryDate"]
+                    );
+
+                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus(
+                        $instrumentData["ourCheckStatus"]
+                    );
+                    
+                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate(
+                        $instrumentData["ourCheckDate"]
                     );
 
                     // Return
@@ -179,6 +212,8 @@ class Instruments extends BasicResource {
                             "Must provide an id parameter"
                         );
                     }
+                    $id = $this->instrumentValidator->validateInstrumentID($id);
+
                     return [$request, $id];
                 },
                 function ($request, $id) {
@@ -191,7 +226,7 @@ class Instruments extends BasicResource {
                     }
 
                     try {
-                        $user = $this->dao->get(self::USER_TYPE, $id);
+                        $user = $this->dao->get($id);
                         if ($user !== null) {
                             $this->loggerDAO->add(
                                 daos\EventLog::DATA_DELETED_EVENT,

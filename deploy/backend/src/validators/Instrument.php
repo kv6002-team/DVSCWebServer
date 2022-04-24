@@ -9,7 +9,7 @@ use kv6002\domain;
 class Instrument {
 
     public function validateInstrumentID($id) {
-        if(!is_numeric($id) || str_contains($value, ".")){
+        if(!is_numeric($id) || str_contains($id, ".")){
             throw new HTTPError(422,
                 "id is not a valid instrument ID"
             );

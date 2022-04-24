@@ -103,8 +103,28 @@ class Garages extends BasicResource {
                     ];
 
                     // Validate
-                    $garageData = $this->garageValidator->validate(
-                        ...$garageData
+                    $garageData["vts"] = $this->garageValidator->validateVTS(
+                        $garageData["vts"]
+                    );
+
+                    $garageData["name"] = $this->garageValidator->validateGarageName(
+                        $garageData["name"]
+                    );
+
+                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName(
+                        $garageData["ownerName"]
+                    );
+
+                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress(
+                        $garageData["emailAddress"]
+                    );
+
+                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber(
+                        $garageData["telephoneNumber"]
+                    );
+
+                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil(
+                        $garageData["paidUntil"]
                     );
 
                     // Return
@@ -165,7 +185,6 @@ class Garages extends BasicResource {
                     // Extract
                     $id = $request->endpointParam("id");
                     $garageData = [
-                        "vts" => $requiredPrivateParam("vts"),
                         "name" => $requiredPrivateParam("name"),
                         "ownerName" => $requiredPrivateParam("ownerName"),
                         "emailAddress" => $requiredPrivateParam("emailAddress"),
@@ -183,8 +202,28 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    $garageData =  $this->garageValidator->validate(
-                        ...$garageData
+                    $id = $this->garageValidator->validateGarageID(
+                        $id
+                    );
+
+                    $garageData["name"] = $this->garageValidator->validateGarageName(
+                        $garageData["name"]
+                    );
+
+                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName(
+                        $garageData["ownerName"]
+                    );
+
+                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress(
+                        $garageData["emailAddress"]
+                    );
+
+                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber(
+                        $garageData["telephoneNumber"]
+                    );
+
+                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil(
+                        $garageData["paidUntil"]
                     );
 
                     // Return
@@ -272,7 +311,29 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    $garageData = $this->garageValidator->validate(...$garageData);
+                    $garageData["vts"] = $this->garageValidator->validateVTS(
+                        $garageData["vts"]
+                    );
+
+                    $garageData["name"] = $this->garageValidator->validateGarageName(
+                        $garageData["name"]
+                    );
+
+                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName(
+                        $garageData["ownerName"]
+                    );
+
+                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress(
+                        $garageData["emailAddress"]
+                    );
+
+                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber(
+                        $garageData["telephoneNumber"]
+                    );
+
+                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil(
+                        $garageData["paidUntil"]
+                    );
 
                     // Extract Instruments
                     $instrumentsDataRaw = $requiredAttr($body, "instruments");
@@ -304,14 +365,30 @@ class Garages extends BasicResource {
                                 "Requested Instrument not found"
                             );
                         }
+                        
+                        $instrumentID = $this->instrumentValidator->validateInstrumentID($instrumentID);
+                        
+                        $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName(
+                            $instrumentData["name"]
+                        );
+
+                        $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate(
+                            $instrumentData["officialCheckExpiryDate"]
+                        );
+
+                        $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus(
+                            $instrumentData["ourCheckStatus"]
+                        );
+
+                        $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate(
+                            $instrumentData["ourCheckDate"]
+                        );
 
                         array_push(
                             $instrumentsData,
                             array_merge(
                                 ["id" => $instrumentID],
-                                $this->instrumentValidator->validate(
-                                    ...$instrumentData
-                                )
+                                $instrumentData
                             )                            
                         );
                     }
@@ -376,6 +453,8 @@ class Garages extends BasicResource {
                             "Must provide an id parameter"
                         );
                     }
+                    $id = $this->instrumentValidator->validateInstrumentID($id);
+
                     return [$request, $id];
                 },
                 function ($request, $id) {
