@@ -1,6 +1,10 @@
 <?php
+/**
+ * @author Scott Donaldson
+ */
 namespace email;
 
+require_once __DIR__ . "/sendgrid-api/sendgrid-php.php";
 use SendGrid\Mail\Mail;
 
 class EmailConnection {
@@ -38,7 +42,7 @@ class EmailConnection {
   }
 
   private function get_attachment($type, $name) {
-    $encoded = base64_encode(file_get_contents(__DIR__ . "attachments/$name"));
+    $encoded = base64_encode(file_get_contents(__DIR__ . "/attachments/$name"));
     return Array(
       "encoded_file" => $encoded,
       "type" => $type,

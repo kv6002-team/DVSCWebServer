@@ -4,6 +4,8 @@ namespace kv6002\resources;
 use util\Util;
 use html\HTML;
 use email\EmailDispatcher;
+use email\Email;
+use email\EmailContent;
 
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
@@ -37,20 +39,20 @@ class Emails extends BasicResource {
                         $body = Util::toJSON($request->body());
                     } catch (JsonException $e) {
                         throw new HTTPError(422,
-                            "Requested Garage list JSON is invalid"
+                            "requested Garage list JSON is not valid"
                         );
                     }
 
                     $garageIDs = [];
                     if (!isset($body["garages"])) {
                         throw new HTTPError(422,
-                            "Garage ID list was not given"
+                            "garage ID list wasn't given"
                         );
                     }
                     foreach ($body["garages"] as $garageID) {
                         if (!is_numeric($garageID)) {
                             throw new HTTPError(422,
-                                "Garage ID list contained an invalid ID"
+                                "garage ID list contained a non valid ID"
                             );
                         }
                         $garageIDs[] = $garageID;
@@ -70,20 +72,25 @@ class Emails extends BasicResource {
                     $dispatcherObjects = Util::mapValues(
                         $requestedGarages,
                         function ($garage) {
-                            return \email\generate_dispatcher_object(
+                            return new Email(
                                 $garage->emailAddress(),
                                 $garage->name(),
-                                Util::mapValues(
-                                    $garage->instruments(),
-                                    function ($instrument) {
-                                        return [
-                                            "instrument_name" => $instrument->name(),
-                                            "instrument_serial_number" => $instrument->serialNumber(),
-                                            "instrument_expiry_date" => $instrument->officialCheckExpiryDate()
-                                        ];
-                                    },
-                                    false
-                                )
+                                (new EmailContent(
+                                    $garage->name(),
+                                    Util::mapValues(
+                                        $garage->instruments(),
+                                        function ($instrument) {
+                                            return [
+                                                "instrument_name" => $instrument->name(),
+                                                "instrument_serial_number" => $instrument->serialNumber(),
+                                                "instrument_expiry_date" => $instrument->officialCheckExpiryDate()
+                                            ];
+                                        },
+                                        false
+                                    )
+                                ))->get_email_html_string(),
+                                null,
+                                true
                             );
                         },
                         false
