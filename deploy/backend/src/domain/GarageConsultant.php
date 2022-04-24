@@ -31,7 +31,7 @@ final class GarageConsultant extends User {
             $passwordResetRequired
     ) {
         parent::__construct($password, $passwordResetRequired);
-        $this->type = GarageConsultant::USER_TYPE;
+        $this->type = self::USER_TYPE;
 
         $this->emailAddress = $emailAddress;
     }
