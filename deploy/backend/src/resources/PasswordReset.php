@@ -135,15 +135,65 @@ class PasswordReset extends BasicResource {
                     return [$request];
                 },
                 new NoContentBuilder()
+            ]),
+
+            "cors_preflight" => Dispatcher::funcToPipeOf([
+                function ($request) {
+                    $origin = $request->header("Origin");
+                    $corsMethod =
+                        $request->header("Access-Control-Request-Method");
+
+                    if ($origin === null || $corsMethod === null) {
+                        throw new HTTPError(405,
+                            "OPTIONS is only supported for CORS preflight"
+                            ." requests"
+                        );
+                    }
+
+                    return [$request];
+                },
+                new NoContentBuilder()
             ])
         ];
+
+        /**
+         * Get the given action, as put through a common pipeline.
+         * 
+         * 'Bottleneck' all actions to into a middle pipeline that adds headers,
+         * ie.
+         *   method ---\                              /--- action
+         *              \                            /
+         *     method ---+-- getAction() pipeline --+--- action
+         *              /                            \
+         *   method ---/                              \--- action
+         */
+        $getAction = function ($actionKey) use ($actions) {
+            return Dispatcher::funcToPipeOf([
+                Dispatcher::funcToKeyOf($actions, $actionKey),
+                function ($response) {
+                    $headers = [
+                        "Access-Control-Allow-Origin" => "*",
+                        "Access-Control-Allow-Methods" =>
+                            // Put this in the invocation pipeline to calculate
+                            // the headers only after the parent class has been
+                            // initialised.
+                            implode(", ", $this->getSupportedMethods()),
+                        "Access-Control-Allow-Headers" => "Authorization"
+                    ];
+
+                    // PHP 5.6 doesn't support `C::func()()` (double-call)
+                    // syntax.
+                    $addHeadersFn = BasicResource::addHeaders($headers);
+                    return $addHeadersFn($response);
+                }
+            ]);
+        };
 
         // Compose (Always add CORS headers)
         parent::__construct([
             "POST" => Dispatcher::funcToPipeOf([
                 $authenticator->auth(),
-                Dispatcher::funcToKeyOf(
-                    $actions,
+                $getAction(
                     function ($request, $user, $authorisations) {
                         if (
                             // Token not sent or not authenticated
@@ -176,24 +226,10 @@ class PasswordReset extends BasicResource {
                         // password change.
                         return "change_password";
                     }
-                ),
-                function ($response) {
-                    $headers = [
-                        "Access-Control-Allow-Origin" => "*",
-                        "Access-Control-Allow-Methods" =>
-                            // Put this in the invocation pipeline to calculate
-                            // the headers only after the parent class has been
-                            // initialised.
-                            implode(", ", $this->getSupportedMethods()),
-                        "Access-Control-Allow-Headers" => "Authorization"
-                    ];
+                )
+            ]),
 
-                    // PHP 5.6 doesn't support `C::func()()` (double-call)
-                    // syntax.
-                    $addHeadersFn = BasicResource::addHeaders($headers);
-                    return $addHeadersFn($response);
-                }
-            ])
+            "OPTIONS" => $getAction("cors_preflight")
         ]);
     }
 
