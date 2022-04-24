@@ -15,9 +15,11 @@ use kv6002\domain;
  */
 class Garages{
     private $db;
+    private $instrumentsDAO;
 
     public function __construct($db){
         $this->db = $db;
+        $this->instrumentDAO = new Instruments($db);
     }
 
     /**
@@ -326,9 +328,17 @@ class Garages{
                 "paidUntil" => standard\DateTime::format($paidUntil)
             ]
         );
-    }
 
-    
-
+        if ($instruments != null) {
+            foreach ($instruments as $instrument) {
+                $instrumentsDAO->updateRaw(
+                    $instrument["id"],
+                    $instrument["name"],
+                    $instrument["officialCheckExpiryDate"],
+                    $instrument["ourCheckStatus"],
+                    $instrument["ourCheckDate"]
+                );
+            }
+        }
     }
 }

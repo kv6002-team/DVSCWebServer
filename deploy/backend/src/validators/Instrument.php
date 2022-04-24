@@ -13,8 +13,8 @@ class Instrument {
         $ourCheckDate
     ) {
         try {
-            $instrumentData["officialCheckExpiryDate"] = DateTime::parse(
-                $instrumentData["officialCheckExpiryDate"]
+            $officialCheckExpiryDate = DateTime::parse(
+                $officialCheckExpiryDate
             );
         } catch (Exception $e) {
             throw new HTTPError(422,
@@ -23,15 +23,15 @@ class Instrument {
             );
         }
 
-        if ($instrumentData["officialCheckExpiryDate"] < new DateTime('today midnight')) {
+        if ($officialCheckExpiryDate < new DateTime('today midnight')) {
             throw new HTTPError(422,
                 "Must provide a date from tomorrow for officialCheckExpiryDate"
             );
         }
 
         try {
-            $instrumentData["ourCheckDate"] = DateTime::parse(
-                $instrumentData["ourCheckDate"]
+            $ourCheckDate = DateTime::parse(
+                $ourCheckDate
             );
         } catch (Exception $e) {
             throw new HTTPError(422,
@@ -40,17 +40,17 @@ class Instrument {
             );
         }
 
-        if ($instrumentData["ourCheckDate"] < new DateTime('yesterday midnight')) {
+        if ($ourCheckDate < new DateTime('yesterday midnight')) {
             throw new HTTPError(422,
                 "Must provide a date from today for ourCheckDate"
             );
         }
-    }
+        return [
+            "name" => $name,
+            "officialCheckExpiryDate" => $officialCheckExpiryDate,
+            "ourCheckStatus" => $ourCheckStatus,
+            "ourCheckDate" => $ourCheckDate    
+        ];
 
-    return [
-        $name,
-        $officialCheckExpiryDate,
-        $ourCheckStatus,
-        $ourCheckDate    
-    ]
+    }
 }

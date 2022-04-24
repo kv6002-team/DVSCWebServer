@@ -22,11 +22,11 @@ use kv6002\validators;
  */
 class Instruments extends BasicResource {
     private $dao;
-    private $validator
+    private $validator;
 
     public function __construct($db) {
         $this->dao = new daos\Instruments($db);
-        $this->validator = new validator\Instrument();
+        $this->validator = new validators\Instrument();
 
         $actions = [
             "add" => Dispatcher::funcToPipeOf([
@@ -54,48 +54,9 @@ class Instruments extends BasicResource {
                     ];
 
                     // Validate
-                    if (!preg_match(
-                        "([A-Za-z0-9]+)",
-                        $instrumentData['serialNumber']
-                    )) {
-                        throw new HTTPError(422,
-                            "serialNumber is not a valid serial number"
-                        );
-                    }
-
-                    try {
-                        $instrumentData["officialCheckExpiryDate"] = DateTime::parse(
-                            $instrumentData["officialCheckExpiryDate"]
-                        );
-                    } catch (Exception $e) {
-                        throw new HTTPError(422,
-                            "Must provide officialCheckExpiryDate in a correct format"
-                            ."(eg. YYYY-MM-DD HH:MM:SS)"
-                        );
-                    }
-
-                    if ($instrumentData["officialCheckExpiryDate"] < new DateTime('today midnight')) {
-                        throw new HTTPError(422,
-                            "Must provide a date from tomorrow for officialCheckExpiryDate"
-                        );
-                    }
-
-                    try {
-                        $instrumentData["ourCheckDate"] = DateTime::parse(
-                            $instrumentData["ourCheckDate"]
-                        );
-                    } catch (Exception $e) {
-                        throw new HTTPError(422,
-                            "Must provide ourCheckDate in a correct format"
-                            ."(eg. YYYY-MM-DD HH:MM:SS)"
-                        );
-                    }
-
-                    if ($instrumentData["ourCheckDate"] < new DateTime('yesterday midnight')) {
-                        throw new HTTPError(422,
-                            "Must provide a date from today for ourCheckDate"
-                        );
-                    }
+                    $instrumentData = $this->validator->validate(
+                        ...$instrumentData
+                    );
 
                     // Return
                     return [
@@ -145,6 +106,7 @@ class Instruments extends BasicResource {
                     $id = $request->endpointParam("id");
                     $instrumentData = [
                         "name" => $requiredPrivateParam("name"),
+                        "serialNumber" => $requiredPrivateParam("serialNumber"),
                         "officialCheckExpiryDate" => $requiredPrivateParam("officialCheckExpiryDate"),
                         "ourCheckStatus" => $requiredPrivateParam("ourCheckStatus"),
                         "ourCheckDate" => $requiredPrivateParam("ourCheckDate")
@@ -160,7 +122,7 @@ class Instruments extends BasicResource {
 
                     $instrumentData = $this->validator->validate(
                         ...$instrumentData
-                    )
+                    );
 
                     // Return
                     return [

@@ -117,11 +117,7 @@ class Request {
                 if ($body === null) {
                     $privateParams = [];
 
-                } else if (
-                        isset($_SERVER["CONTENT_TYPE"]) &&
-                        explode(";", $_SERVER["CONTENT_TYPE"], 2)[0]
-                            === self::$BASIC_FORM_TYPE
-                ) {
+                } else if (self::_contentType() === self::$BASIC_FORM_TYPE) {
                     $privateParams = self::parseQueryStr($body);
 
                 } else {
@@ -391,6 +387,31 @@ class Request {
     /* Header-Parsing Utils 
     -------------------------------------------------- */
 
+    
+    
+
+    /**
+     * Return the content type of the request body.
+     * 
+     * This excludes any parameters for the content type, such as charset.
+     * 
+     * @return string The content type string.
+     */
+    public function contentType() {
+        return self::_contentType();
+    }
+
+    /**
+     * Return the charset of the request body.
+     * 
+     * This is usually either unset, or 'utf-8'.
+     * 
+     * @return string The charset of the request body.
+     */
+    public function contentTypeCharset() {
+        return self::_contentTypeCharset();
+    }
+
     /**
      * Return the list of accepted content types, in descending order of
      * preference.
@@ -501,5 +522,21 @@ class Request {
                 return urldecode($value);
             }
         );
+    }
+
+    private static function _contentType() {
+        return isset($_SERVER["CONTENT_TYPE"]) ?
+            explode(";", $_SERVER["CONTENT_TYPE"], 2)[0] :
+            null;
+    }
+
+    private static function _contentTypeCharset() {
+        if (!isset($_SERVER["CONTENT_TYPE"])) return null;
+
+        $contentTypeParams = $this->parseQueryStr(
+            explode(";", $_SERVER["CONTENT_TYPE"], 2)[1]
+        );
+        if (!isset($contentTypeParams["charset"])) return null;
+        return $contentTypeParams["charset"];
     }
 }

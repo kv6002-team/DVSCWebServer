@@ -104,6 +104,25 @@ class Instruments{
             $ourCheckStatus,
             $ourCheckDate
     ) {
+        $this->updateRaw(
+            $id,
+            $name,
+            $officialCheckExpiryDate,
+            $ourCheckStatus,
+            $ourCheckDate
+        );
+
+        // Commit
+        $this->db->execute("COMMIT");
+    }
+    
+    public function updateRaw(
+            $id,
+            $name,
+            $officialCheckExpiryDate,
+            $ourCheckStatus,
+            $ourCheckDate
+    ) {
         // Update
         $this->db->execute(
             "UPDATE Instrument SET"
@@ -120,9 +139,6 @@ class Instruments{
                 "ourCheckDate" => standard\DateTime::format($ourCheckDate)
             ]
         );
-
-        // Commit
-        $this->db->execute("COMMIT");
     }
 
     /**
