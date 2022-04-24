@@ -29,7 +29,7 @@ export default class ContactUs extends react.Component {
       <Main>
         <Container>
           <h1>Contact Us</h1>
-          <p className="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla laoreet tellus velit, at efficitur magna malesuada fermentum. Proin interdum tristique ultrices. Morbi maximus ex in mi ultricies pretium tincidunt id.</p>
+          <p className="mb-3">Please do not hesitate to get in contact with us. DVSC aim to respond in a timely manner. If your request is more urgent then please phone: +44 07493904628</p>
 
           <Form>
             <Form.Group className="mb-3" controlId="contactEmail">

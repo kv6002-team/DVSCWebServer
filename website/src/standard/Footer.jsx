@@ -10,6 +10,7 @@ import './Footer.css';
  * @extends {react.Component<BasicComponent>}
  * 
  * @author William Taylor (19009576)
+ * @author Scott Donaldson (19019810)
  */
 export default class Footer extends react.Component {
   render() {
@@ -20,8 +21,8 @@ export default class Footer extends react.Component {
           <Row className="pb-3">
             <Col sm={1}></Col>
             <Col sm={3}>
-              <p><strong>Email</strong>: contact@dvsc.services</p>
-              <p><strong>Phone</strong>: 1234 567 8910</p>
+              <p><strong>Email</strong>: kevindonaldsondvsc@outlook.com</p>
+              <p><strong>Phone</strong>: +44 07493904628</p>
             </Col>
             <Col sm={3}>
               <Link to="/legal/privacy-policy">Privacy Policy</Link>

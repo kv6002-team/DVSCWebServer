@@ -21,17 +21,18 @@ export default class Home extends react.Component {
           <Container>
             <Row>
               <Col sm={2}></Col>
-              <Col sm={2}>
-                <Image
-                  fluid={true}
-                  roundedCircle={true}
-                  className="shadow-3"
-                  src={coverImage}
-                  alt="cover image"
-                ></Image>
-              </Col>
+              <Col sm={2}><h1>Welcome Donaldsons Vehicle Specialist Consultancy Services</h1></Col>
               <Col sm={6}>
-                About Us. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra nec massa quis ultricies. Suspendisse maximus efficitur magna, in pulvinar nisi. Curabitur vestibulum libero a diam ullamcorper, eget sodales ex lobortis. Cras eget odio et elit vulputate imperdiet. Duis maximus rhoncus turpis non auctor. Integer eu ultrices ipsum. Suspendisse id pulvinar tellus, et molestie dolor. Vestibulum orci felis, tristique quis nisi eget, volutpat placerat elit. Phasellus eu nulla eget leo tempor eleifend. Mauris ut vulputate orci. Curabitur fringilla odio vel metus ultrices, a viverra tellus gravida. Aliquam sed ipsum nec eros hendrerit efficitur et vitae lacus. Vestibulum rhoncus nec erat sed varius. Quisque mollis vestibulum ex, nec euismod leo. Pellentesque mollis lorem vitae auctor varius. 
+                <p>
+                  We are currently in our third year of assisting MoT Stations with site visits and annual CPD training.
+                  We are a local North East individual company offering a bespoke individual service for MOT Testers and MOT Managers.
+                </p>
+                <p>
+                  Offering annual CPD training courses, as well as the annual MOT Testers Training.
+                </p>
+                <p>
+                  The Training will be delivered by an trained professional Ex-DVSA Enforcement officer of 17 years who has a wealth of knowledge and experience across a wide scope of Motor Cehicle classes and types.
+                </p>
               </Col>
             </Row>
           </Container>
@@ -39,25 +40,17 @@ export default class Home extends react.Component {
 
         <Container>
           <Row className="pt-5 pb-5">
-            <Col lg={2}>
-              <Image
-                fluid={true}
-                src={coverImage}
-                alt="cover image"
-              ></Image>
+            <Col lg={4} className="text-right">
+              Individual Services include:
             </Col>
             <Col lg={4}>
-              More stuff about us. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra nec massa quis ultricies. Suspendisse maximus efficitur magna, in pulvinar nisi. Curabitur vestibulum libero a diam ullamcorper, eget sodales ex lobortis. Cras eget odio et elit vulputate imperdiet. Duis maximus rhoncus turpis non auctor. Integer eu ultrices ipsum. Suspendisse id pulvinar tellus, et molestie dolor. Vestibulum orci felis, tristique quis nisi eget, volutpat placerat elit. Phasellus eu nulla eget leo tempor eleifend. Mauris ut vulputate orci. Curabitur fringilla odio vel metus ultrices, a viverra tellus gravida. Aliquam sed ipsum nec eros hendrerit efficitur et vitae lacus. Vestibulum rhoncus nec erat sed varius. Quisque mollis vestibulum ex, nec euismod leo. Pellentesque mollis lorem vitae auctor varius. 
-            </Col>
-            <Col lg={2}>
-              <Image
-                fluid={true}
-                src={coverImage}
-                alt="cover image"
-              ></Image>
-            </Col>
-            <Col lg={4}>
-              More stuff about us. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra nec massa quis ultricies. Suspendisse maximus efficitur magna, in pulvinar nisi. Curabitur vestibulum libero a diam ullamcorper, eget sodales ex lobortis. Cras eget odio et elit vulputate imperdiet. Duis maximus rhoncus turpis non auctor. Integer eu ultrices ipsum. Suspendisse id pulvinar tellus, et molestie dolor. Vestibulum orci felis, tristique quis nisi eget, volutpat placerat elit. Phasellus eu nulla eget leo tempor eleifend. Mauris ut vulputate orci. Curabitur fringilla odio vel metus ultrices, a viverra tellus gravida. Aliquam sed ipsum nec eros hendrerit efficitur et vitae lacus. Vestibulum rhoncus nec erat sed varius. Quisque mollis vestibulum ex, nec euismod leo. Pellentesque mollis lorem vitae auctor varius. 
+              <ul>
+                <li>MoT VT8 Practical Training</li>
+                <li>MoT VT6 Practical Training</li>
+                <li>Annual Assessments</li>
+                <li>Representation on disciplinary cases</li>
+                <li>24/7 Helpline for MoT queries</li>
+              </ul>
             </Col>
           </Row>
         </Container>
