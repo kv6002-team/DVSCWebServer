@@ -20,9 +20,9 @@ class ChangePassword extends react.Component {
       success: null,
       error: null,
 
-      usernameFixed: false,
-      username: "",
+      loggedIn: false,
 
+      username: "",
       newPassword: "",
       repeatNewPassword: ""
     };
@@ -55,10 +55,20 @@ class ChangePassword extends react.Component {
                 type="text"
                 placeholder="username"
                 value={this.state.username}
-                disabled={this.state.usernameFixed}
+                disabled={this.state.loggedIn}
                 onChange={(e) => this.setUsername(e.target.value)}
               />
             </Form.Group>
+
+            {!this.state.loggedIn ? (
+              <Alert variant="danger">
+                You must verify your account's email address before you can
+                change your password. We will send you an email containing link
+                to a page in which you can change your password. The page will
+                stop allowing you to change your password after 10 minutes from
+                clicking 'Verify Email' below.
+              </Alert>
+            ) : null}
 
             <Form.Group className="mb-3" controlId="changePasswordNewPassword">
               <Form.Label>New Password</Form.Label>
@@ -66,6 +76,7 @@ class ChangePassword extends react.Component {
                 type="text"
                 placeholder="password"
                 value={this.state.newPassword}
+                disabled={!this.state.loggedIn}
                 onChange={(e) => this.setNewPassword(e.target.value)}
               />
             </Form.Group>
@@ -76,12 +87,13 @@ class ChangePassword extends react.Component {
                 type="text"
                 placeholder="password"
                 value={this.state.repeatNewPassword}
+                disabled={!this.state.loggedIn}
                 onChange={(e) => this.setRepeatNewPassword(e.target.value)}
               />
             </Form.Group>
 
             <Button variant="primary" onClick={this.changePassword}>
-              Change Password
+              {this.state.loggedIn ? "Change Password" : "Verify Email"}
             </Button>
           </Form>
         </Container>
@@ -134,9 +146,9 @@ class ChangePassword extends react.Component {
 
     if (token === null) {
       // Reset after logout
-      this.setState({ usernameFixed: false, username: "" });
+      this.setState({ loggedIn: false, username: "" });
     } else {
-      this.setState({ usernameFixed: true, username: token.decoded.username });
+      this.setState({ loggedIn: true, username: token.decoded.username });
     }
   }
 
@@ -146,7 +158,7 @@ class ChangePassword extends react.Component {
   componentDidMount() {
     const token = this.props.auth.token;
     if (token !== null) {
-      this.setState({ usernameFixed: true, username: token.decoded.username });
+      this.setState({ loggedIn: true, username: token.decoded.username });
     }
   }
 
@@ -156,10 +168,11 @@ class ChangePassword extends react.Component {
   /**
    * @returns The headers needed for this component's fetches.
    */
-   getHeaders = () => {
+  getHeaders = () => {
+    if (this.props.auth.token === null) return {};
     return {
       "Authorization": "bearer " + this.props.auth.token.encoded
-    }
-  };
+    };
+  }
 }
 export default makeAuthConsumer(ChangePassword);
