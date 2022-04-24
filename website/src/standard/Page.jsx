@@ -27,9 +27,9 @@ export default class Page extends react.Component {
           id: this.props.id,
           className: optionalJoin(" ", ["page", this.props.className])
       })}>
-        <Navigation approot={this.props.approot} pages={this.props.pages} />
+        <Navigation pages={this.props.pages} />
         {this.props.children}
-        <Footer approot={this.props.approot} />
+        <Footer />
       </div>
     );
   }

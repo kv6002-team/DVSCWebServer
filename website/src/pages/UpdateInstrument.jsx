@@ -162,7 +162,7 @@ class UpdateInstrument extends react.Component {
   }
 
   /**
-   * Fetch/clear the reading list on login/logout (respectively) while this
+   * Fetch/clear the instrument list on login/logout (respectively) while this
    * component is mounted.
    * 
    * @param {object} prevProps The previous render's props.
