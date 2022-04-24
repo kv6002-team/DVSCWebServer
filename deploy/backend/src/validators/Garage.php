@@ -6,14 +6,53 @@ use kv6002\standard\DateTime;
 
 class Garage {
 
-    public function validate(
-            $vts,
-            $name,
-            $ownerName,
-            $emailAddress,
-            $telephoneNumber,
-            $paidUntil
-    ) {
+    public function validateGarageID($id) {
+        if(!is_numeric($id) || str_contains($id, ".")){
+            throw new HTTPError(422,
+                "id is not a valid garage ID"
+            );
+        }
+        return $id;
+    }
+
+    public function validateVTS($vts) {
+        // This also rules out possibility of a colon being in it.
+        !preg_match(
+            "/^[A-Za-z0-9]+$/",
+            $vts
+        )) {
+            throw new HTTPError(422,
+                "vts is not a valid VTS"
+            );
+        }
+        return $vts;
+    }
+
+    public function validateGarageName($name) {
+        !preg_match(
+            "/^[A-Za-z0-9]+$/",
+            $name
+        )) {
+            throw new HTTPError(422,
+                "name is not a valid garage name"
+            );
+        }
+        return $name;
+    }
+
+    public function validateOwnerName($ownerName) {
+        !preg_match(
+            "/^[A-Za-z0-9]+$/",
+            $ownerName
+        )) {
+            throw new HTTPError(422,
+                "ownerName is not a valid owner name"
+            );
+        }
+        return $ownerName;  
+    }
+
+    public function validateEmailAddress($emailAddress) {
         if (!preg_match(
             "/^"                   // From start of string
             ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
@@ -33,7 +72,18 @@ class Garage {
                 "emailAddress is not a valid email address"
             );
         }
+    }
 
+    public function validateTelephoneNumber($telephoneNumber) {
+        if(!is_numeric($telephoneNumber){
+            throw new HTTPError(422,
+                "telephoneNumber is not a valid telephone number"
+            );
+        }
+        return $telephoneNumber;     
+    }
+
+    public function validatePaidUntil($paidUntil) {
         try {
             $paidUntil = DateTime::parse(
                 $paidUntil
@@ -44,20 +94,6 @@ class Garage {
                 ." YYYY-MM-DD HH:MM:SS)"
             );
         }
-
-        if (str_contains($vts, ":")) {
-            throw new HTTPError(422,
-                "VTS number must not contain a colon"
-            );
-        }
-
-        return [
-            "vts" => $vts,
-            "name" => $name,
-            "ownerName" => $ownerName,
-            "emailAddress" => $emailAddress,
-            "telephoneNumber" => $telephoneNumber,
-            "paidUntil" => $paidUntil
-        ];
+        return $paidUntil;
     }
 }
