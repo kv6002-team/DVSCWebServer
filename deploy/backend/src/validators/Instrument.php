@@ -18,7 +18,7 @@ class Instrument {
     }
 
     public function validateInstrumentName($name) {
-        !preg_match(
+        if(!preg_match(
             "/^[A-Za-z0-9]+$/",
             $name
         )) {
@@ -30,7 +30,7 @@ class Instrument {
     }
 
     public function validateSerialNumber($serialNumber) {
-        !preg_match(
+        if(!preg_match(
             "/^[A-Za-z0-9]+$/",
             $serialNumber
         )) {
@@ -53,7 +53,7 @@ class Instrument {
             );
         }
 
-        if ($officialCheckExpiryDate < new \DateTimeImmutable('tomorrow')) {
+        if ($officialCheckExpiryDate < new \DateTimeImmutable('today')) {
             throw new HTTPError(422,
                 "Must provide a date from tomorrow for officialCheckExpiryDate"
             );
@@ -73,7 +73,7 @@ class Instrument {
             );
         }
 
-        if ($ourCheckDate < new \DateTimeImmutable('tomorrow + 1 day')) {
+        if ($ourCheckDate < new \DateTimeImmutable('today + 1 day')) {
             throw new HTTPError(422,
                 "Must provide a date from today for ourCheckDate"
             );

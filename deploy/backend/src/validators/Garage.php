@@ -17,7 +17,7 @@ class Garage {
 
     public function validateVTS($vts) {
         // This also rules out possibility of a colon being in it.
-        !preg_match(
+        if(!preg_match(
             "/^[A-Za-z0-9]+$/",
             $vts
         )) {
@@ -29,7 +29,7 @@ class Garage {
     }
 
     public function validateGarageName($name) {
-        !preg_match(
+        if(!preg_match(
             "/^[A-Za-z0-9]+$/",
             $name
         )) {
@@ -41,7 +41,7 @@ class Garage {
     }
 
     public function validateOwnerName($ownerName) {
-        !preg_match(
+        if(!preg_match(
             "/^[A-Za-z0-9]+$/",
             $ownerName
         )) {
@@ -53,7 +53,7 @@ class Garage {
     }
 
     public function validateEmailAddress($emailAddress) {
-        if (!preg_match(
+        if(!preg_match(
             "/^"                   // From start of string
             ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
             ."[A-Za-z0-9_-]+"      // First '.'-delimited segment
@@ -75,7 +75,7 @@ class Garage {
     }
 
     public function validateTelephoneNumber($telephoneNumber) {
-        if(!is_numeric($telephoneNumber){
+        if(!is_numeric($telephoneNumber)){
             throw new HTTPError(422,
                 "telephoneNumber is not a valid telephone number"
             );
