@@ -54,7 +54,7 @@ export default function App() {
       name: "Change Password",
       content: ChangePassword,
       onNav: (auth) => (
-        auth === null ||
+        auth !== null &&
         !auth.decoded.authorisations.includes("password_reset__password_auth")
       )
     },
