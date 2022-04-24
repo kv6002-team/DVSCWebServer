@@ -10,7 +10,6 @@ import UpdateInstrument from './pages/UpdateInstrument';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 /**
@@ -19,7 +18,7 @@ import './App.css';
  * @returns {import('react').ReactElement} The root element of the app.
  */
 export default function App() {
-  const approot = "";
+  const approot = "https://dvsc.services";
   const basename = "";
   const localStoragePrefix = "DISSystemAssignment";
 
