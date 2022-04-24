@@ -1,6 +1,8 @@
 import react from 'react';
+import { Container } from 'react-bootstrap/lib/Tab';
 
 import Main from '../standard/Main';
+import './PrivacyPolicy.css';
 
 /**
  * The privacy policy page.
@@ -13,21 +15,24 @@ import Main from '../standard/Main';
 export default class PrivacyPolicy extends react.Component {
   render() {
     return (
-      <Main header="Donaldsons' Vehicle Specialist Consultancy">
-        <h2>DVSC Privacy Policy</h2>
-        <h3>Contact Details</h3>
+      <Main header="Donaldsons' Vehicle Specialist Consultancy Privacy Policy">
+        <Container>
+        <br/>
+        <h2>Contact Details</h2>
         <p>
           Name: Kevin Donaldson
+        </p>
+        <p>
           Email: kevindonaldsondvsc@outlook.co.uk
         </p>
-        <h3>Types of personal information we collect</h3>
+        <h2>Types of personal information we collect</h2>
         <p>
           We currently collect and process the following information:
           <ul>
             <li>Personal identifiers, contacts and characteristics (For example, name and contact details)</li>
           </ul>
         </p>
-        <h3>How we collect personal information and why we have it</h3>
+        <h2>How we collect personal information and why we have it</h2>
         <p>
           We do not collect information indirectly and only process information directly provided by you.
           Most of the personal infomation we process is provided to us directly by you for one of the following reasons:
@@ -42,18 +47,18 @@ export default class PrivacyPolicy extends react.Component {
 
           Under the UK General Data Protecection Regulation (UK GDPR), the lawfull bases we rely on for processing this information are:
           <ul>
-            <li>Your consent. You are able to remove your conset at any time. You can do this by contacting Kevin Donaldson: kevindonaldsondvsc@outlook.com.</li>
+            <li>Your consent. You are able to remove your conset at any time. You can do this by contacting Kevin Donaldson at kevindonaldsondvsc@outlook.com.</li>
             <li>We have a contractual obligation.</li>
             <li>We have legitimate interest.</li>
           </ul>
         </p>
-        <h3>How we store your information</h3>
+        <h2>How we store your information</h2>
         <p>
           Your information is stored securely on an offsite server located in the UK.
           We keep your information for as long as you remain a customer.
           Data is deleted by permenantly removing it from our service database immediately after you are no longer a customer.
         </p>
-        <h3>Your data protection rights</h3>
+        <h2>Your data protection rights</h2>
         <p>
           Under data protection law, you have rights including:
           <ul>
@@ -86,22 +91,25 @@ export default class PrivacyPolicy extends react.Component {
             </li>
           </ul>
           Please contact us at: kevindonaldsondvsc@outlook.com or +44 07493904628
-        </p>
-        <h3>How to complain</h3>
+        </p><br/>
+        <h2>How to complain</h2>
         <p>
           If you have any concerns about our use of your personal information, you can make a complaint to us at kevindonaldsondvsc@outlook.com or +44 07493904628.
           You can also complain to the ICO if you are unhappy with how we have used your data.
-          The ICO's address:            
-          Information Commissioner's Office
-          Wycliffe House
-          Water Lane
-          Wilmslow
-          Cheshire
-          SK9 5AF
-
-          Helpline number: 0303 123 1113
-          ICO website: https://www.ico.org.uk
+          The ICO's address:      
+          <ul id='ICO-Address'>
+            <li>Information Commissioner's Office</li>
+            <li>Wycliffe House</li>
+            <li>Water Lane</li>
+            <li>Wilmslow</li>
+            <li>Wilmslow</li>
+            <li>Cheshire</li>
+            <li>SK9 5AF</li>
+            <li>Helpline number: 0303 123 1113</li>
+            <li>ICO website: https://www.ico.org.uk</li>
+          </ul>
         </p>
+        </Container>
       </Main>
     );
   }
