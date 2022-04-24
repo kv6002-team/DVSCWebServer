@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import ContactUs from './pages/ContactUs';
 import UpdateInstrument from './pages/UpdateInstrument';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import ChangePassword from './pages/ChangePassword';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -21,6 +22,8 @@ export default function App() {
   const approot = "https://dvsc.services";
   const basename = "";
   const localStoragePrefix = "DISSystemAssignment";
+
+  const resetPasswordRequiredRoute = "/reset-password-required";
 
   const pages = {
     "/": {
@@ -51,6 +54,13 @@ export default function App() {
       auth: false
     },
 
+    [resetPasswordRequiredRoute]: {
+      name: "Reset Password (Required)",
+      content: ChangePassword,
+      nav: false,
+      auth: true
+    },
+
     "*": {
       name: "Not Found",
       content: NotFound,
@@ -62,7 +72,11 @@ export default function App() {
   return (
     <BrowserRouter basename={basename}>
       <AuthProvider localStoragePrefix={localStoragePrefix}>
-        <Page approot={approot} pages={pages}>
+        <Page
+          approot={approot}
+          pages={pages}
+          resetPasswordRequiredRoute={resetPasswordRequiredRoute}
+        >
           <Routes>
             {mapObj(
               pages,
