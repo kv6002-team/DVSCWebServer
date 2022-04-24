@@ -32,13 +32,11 @@ class Navigation extends react.Component {
             {mapObj(
               filterObj(
                 this.props.pages,
-                (_, pageInfo) => (
-                  pageInfo.nav &&
-                  (
-                    !pageInfo.auth ||             // If it's not auth-requiring
-                    this.props.auth.token != null // Or if we're authed
-                  )
-                )
+                (_, pageInfo) => {
+                  if (pageInfo.onNav === true) return true;
+                  if (pageInfo.onNav === false) return false;
+                  return pageInfo.onNav(this.props.auth.token);
+                }
               ),
               (path, pageInfo, i) => (
                 <Nav.Link key={i} as={NavLink} to={path}>
@@ -47,10 +45,7 @@ class Navigation extends react.Component {
               ),
               false
             )}
-            <AuthManager
-              endpoint={this.props.approot + "/api/auth"}
-              localStoragePrefix={this.props.localStoragePrefix}
-            />
+            <AuthManager localStoragePrefix={this.props.localStoragePrefix}/>
           </Nav>
         </Container>
       </Navbar>

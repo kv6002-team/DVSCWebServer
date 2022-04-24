@@ -20,6 +20,9 @@ class ChangePassword extends react.Component {
       success: null,
       error: null,
 
+      usernameFixed: false,
+      username: "",
+
       newPassword: "",
       repeatNewPassword: ""
     };
@@ -46,11 +49,22 @@ class ChangePassword extends react.Component {
           }
 
           <Form>
+            <Form.Group className="mb-3" controlId="changePasswordUsername">
+              <Form.Label>Username</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="username"
+                value={this.state.username}
+                disabled={this.state.usernameFixed}
+                onChange={(e) => this.setUsername(e.target.value)}
+              />
+            </Form.Group>
+
             <Form.Group className="mb-3" controlId="changePasswordNewPassword">
               <Form.Label>New Password</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="New Password"
+                placeholder="password"
                 value={this.state.newPassword}
                 onChange={(e) => this.setNewPassword(e.target.value)}
               />
@@ -60,7 +74,7 @@ class ChangePassword extends react.Component {
               <Form.Label>Repeat New Password</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="New Password"
+                placeholder="password"
                 value={this.state.repeatNewPassword}
                 onChange={(e) => this.setRepeatNewPassword(e.target.value)}
               />
@@ -75,6 +89,7 @@ class ChangePassword extends react.Component {
     );
   }
 
+  setUsername = (username) => this.setState({ username: username });
   setNewPassword = (newPassword) => this.setState({ newPassword: newPassword });
   setRepeatNewPassword = (repeatNewPassword) => this.setState({ repeatNewPassword: repeatNewPassword });
 
@@ -98,12 +113,41 @@ class ChangePassword extends react.Component {
         body
     )
       .then(() => {
+        this.props.auth.login(this.state.username, this.state.newPassword);
         this.setState({ success: true });
       })
       .catch((error) => {
         this.props.handleIfAuthError(error);
         this.setState({ success: false, error: error.explanation });
       });
+  }
+
+  /**
+   * Set/clear the username on login/logout (respectively) while this component
+   * is mounted.
+   * 
+   * @param {object} prevProps The previous render's props.
+   */
+  componentDidUpdate(prevProps) {
+    const token = this.props.auth.token;
+    if (token === prevProps.auth.token) return; // Loop guard
+
+    if (token === null) {
+      // Reset after logout
+      this.setState({ usernameFixed: false, username: "" });
+    } else {
+      this.setState({ usernameFixed: true, username: token.decoded.username });
+    }
+  }
+
+  /**
+   * Set the username value & fixed status on mount.
+   */
+  componentDidMount() {
+    const token = this.props.auth.token;
+    if (token !== null) {
+      this.setState({ usernameFixed: true, username: token.decoded.username });
+    }
   }
 
   /* Utils

@@ -23,60 +23,75 @@ export default function App() {
   const basename = "";
   const localStoragePrefix = "DISSystemAssignment";
 
-  const resetPasswordRequiredRoute = "/reset-password-required";
+  const authEndpoint = "/api/auth";
+  const resetPasswordRequiredRoute = "/account/reset-password-required";
 
   const pages = {
     "/": {
       name: "Home",
       content: Home,
-      nav: true,
-      auth: false
+      onNav: true
     },
 
     "/contact-us": {
       name: "Contact Us",
       content: ContactUs,
-      nav: true,
-      auth: false
+      onNav: true
     },
 
     "/update-instrument": {
       name: "Update Instrument",
       content: UpdateInstrument,
-      nav: true,
-      auth: true
+      onNav: (auth) => auth !== null
+    },
+
+    "/account/reset-password": {
+      name: "Forgot Password",
+      content: ChangePassword,
+      onNav: (auth) => auth === null
+    },
+    "/account/change-password": {
+      name: "Change Password",
+      content: ChangePassword,
+      onNav: (auth) => (
+        auth === null ||
+        !auth.decoded.authorisations.includes("password_reset__password_auth")
+      )
+    },
+    [resetPasswordRequiredRoute]: {
+      name: "Reset Password (Required)",
+      content: ChangePassword,
+      // Put it on the navbar if a password reset is needed so that if the user
+      // changes pages within the app, you can get back to the password reset
+      // page without having to reload the whole app.
+      onNav: (auth) => (
+        auth !== null &&
+        auth.decoded.authorisations.includes("password_reset__password_auth")
+      )
     },
 
     "/legal/privacy-policy": {
       name: "Privacy Policy",
       content: PrivacyPolicy,
-      nav: false,
-      auth: false
-    },
-
-    [resetPasswordRequiredRoute]: {
-      name: "Reset Password (Required)",
-      content: ChangePassword,
-      nav: false,
-      auth: true
+      onNav: false
     },
 
     "*": {
       name: "Not Found",
       content: NotFound,
-      nav: false,
-      auth: false
+      onNav: false
     }
   };
 
   return (
     <BrowserRouter basename={basename}>
-      <AuthProvider localStoragePrefix={localStoragePrefix}>
-        <Page
-          approot={approot}
-          pages={pages}
-          resetPasswordRequiredRoute={resetPasswordRequiredRoute}
-        >
+      <AuthProvider
+        localStoragePrefix={localStoragePrefix}
+        approot={approot}
+        authEndpoint={authEndpoint}
+        resetPasswordRequiredRoute={resetPasswordRequiredRoute}
+      >
+        <Page pages={pages}>
           <Routes>
             {mapObj(
               pages,
