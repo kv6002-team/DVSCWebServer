@@ -134,7 +134,7 @@ class Garages extends BasicResource {
                 // Process Request
                 function ($request, $garageData) {
                     try {
-                        $defaultPass = (new DateTime())->format("dmy");
+                        $defaultPass = (new \DateTimeImmutable())->format("dmy");
                         $garage = $this->usersDAO->add(
                             ...[self::USER_TYPE],
                             ...[
