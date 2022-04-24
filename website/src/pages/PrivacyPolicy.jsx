@@ -8,6 +8,7 @@ import Main from '../standard/Main';
  * @extends {react.Component<APIConsumer>}
  * 
  * @author William Taylor (19009576)
+ * @author Scott Donaldson (19019810)
  */
 export default class PrivacyPolicy extends react.Component {
   render() {
