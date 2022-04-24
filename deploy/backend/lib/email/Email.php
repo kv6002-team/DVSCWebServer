@@ -2,22 +2,27 @@
 namespace email;
 
 class Email {
-  protected $recipient_email;
-  protected $recipient_name;
-  protected $subject;
-  protected $content;
-  protected $include_attachment;
+  private $recipient_email;
+  private $recipient_name;
+  private $subject;
+  private $content;
+  private $include_attachment;
 
-  public function __construct($recipient_email, $recipient_name, $content, $subject = null, $include_attachment = false){
-    if(!is_null($subject)) $this->subject = $subject; 
-    else $this->subject = DEFAULT_SUBJECT;
+  public function __construct(
+      $recipient_email,
+      $recipient_name,
+      $content,
+      $subject = null,
+      $include_attachment = false
+  ) {
     $this->recipient_email = $recipient_email;
     $this->recipient_name = $recipient_name;
     $this->content = $content;
+    $this->subject = $subject !== null ? $subject : DEFAULT_SUBJECT;
     $this->include_attachment = $include_attachment;
   }
 
-  public function send(){
+  public function send() {
     $email = Array(
       "recipient_email" => $this->recipient_email,
       "recipient_name" => $this->recipient_name,
@@ -29,4 +34,3 @@ class Email {
     $email_conn->send_email($email);
   }
 }
-?>
