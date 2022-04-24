@@ -59,14 +59,16 @@ class Instruments extends BasicResource {
                     $instrumentData = $this->validator->validate(
                         ...$instrumentData
                     );
+
                     try {
                         $this->loggerDAO->add(
                             daos\EventLog::DATA_CREATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
-                            "New Instrument added - " . $instrumentData['serialNumber'],
+                            "Instrument added: " . $instrumentData['serialNumber'] ."'",
                             new DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     // Return
                     return [
                         $request,
@@ -83,7 +85,7 @@ class Instruments extends BasicResource {
                             "New garage created" . $garageData['vts'],
                             new DateTimeImmutable("now")
                         );
-                    } catch (DatabaseError $e) { /*Do nothing*/ }    
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     try {
                         $instrument = $this->dao->add(
@@ -146,10 +148,11 @@ class Instruments extends BasicResource {
                         $this->loggerDAO->add(
                             daos\EventLog::DATA_UPDATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
-                            "Instrument Updated - " . $instrumentData['serialNumber'],
+                            "Instrument updated: " . $instrumentData['serialNumber'] . "'",
                             new DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     // Return
                     return [
                         $request,
@@ -195,14 +198,16 @@ class Instruments extends BasicResource {
                             "No instrument with that ID exists."
                         );  
                     }
+
                     try {
                         $this->loggerDAO->add(
                             daos\EventLog::DATA_UPDATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
-                            "Instrument Removed - " . $id,
+                            "Instrument removed: '$id'",
                             new DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     return [$request];
                 },
                 new NoContentBuilder()

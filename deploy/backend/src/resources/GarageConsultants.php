@@ -114,12 +114,11 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         );
                     }
 
-                    
                     try {
                         $this->loggerDAO->add(
                             daos\EventLog::DATA_CREATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
-                            "New Garage Consultant Added '$emailAddress'",
+                            "Garage Consultant added: '$emailAddress'",
                             new DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }

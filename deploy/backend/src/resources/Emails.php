@@ -24,7 +24,6 @@ require_once __DIR__ . "/../../lib/email/DispatcherObject.php";
  * @author Liam
  */
 class Emails extends BasicResource {
-
     private $loggerDAO;
 
     public function __construct($db) {
@@ -97,7 +96,7 @@ class Emails extends BasicResource {
                         $this->loggerDAO->add(
                             daos\EventLog::MESSAGE_EVENT,
                             daos\EventLog::INFO_LEVEL,
-                            "Report Emails Sent",
+                            "Report emails sent",
                             new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }

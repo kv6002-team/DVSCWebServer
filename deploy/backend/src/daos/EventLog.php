@@ -53,6 +53,6 @@ class EventLog {
                 "timestamp" => standard\DateTime::format($timestamp)
             ]
         );
-        $this->db->execute("COMMIT"); // Suicide
+        $this->db->execute("COMMIT");
     }
 }
