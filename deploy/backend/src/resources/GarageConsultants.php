@@ -165,6 +165,15 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         );
                     }
 
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_UPDATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Garage Consultant modified: '$emailAddress'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     return [$request];
                 },
                 new NoContentBuilder()
@@ -188,6 +197,18 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                             "No garage consultant with that ID exists."
                         );
                     }
+
+                    try {
+                        $user = $this->dao->get(self::USER_TYPE, $id);
+                        if ($user !== null) {
+                            $this->loggerDAO->add(
+                                daos\EventLog::DATA_DELETED_EVENT,
+                                daos\EventLog::INFO_LEVEL,
+                                "Garage Consultant removed: '" . $user->username() . "'",
+                                new DateTimeImmutable("now")
+                            );
+                        }
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
                 },

@@ -60,15 +60,6 @@ class Instruments extends BasicResource {
                         ...$instrumentData
                     );
 
-                    try {
-                        $this->loggerDAO->add(
-                            daos\EventLog::DATA_CREATED_EVENT,
-                            daos\EventLog::INFO_LEVEL,
-                            "Instrument added: " . $instrumentData['serialNumber'] ."'",
-                            new DateTimeImmutable("now")
-                        );
-                    } catch (DatabaseError $e) { /*Do nothing*/ }
-
                     // Return
                     return [
                         $request,
@@ -79,15 +70,6 @@ class Instruments extends BasicResource {
                 // Process Request
                 function ($request, $instrumentData) {
                     try {
-                        $this->loggerDAO->add(
-                            daos\EventLog::DATA_CREATED_EVENT,
-                            daos\EventLog::INFO_LEVEL,
-                            "New garage created" . $garageData['vts'],
-                            new DateTimeImmutable("now")
-                        );
-                    } catch (DatabaseError $e) { /*Do nothing*/ }
-
-                    try {
                         $instrument = $this->dao->add(
                             ...$instrumentData
                         );
@@ -97,6 +79,15 @@ class Instruments extends BasicResource {
                             ." exists"
                         );
                     }
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_CREATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Instrument added: " . $instrumentData['serialNumber'] ."'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request, $instrument];
                 },
@@ -144,15 +135,6 @@ class Instruments extends BasicResource {
                         ...$instrumentData
                     );
 
-                    try {
-                        $this->loggerDAO->add(
-                            daos\EventLog::DATA_UPDATED_EVENT,
-                            daos\EventLog::INFO_LEVEL,
-                            "Instrument updated: " . $instrumentData['serialNumber'] . "'",
-                            new DateTimeImmutable("now")
-                        );
-                    } catch (DatabaseError $e) { /*Do nothing*/ }
-
                     // Return
                     return [
                         $request,
@@ -174,6 +156,15 @@ class Instruments extends BasicResource {
                             ." exists"
                         );
                     }
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_UPDATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Instrument modified: " . $instrumentData['serialNumber'] . "'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
                 },
@@ -200,12 +191,15 @@ class Instruments extends BasicResource {
                     }
 
                     try {
-                        $this->loggerDAO->add(
-                            daos\EventLog::DATA_UPDATED_EVENT,
-                            daos\EventLog::INFO_LEVEL,
-                            "Instrument removed: '$id'",
-                            new DateTimeImmutable("now")
-                        );
+                        $user = $this->dao->get(self::USER_TYPE, $id);
+                        if ($user !== null) {
+                            $this->loggerDAO->add(
+                                daos\EventLog::DATA_DELETED_EVENT,
+                                daos\EventLog::INFO_LEVEL,
+                                "Instrument removed: '" . $user->serialNumber() . "'",
+                                new DateTimeImmutable("now")
+                            );
+                        }
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
