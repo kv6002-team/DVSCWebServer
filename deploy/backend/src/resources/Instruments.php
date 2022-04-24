@@ -27,8 +27,8 @@ class Instruments extends BasicResource {
 
     public function __construct($db) {
         $this->dao = new daos\Instruments($db);
+        $this->loggerDAO = new daos\EventLog($db);
         $this->validator = new validators\Instrument();
-        $this->loggerDAO = new daos\EventLog();
 
         $actions = [
             "add" => Dispatcher::funcToPipeOf([
@@ -85,7 +85,7 @@ class Instruments extends BasicResource {
                             daos\EventLog::DATA_CREATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
                             "Instrument added: " . $instrumentData['serialNumber'] ."'",
-                            new DateTimeImmutable("now")
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
@@ -162,7 +162,7 @@ class Instruments extends BasicResource {
                             daos\EventLog::DATA_UPDATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
                             "Instrument modified: " . $instrumentData['serialNumber'] . "'",
-                            new DateTimeImmutable("now")
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
@@ -197,7 +197,7 @@ class Instruments extends BasicResource {
                                 daos\EventLog::DATA_DELETED_EVENT,
                                 daos\EventLog::INFO_LEVEL,
                                 "Instrument removed: '" . $user->serialNumber() . "'",
-                                new DateTimeImmutable("now")
+                                new \DateTimeImmutable("now")
                             );
                         }
                     } catch (DatabaseError $e) { /*Do nothing*/ }

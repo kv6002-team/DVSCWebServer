@@ -135,7 +135,7 @@ class Garages extends BasicResource {
                             daos\EventLog::DATA_CREATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
                             "Garage added: '" . $garageData['vts'] . "'",
-                            new DateTimeImmutable("now")
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
@@ -217,7 +217,7 @@ class Garages extends BasicResource {
                             daos\EventLog::DATA_UPDATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
                             "Garage modified: '" . $garageData['vts'] ."'",
-                            new DateTimeImmutable("now")
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
@@ -359,7 +359,7 @@ class Garages extends BasicResource {
                             "Garage modified: '" . $garageData['vts'] ."'."
                             ." Note: Instruments for this garage may also have"
                             ." been modified.",
-                            new DateTimeImmutable("now")
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
@@ -394,7 +394,7 @@ class Garages extends BasicResource {
                                 daos\EventLog::DATA_DELETED_EVENT,
                                 daos\EventLog::INFO_LEVEL,
                                 "Garage removed: '" . $user->username() . "'",
-                                new DateTimeImmutable("now")
+                                new \DateTimeImmutable("now")
                             );
                         }
                     } catch (DatabaseError $e) { /*Do nothing*/ }

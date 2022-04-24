@@ -127,8 +127,8 @@ class PasswordReset extends BasicResource {
                         $this->loggerDAO->add(
                             daos\EventLog::LOGIN_EVENT,
                             daos\EventLog::WARN_LEVEL,
-                            "Changed password for user '" . $user->username() ."'",
-                            new DateTimeImmutable("now")
+                            "Changed password for user '" . $user->username() . "'",
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
