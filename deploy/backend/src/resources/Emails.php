@@ -24,8 +24,12 @@ require_once __DIR__ . "/../../lib/email/DispatcherObject.php";
  * @author Liam
  */
 class Emails extends BasicResource {
+
+    private $loggerDAO;
+
     public function __construct($db) {
         $dao = new daos\Users($db);
+        $this->loggerDAO = new daos\EventLog($db);
 
         $actions = [
             "send_garage_emails" => Dispatcher::funcToPipeOf([
@@ -88,6 +92,15 @@ class Emails extends BasicResource {
                     
                     $emailDispatcher = new EmailDispatcher($dispatcherObjects);
                     $emailDispatcher->send_emails();
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::MESSAGE_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Report Emails Sent",
+                            new \DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
                 },

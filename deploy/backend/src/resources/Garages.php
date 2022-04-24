@@ -25,18 +25,24 @@ use kv6002\validators;
 class Garages extends BasicResource {
     private const USER_TYPE = domain\Garage::USER_TYPE;
 
-    private $usersDAO; // Cat
-    private $instrumentsDAO;
-    private $view;
     private $garageValidator;
     private $instrumentValidator;
 
+    private $usersDAO; // Cat
+    private $instrumentsDAO;
+    private $loggerDAO;
+    
+    private $view;
+
     public function __construct($db, $authenticator) {
-        $this->usersDAO = new daos\Users($db);
-        $this->instrumentsDAO = new daos\Instruments($db);
-        $this->view = new views\GaragesJSON();
         $this->garageValidator = new validators\Garage();
         $this->instrumentValidator = new validators\Instrument();
+
+        $this->usersDAO = new daos\Users($db);
+        $this->instrumentsDAO = new daos\Instruments($db);
+        $this->loggerDAO = new daos\EventLog($db);
+
+        $this->view = new views\GaragesJSON();
 
         $actions = [
             "get_all_simple" => Dispatcher::funcToPipeOf([
@@ -102,7 +108,14 @@ class Garages extends BasicResource {
                     $garageData = $this->garageValidator->validate(
                         ...$garageData
                     );
-
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_CREATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "New garage created" . $garageData['vts'],
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }    
                     // Return
                     return [$request, $garageData];
                 },
@@ -173,7 +186,14 @@ class Garages extends BasicResource {
                     $garageData =  $this->garageValidator->validate(
                         ...$garageData
                     );
-
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_UPDATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Garage modified created" . $garageData['vts'],
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }        
                     // Return
                     return [
                         $request,
@@ -351,7 +371,14 @@ class Garages extends BasicResource {
                             "No garage with that ID exists."
                         );
                     }
-
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_DELETED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Garage removed - " . $id,
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }    
                     return [$request];
                 },
                 new NoContentBuilder()

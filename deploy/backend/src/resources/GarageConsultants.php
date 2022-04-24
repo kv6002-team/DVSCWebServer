@@ -27,10 +27,12 @@ class GarageConsultants extends BasicResource implements WithMetadata {
 
     private $dao;
     private $view;
+    private $loggerDAO;
 
     public function __construct($db, $authenticator) {
         $this->dao = new daos\Users($db);
         $this->view = new views\GarageConsultantsJSON();
+        $this->loggerDAO = new daos\EventLog($db);
 
         // Which actions can we take?
         $actions = [
@@ -111,6 +113,16 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                             "already registered"
                         );
                     }
+
+                    
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_CREATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "New Garage Consultant Added '$emailAddress'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request, $garageConsultant];
                 },

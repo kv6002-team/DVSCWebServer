@@ -96,7 +96,7 @@ class Authenticate extends BasicResource implements WithMetadata {
                             !password_verify($password, $user->password())
                     ) {
                         try {
-                            $loggerDAO->add(
+                            $this->loggerDAO->add(
                                 daos\EventLog::LOGIN_EVENT,
                                 daos\EventLog::WARN_LEVEL,
                                 "Failed login attempt for user '$username'",
@@ -108,7 +108,7 @@ class Authenticate extends BasicResource implements WithMetadata {
                     }
 
                     try {
-                        $loggerDAO->add(
+                        $this->loggerDAO->add(
                             daos\EventLog::LOGIN_EVENT,
                             daos\EventLog::INFO_LEVEL,
                             "Successful login of '$username'",
