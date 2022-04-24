@@ -21,6 +21,36 @@ class Instruments{
         $this->db = $db;
     }
 
+    public function get($id) {
+       
+        return $instrument = $this->db->fetch(
+            "SELECT garageID,"
+            ."   name,"
+            ."   serialNumber,"
+            ."   officialCheckExpiryDate,"
+            ."   ourCheckStatus,"
+            ."   ourCheckDate"
+            ." FROM Instrument"
+            ." WHERE id = :id",
+            ["id" => $id],
+            domain\Instrument::class,
+            null,
+            [
+                new Field("name"),
+                new Field("serialNumber"),
+
+                new Field("officialCheckExpiryDate",
+                    [standard\DateTime::class, "parse"]),
+
+                new Field("ourCheckStatus",
+                    [domain\Instrument::class, "parseOurCheckStatus"]),
+
+                new Field("ourCheckDate",
+                    [standard\DateTime::class, "parse"])
+            ]
+        );
+    }
+
     /**
      * 
      */

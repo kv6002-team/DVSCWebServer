@@ -226,12 +226,12 @@ class Instruments extends BasicResource {
                     }
 
                     try {
-                        $user = $this->dao->get($id);
-                        if ($user !== null) {
+                        $instrument = $this->dao->get($id);
+                        if ($instrument !== null) {
                             $this->loggerDAO->add(
                                 daos\EventLog::DATA_DELETED_EVENT,
                                 daos\EventLog::INFO_LEVEL,
-                                "Instrument removed: '" . $user->serialNumber() . "'",
+                                "Instrument removed: '" . $instrument->serialNumber() . "'",
                                 new \DateTimeImmutable("now")
                             );
                         }
