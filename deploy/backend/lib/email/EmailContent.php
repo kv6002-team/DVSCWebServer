@@ -18,7 +18,7 @@ class EmailContent {
   }
 
   private function generate_email_content($garage_name, $instrument_array = Array()) {
-    $output = (
+    return (
       $this->get_email_header($garage_name)
       . $this->generate_instrument_table($instrument_array)
       . $this->get_email_footer()
