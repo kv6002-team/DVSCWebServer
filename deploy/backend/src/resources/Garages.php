@@ -1,6 +1,8 @@
 <?php
 namespace kv6002\resources;
 
+use util\Util;
+
 use database\exceptions\DatabaseError;
 
 use dispatcher\Dispatcher;
@@ -23,19 +25,23 @@ use kv6002\validators;
 class Garages extends BasicResource {
     private const USER_TYPE = domain\Garage::USER_TYPE;
 
-    private $dao; // Cat
+    private $usersDAO; // Cat
+    private $instrumentsDAO;
     private $view;
-    private $validator;
+    private $garageValidator;
+    private $instrumentValidator;
 
     public function __construct($db, $authenticator) {
-        $this->dao = new daos\Users($db);
+        $this->usersDAO = new daos\Users($db);
+        $this->instrumentsDAO = new daos\Instruments($db);
         $this->view = new views\GaragesJSON();
-        $this->validator = new validators\Garage();
+        $this->garageValidator = new validators\Garage();
+        $this->instrumentValidator = new validators\Instrument();
 
         $actions = [
             "get_all_simple" => Dispatcher::funcToPipeOf([
                 function ($request) {
-                    return [$request, $this->dao->getAll(self::USER_TYPE)];
+                    return [$request, $this->usersDAO->getAll(self::USER_TYPE)];
                 },
                 JSONBuilder::typeSelector(
                     function ($request, $garages){
@@ -49,7 +55,7 @@ class Garages extends BasicResource {
                     return [$request, $request->endpointParam("id")];
                 },
                 function ($request, $id) {
-                    $garage = $this->dao->get(self::USER_TYPE, $id);
+                    $garage = $this->usersDAO->get(self::USER_TYPE, $id);
                     if ($garage === null) {
                         throw new HTTPError(404,
                             "Requested Garage does not exist"
@@ -93,9 +99,9 @@ class Garages extends BasicResource {
                     ];
 
                     // Validate
-                    $garageData = $this->validator->validate(
-                        ...$garageData;
-                    )
+                    $garageData = $this->garageValidator->validate(
+                        ...$garageData
+                    );
 
                     // Return
                     return [$request, $garageData];
@@ -105,7 +111,7 @@ class Garages extends BasicResource {
                 function ($request, $garageData) {
                     try {
                         $defaultPass = (new DateTime())->format("dmy");
-                        $garage = $this->dao->add(
+                        $garage = $this->usersDAO->add(
                             ...[self::USER_TYPE],
                             ...[
                                 password_hash($defaultPass, PASSWORD_DEFAULT),
@@ -164,9 +170,9 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    $garageData =  $this->validator->validate(
+                    $garageData =  $this->garageValidator->validate(
                         ...$garageData
-                    )
+                    );
 
                     // Return
                     return [
@@ -177,9 +183,139 @@ class Garages extends BasicResource {
                 },
                 function ($request, $id, $garageData) {
                     try {
-                        $this->dao->update(
+                        $this->usersDAO->update(
                             self::USER_TYPE,
                             $id,
+                            $garageData["vts"],
+                            $garageData["name"],
+                            $garageData["ownerName"],
+                            $garageData["emailAddress"],
+                            $garageData["telephoneNumber"],
+                            $garageData["paidUntil"]
+                        );
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(404,
+                            "No garage with that ID exists."
+                        );
+                    }
+                    return [$request];
+                },
+                new NoContentBuilder()
+            ]),
+
+            "updateJSON" => Dispatcher::funcToPipeOf([ 
+                function ($request) {
+                    // Utility
+                    $requiredAttr = function ($obj, $name) {
+                        if(!isset($obj[$name])) {
+                            throw new HTTPError(422,
+                                "Must provide $name attribute of Garage"
+                            );
+                        }
+                        return $obj[$name];
+                    };
+                    
+                    // Parse JSON
+                    try {
+                        $body = Util::toJSON($request->body());
+                    } catch (JsonException $e) {
+                        throw new HTTPError(422,
+                            "Requested Garage JSON is invalid"
+                        );
+                    }
+
+                    // Extract Garage
+                    $garageID = $request->endpointParam("id");
+                    $garageData = [
+                        "vts" => $requiredAttr($body, "vts"),
+                        "name" => $requiredAttr($body, "name"),
+                        "ownerName" => $requiredAttr($body, "ownerName"),
+                        "emailAddress" => $requiredAttr($body, "emailAddress"),
+                        "telephoneNumber" => $requiredAttr($body, "telephoneNumber"),
+                        "paidUntil" => $requiredAttr($body, "paidUntil")
+                    ];
+                    
+                    // Validate Garage
+                    if ($garageID === null) {
+                        throw new HTTPError(422,
+                            "Cannot update the whole collection of garages"
+                            ." (did you mean to `PATCH /api/garages/:id`?)"
+                        );
+                    }
+
+                    if ($this->usersDAO->get(self::USER_TYPE, $garageID) === null) {
+                        throw new HTTPError(404,
+                            "Requested Garage not found"
+                        );
+                    }
+
+                    $garageData = $this->garageValidator->validate(...$garageData);
+
+                    // Extract Instruments
+                    $instrumentsDataRaw = $requiredAttr($body, "instruments");
+                    if (!is_array($instrumentsDataRaw)) {
+                        throw new HTTPError(422,
+                            "InstrumentData must be a JSONArray"
+                        );
+                    }
+
+                    $instrumentsData = [];
+                    foreach ($instrumentsDataRaw as $instrumentDataRaw) {
+                        $instrumentID = $requiredAttr($instrumentDataRaw, "id");
+                        $instrumentData = [
+                            "name" => $requiredAttr($instrumentDataRaw, "name"),
+                            "officialCheckExpiryDate" => $requiredAttr($instrumentDataRaw, "officialCheckExpiryDate"),
+                            "ourCheckStatus" => $requiredAttr($instrumentDataRaw, "ourCheckStatus"),
+                            "ourCheckDate" => $requiredAttr($instrumentDataRaw, "ourCheckDate")
+                        ];
+
+                        // Validate Instruments
+                        if ($instrumentID === null) {
+                            throw new HTTPError(422,
+                                "Instrument ID invalid"
+                            );
+                        }
+                        
+                        if ($this->instrumentsDAO->get($instrumentID) === null) {
+                            throw new HTTPError(404,
+                                "Requested Instrument not found"
+                            );
+                        }
+
+                        array_push(
+                            $instrumentsData,
+                            array_merge(
+                                ["id" => $instrumentID],
+                                $this->instrumentValidator->validate(
+                                    ...$instrumentData
+                                )
+                            )                            
+                        );
+                    }
+                    return [$request, $garageID, $garageData, $instrumentsData];
+                },
+                function ($request, $garageID, $garageData, $instrumentsData) {
+                    try {
+        
+                        foreach ($instrumentsData as $instrument) {
+                            $this->instrumentsDAO->updateRaw(
+                                $instrument["id"],
+                                $instrument["name"],
+                                $instrument["officialCheckExpiryDate"],
+                                $instrument["ourCheckStatus"],
+                                $instrument["ourCheckDate"]
+                            );
+                        }
+                    } catch (DatabaseError $e) {
+                        throw new HTTPError(404,
+                            "Instrument with id '".$instrument["id"]."' does not exist."
+                        );
+                    }
+
+                    try {
+                        $this->usersDAO->update(
+                            self::USER_TYPE,
+                            $garageID,
                             $garageData["vts"],
                             $garageData["name"],
                             $garageData["ownerName"],
@@ -209,7 +345,7 @@ class Garages extends BasicResource {
                 },
                 function ($request, $id) {
                     try {
-                        $this->dao->remove(self::USER_TYPE, $id);
+                        $this->usersDAO->remove(self::USER_TYPE, $id);
                     } catch (DatabaseError $e) {
                         throw new HTTPError(404,
                             "No garage with that ID exists."
@@ -286,9 +422,15 @@ class Garages extends BasicResource {
             ),
 
             "POST" => $getAction("add"),
-            "PATCH" => $getAction("update"),
+            "PATCH" => $getAction(
+                function ($request) {
+                    if ($request->contentType() === "application/json") {
+                        return "updateJSON";
+                    }
+                    return "update";
+                }
+            ),
             "DELETE" => $getAction("remove"),
-            
             "OPTIONS" => $getAction("cors_preflight")
         ]);
     }

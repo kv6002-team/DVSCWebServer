@@ -52,12 +52,12 @@ class Garage {
         }
 
         return [
-            $vts,
-            $name,
-            $ownerName,
-            $emailAddress,
-            $telephoneNumber,
-            $paidUntil
+            "vts" => $vts,
+            "name" => $name,
+            "ownerName" => $ownerName,
+            "emailAddress" => $emailAddress,
+            "telephoneNumber" => $telephoneNumber,
+            "paidUntil" => $paidUntil
         ];
     }
 }
