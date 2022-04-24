@@ -23,7 +23,7 @@ class Instrument {
             );
         }
 
-        if ($officialCheckExpiryDate < new DateTime('today midnight')) {
+        if ($officialCheckExpiryDate < new \DateTimeImmutable('tomorrow')) {
             throw new HTTPError(422,
                 "Must provide a date from tomorrow for officialCheckExpiryDate"
             );
@@ -40,7 +40,7 @@ class Instrument {
             );
         }
 
-        if ($ourCheckDate < new DateTime('yesterday midnight')) {
+        if ($ourCheckDate < new \DateTimeImmutable('tomorrow + 1 day')) {
             throw new HTTPError(422,
                 "Must provide a date from today for ourCheckDate"
             );
