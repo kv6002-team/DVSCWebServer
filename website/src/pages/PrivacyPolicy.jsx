@@ -1,5 +1,5 @@
 import react from 'react';
-import { Container } from 'react-bootstrap/lib/Tab';
+import { Container } from 'react-bootstrap';
 
 import Main from '../standard/Main';
 import './PrivacyPolicy.css';
