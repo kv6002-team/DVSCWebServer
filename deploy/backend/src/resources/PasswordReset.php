@@ -122,6 +122,16 @@ class PasswordReset extends BasicResource {
                         $user,
                         password_hash($newPassword, PASSWORD_DEFAULT)
                     );
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::LOGIN_EVENT,
+                            daos\EventLog::WARN_LEVEL,
+                            "Changed password for user '" . $user->username() ."'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     return [$request];
                 },
                 new NoContentBuilder()

@@ -23,10 +23,12 @@ use kv6002\validators;
 class Instruments extends BasicResource {
     private $dao;
     private $validator;
+    private $loggerDAO;
 
     public function __construct($db) {
         $this->dao = new daos\Instruments($db);
         $this->validator = new validators\Instrument();
+        $this->loggerDAO = new daos\EventLog();
 
         $actions = [
             "add" => Dispatcher::funcToPipeOf([
@@ -77,6 +79,15 @@ class Instruments extends BasicResource {
                             ." exists"
                         );
                     }
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_CREATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Instrument added: " . $instrumentData['serialNumber'] ."'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request, $instrument];
                 },
@@ -146,6 +157,15 @@ class Instruments extends BasicResource {
                         );
                     }
 
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_UPDATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Instrument modified: " . $instrumentData['serialNumber'] . "'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     return [$request];
                 },
                 new NoContentBuilder()
@@ -169,6 +189,18 @@ class Instruments extends BasicResource {
                             "No instrument with that ID exists."
                         );  
                     }
+
+                    try {
+                        $user = $this->dao->get(self::USER_TYPE, $id);
+                        if ($user !== null) {
+                            $this->loggerDAO->add(
+                                daos\EventLog::DATA_DELETED_EVENT,
+                                daos\EventLog::INFO_LEVEL,
+                                "Instrument removed: '" . $user->serialNumber() . "'",
+                                new DateTimeImmutable("now")
+                            );
+                        }
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
                 },

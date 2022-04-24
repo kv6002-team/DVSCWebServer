@@ -26,10 +26,12 @@ class Authenticate extends BasicResource implements WithMetadata {
 
     private $authenticator;
     private $dao;
+    private $loggerDAO;
 
     public function __construct($db, $authenticator) {
         $this->authenticator = $authenticator;
         $this->dao = new daos\Users($db);
+        $this->loggerDAO = new daos\EventLog($db);
 
         // Define actions
         $actions = [
@@ -93,8 +95,26 @@ class Authenticate extends BasicResource implements WithMetadata {
                             $user === null ||
                             !password_verify($password, $user->password())
                     ) {
+                        try {
+                            $this->loggerDAO->add(
+                                daos\EventLog::LOGIN_EVENT,
+                                daos\EventLog::WARN_LEVEL,
+                                "Failed login attempt for user '$username'",
+                                new DateTimeImmutable("now")
+                            );
+                        } catch (DatabaseError $e) { /*Do nothing*/ }
+
                         throw new HTTPError(401, self::$AUTH_INVALID_ERR_STR);
                     }
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::LOGIN_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Successful login of '$username'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     // Construct a JWT for that user. For general use if they don't
                     // require a password reset, for password reset only if they do.

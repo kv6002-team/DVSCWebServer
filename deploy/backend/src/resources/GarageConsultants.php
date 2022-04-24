@@ -27,10 +27,12 @@ class GarageConsultants extends BasicResource implements WithMetadata {
 
     private $dao;
     private $view;
+    private $loggerDAO;
 
     public function __construct($db, $authenticator) {
         $this->dao = new daos\Users($db);
         $this->view = new views\GarageConsultantsJSON();
+        $this->loggerDAO = new daos\EventLog($db);
 
         // Which actions can we take?
         $actions = [
@@ -112,6 +114,15 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         );
                     }
 
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_CREATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Garage Consultant added: '$emailAddress'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     return [$request, $garageConsultant];
                 },
                 JSONBuilder::typeSelector(
@@ -154,6 +165,15 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         );
                     }
 
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_UPDATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Garage Consultant modified: '$emailAddress'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     return [$request];
                 },
                 new NoContentBuilder()
@@ -177,6 +197,18 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                             "No garage consultant with that ID exists."
                         );
                     }
+
+                    try {
+                        $user = $this->dao->get(self::USER_TYPE, $id);
+                        if ($user !== null) {
+                            $this->loggerDAO->add(
+                                daos\EventLog::DATA_DELETED_EVENT,
+                                daos\EventLog::INFO_LEVEL,
+                                "Garage Consultant removed: '" . $user->username() . "'",
+                                new DateTimeImmutable("now")
+                            );
+                        }
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
                 },

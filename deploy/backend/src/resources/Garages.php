@@ -25,18 +25,24 @@ use kv6002\validators;
 class Garages extends BasicResource {
     private const USER_TYPE = domain\Garage::USER_TYPE;
 
-    private $usersDAO; // Cat
-    private $instrumentsDAO;
-    private $view;
     private $garageValidator;
     private $instrumentValidator;
 
+    private $usersDAO; // Cat
+    private $instrumentsDAO;
+    private $loggerDAO;
+    
+    private $view;
+
     public function __construct($db, $authenticator) {
-        $this->usersDAO = new daos\Users($db);
-        $this->instrumentsDAO = new daos\Instruments($db);
-        $this->view = new views\GaragesJSON();
         $this->garageValidator = new validators\Garage();
         $this->instrumentValidator = new validators\Instrument();
+
+        $this->usersDAO = new daos\Users($db);
+        $this->instrumentsDAO = new daos\Instruments($db);
+        $this->loggerDAO = new daos\EventLog($db);
+
+        $this->view = new views\GaragesJSON();
 
         $actions = [
             "get_all_simple" => Dispatcher::funcToPipeOf([
@@ -83,8 +89,6 @@ class Garages extends BasicResource {
                         }
                         return $value;
                     };
-                    
-                
 
                     // Extract
                     $garageData = [
@@ -125,6 +129,15 @@ class Garages extends BasicResource {
                             ."registered"
                         );
                     }
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_CREATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Garage added: '" . $garageData['vts'] . "'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request, $garage];
                 },
@@ -198,6 +211,16 @@ class Garages extends BasicResource {
                             "No garage with that ID exists."
                         );
                     }
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_UPDATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Garage modified: '" . $garageData['vts'] ."'",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     return [$request];
                 },
                 new NoContentBuilder()
@@ -328,6 +351,18 @@ class Garages extends BasicResource {
                             "No garage with that ID exists."
                         );
                     }
+
+                    try {
+                        $this->loggerDAO->add(
+                            daos\EventLog::DATA_UPDATED_EVENT,
+                            daos\EventLog::INFO_LEVEL,
+                            "Garage modified: '" . $garageData['vts'] ."'."
+                            ." Note: Instruments for this garage may also have"
+                            ." been modified.",
+                            new DateTimeImmutable("now")
+                        );
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     return [$request];
                 },
                 new NoContentBuilder()
@@ -351,6 +386,18 @@ class Garages extends BasicResource {
                             "No garage with that ID exists."
                         );
                     }
+
+                    try {
+                        $user = $this->dao->get(self::USER_TYPE, $id);
+                        if ($user !== null) {
+                            $this->loggerDAO->add(
+                                daos\EventLog::DATA_DELETED_EVENT,
+                                daos\EventLog::INFO_LEVEL,
+                                "Garage removed: '" . $user->username() . "'",
+                                new DateTimeImmutable("now")
+                            );
+                        }
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
                 },
