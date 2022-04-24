@@ -100,7 +100,7 @@ class Authenticate extends BasicResource implements WithMetadata {
                                 daos\EventLog::LOGIN_EVENT,
                                 daos\EventLog::WARN_LEVEL,
                                 "Failed login attempt for user '$username'",
-                                new DateTimeImmutable("now")
+                                new \DateTimeImmutable("now")
                             );
                         } catch (DatabaseError $e) { /*Do nothing*/ }
 
@@ -112,7 +112,7 @@ class Authenticate extends BasicResource implements WithMetadata {
                             daos\EventLog::LOGIN_EVENT,
                             daos\EventLog::INFO_LEVEL,
                             "Successful login of '$username'",
-                            new DateTimeImmutable("now")
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 

@@ -3,6 +3,7 @@ namespace kv6002\daos;
 
 use kv6002\daos\exceptions\UnsupportedUserTypeError;
 
+use kv6002\standard;
 use kv6002\domain;
 use kv6002\daos;
 
@@ -44,7 +45,7 @@ class EventLog {
             ."   :type,"
             ."   :level,"
             ."   :message,"
-            ."   :timestamp,"
+            ."   :timestamp"
             ." )",
             [
                 "type" => $type,

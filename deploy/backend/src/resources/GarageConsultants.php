@@ -119,7 +119,7 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                             daos\EventLog::DATA_CREATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
                             "Garage Consultant added: '$emailAddress'",
-                            new DateTimeImmutable("now")
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
@@ -170,7 +170,7 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                             daos\EventLog::DATA_UPDATED_EVENT,
                             daos\EventLog::INFO_LEVEL,
                             "Garage Consultant modified: '$emailAddress'",
-                            new DateTimeImmutable("now")
+                            new \DateTimeImmutable("now")
                         );
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
@@ -205,7 +205,7 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                                 daos\EventLog::DATA_DELETED_EVENT,
                                 daos\EventLog::INFO_LEVEL,
                                 "Garage Consultant removed: '" . $user->username() . "'",
-                                new DateTimeImmutable("now")
+                                new \DateTimeImmutable("now")
                             );
                         }
                     } catch (DatabaseError $e) { /*Do nothing*/ }
