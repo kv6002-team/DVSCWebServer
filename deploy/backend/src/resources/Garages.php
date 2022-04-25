@@ -291,7 +291,6 @@ class Garages extends BasicResource {
                         $this->usersDAO->update(
                             self::USER_TYPE,
                             $id,
-                            $garageData["vts"],
                             $garageData["name"],
                             $garageData["ownerName"],
                             $garageData["emailAddress"],
@@ -348,7 +347,6 @@ class Garages extends BasicResource {
                     // Extract Garage
                     $garageID = $request->endpointParam("id");
                     $garageData = [
-                        "vts" => $requiredAttr($body, "vts"),
                         "name" => $requiredAttr($body, "name"),
                         "ownerName" => $requiredAttr($body, "ownerName"),
                         "emailAddress" => $requiredAttr($body, "emailAddress"),
@@ -369,10 +367,6 @@ class Garages extends BasicResource {
                             "Requested Garage not found"
                         );
                     }
-
-                    $garageData["vts"] = $this->garageValidator->validateVTS(
-                        $garageData["vts"]
-                    );
 
                     $garageData["name"] = $this->garageValidator->validateGarageName(
                         $garageData["name"]
@@ -475,7 +469,6 @@ class Garages extends BasicResource {
                         $this->usersDAO->update(
                             self::USER_TYPE,
                             $garageID,
-                            $garageData["vts"],
                             $garageData["name"],
                             $garageData["ownerName"],
                             $garageData["emailAddress"],
