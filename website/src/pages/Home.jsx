@@ -30,7 +30,7 @@ export default class Home extends react.Component {
                   Offering annual CPD training courses, as well as annual MOT Testers Training.
                 </p>
                 <p>
-                  The Training will be delivered by a trained professional Ex-DVSA Enforcement officer of 17 years who has a wealth of knowledge and experience across a wide scope of Motor Vehicle classes and types.
+                  The Training will be delivered by a trained professional Ex-DVSA Enforcement officer of 17 years with an additional 23 years in the Motor Industry who has a wealth of knowledge and experience across a wide scope of Motor Vehicle classes and types.
                 </p>
               </Col>
             </Row>
