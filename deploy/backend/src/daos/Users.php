@@ -120,7 +120,7 @@ class Users {
             "INSERT INTO User (password, passwordResetRequired)"
             ." VALUES ("
             ."   :password,"
-            ."   :passwordResetRequired"
+            ."   CAST( :passwordResetRequired AS UNSIGNED )"
             ." )",
             [
                 "password" => $password,

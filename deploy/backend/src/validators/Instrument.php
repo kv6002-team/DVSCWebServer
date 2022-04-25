@@ -19,7 +19,7 @@ class Instrument {
 
     public function validateInstrumentName($name) {
         if(!preg_match(
-            "/^[A-Za-z0-9]+$/",
+            "/^[A-Za-z0-9 ]+$/",
             $name
         )) {
             throw new HTTPError(422,
