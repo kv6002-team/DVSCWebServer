@@ -33,15 +33,15 @@ class UpdateInstrument extends react.Component {
       <Main>
         <Container>
           <h1>Update Instrument Due Date</h1>
-          <p className="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla laoreet tellus velit, at efficitur magna malesuada fermentum. Proin interdum tristique ultrices. Morbi maximus ex in mi ultricies pretium tincidunt id.</p>
+          <p className="mb-3">Set the due date for the next official check of each of your MoT testing tools using the form below.</p>
 
           {this.state.updateSuccessful !== null ?
             (this.state.updateSuccessful === true ? (
-              <Alert variant="success" dismissible>
+              <Alert variant="success" dismissible onClose={() => this.setUpdateSuccess(null)}>
                 <p>Instrument due date updated successfully.</p>
               </Alert>
             ) : (
-              <Alert variant="danger" dismissible>
+              <Alert variant="danger" dismissible onClose={() => this.setUpdateSuccess(null)}>
                 <p>Attempting to update the instrument due date failed.</p>
                 <p>{this.state.updateError.explanation}</p>
               </Alert>
@@ -88,6 +88,11 @@ class UpdateInstrument extends react.Component {
     newExpiryDate: this.formatDate(
       new Date(instruments[selectedID].officialCheckExpiryDate)
     )
+  });
+
+  setUpdateSuccess = (status, error) => this.setState({
+    updateSuccessful: status,
+    updateError: status === false ? error : null
   });
   setInstrument = (instrumentID) => this.setState(
     this.newInstrumentStateFor(this.state.instruments, instrumentID)
@@ -152,12 +157,10 @@ class UpdateInstrument extends react.Component {
         this.getHeaders(),
         body
     )
-      .then(() => {
-        this.setState({ updateSuccessful: true });
-      })
+      .then(() => this.setUpdateSuccess(true))
       .catch((error) => {
         this.props.handleIfAuthError(error);
-        this.setState({ updateSuccessful: false, updateError: error });
+        this.setUpdateSuccess(false, error);
       });
   }
 

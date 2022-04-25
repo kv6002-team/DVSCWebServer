@@ -5,6 +5,8 @@
 
 namespace email;
 
+require_once "EmailConfig.php";
+
 class EmailDispatcher {
   protected $emails_list;
 
@@ -22,15 +24,15 @@ class EmailDispatcher {
     }
   }
 
-  public function send_reset_email($recipient_email, $recipient_name, $reset_link) {
+  public static function send_reset_email($recipient_email, $recipient_name, $reset_link) {
     $subject = COMPANY_NAME_SHORT . " | Password Reset";
 
     $content = (
       "<h1>Password Reset</h1>"
-      ."<span>If you did not request this password reset, please ignore it.</span>"
-      ."<a href='$reset_link'></a>"
+      ."<p>If you did not request this password reset, please ignore it.</p>"
+      ."Click here to change your password for DVSC: <a href='$reset_link'>$reset_link</a>"
     );
-  
+
     $email = new Email(
       $recipient_email,
       $recipient_name,
@@ -41,7 +43,7 @@ class EmailDispatcher {
     $email->send();
   }
 
-  public function send_contactus_email($recipient_email = null, $contact_form) {
+  public static function send_contactus_email($recipient_email = null, $contact_form) {
     $contact_form = $contact_form->as_array();
 
     if (is_null($recipient_email)) $recipient_email = CONTACT_US_CONFIG['fallback_recipient'];

@@ -2,6 +2,7 @@
 namespace kv6002\resources;
 
 use util\Util;
+use email\EmailDispatcher;
 
 use dispatcher\Dispatcher;
 use router\resource\BasicResource;
@@ -27,10 +28,12 @@ class PasswordReset extends BasicResource {
 
     private $authenticator;
     private $dao;
+    private $loggerDAO;
 
     public function __construct($db, $authenticator) {
         $this->authenticator = $authenticator;
         $this->dao = new daos\Users($db);
+        $this->loggerDAO = new daos\EventLog($db);
 
         // Which actions can we take?
         $actions = [
@@ -82,10 +85,6 @@ class PasswordReset extends BasicResource {
                         );
                     }
 
-                    // FIXME: Just give the token back directly for now (no
-                    //        security). Eventually, send it in a link in an
-                    //        email to the email addr registered for that user.
-
                     // Construct a JWT for that user for specialised use
                     // (account verification only).
                     $jwt = [
@@ -94,13 +93,20 @@ class PasswordReset extends BasicResource {
                             $user, ["password_reset__email_auth"]
                         )
                     ];
-                    return [$request, $jwt];
+
+                    EmailDispatcher::send_reset_email(
+                        $user->emailAddress(),
+                        $user->username(), // FIXME: Not ideal, but all we can guarantee
+                        (
+                            // TODO: Fix hard-coding the front-end URL
+                            "https://www.dvsc.services/account/reset-password?"
+                            . Util::attrsStr($jwt, "&", "=", "")
+                        )
+                    );
+
+                    return [$request];
                 },
-                JSONBuilder::typeSelector(
-                    function ($request, $jwt) {
-                        return $jwt;
-                    }
-                )
+                new NoContentBuilder()
             ]),
 
             "change_password" => Dispatcher::funcToPipeOf([

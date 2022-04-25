@@ -1,4 +1,9 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams
+} from "react-router-dom";
 
 /**
  * A higher-order component that replaces the old withRouter() HOC from
@@ -16,10 +21,12 @@ export default function withRouter(Component) {
     let location = useLocation();
     let navigate = useNavigate();
     let params = useParams();
+    let [searchParams,] = useSearchParams();
+
     return (
       <Component
         {...props}
-        router={{ location, navigate, params }}
+        router={{ location, navigate, params, searchParams }}
       />
     );
   }

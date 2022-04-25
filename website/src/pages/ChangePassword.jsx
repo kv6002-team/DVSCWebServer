@@ -33,20 +33,24 @@ class ChangePassword extends react.Component {
       <Main>
         <Container>
           <h1>Change Password</h1>
-          <p className="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla laoreet tellus velit, at efficitur magna malesuada fermentum. Proin interdum tristique ultrices. Morbi maximus ex in mi ultricies pretium tincidunt id.</p>
 
-          {this.state.success !== null ?
-            (this.state.success === true ? (
-              <Alert variant="success" dismissible onClose={() => this.setState({success: null})}>
-                <p>Password changed successfully.</p>
-              </Alert>
-            ) : (
-              <Alert variant="danger" dismissible onClose={() => this.setState({success: null})}>
-                <p>Attempting to change your password failed.</p>
-                <p>{this.state.error}</p>
-              </Alert>
-            )) : null
-          }
+          {(() => {
+            if (this.state.success === null) return null;
+            if (this.state.success === true) {
+              return (
+                <Alert variant="success" dismissible onClose={() => this.setState({success: null})}>
+                  <p>{this.state.loggedIn ? "Password changed successfully" : "Verification email sent"}.</p>
+                </Alert>
+              );
+            } else {
+              return (
+                <Alert variant="danger" dismissible onClose={() => this.setState({success: null})}>
+                  <p>{this.state.loggedIn ? "Attempting to change your password failed" : "VerificationEmail failed to send"}.</p>
+                  <p>{this.state.error}</p>
+                </Alert>
+              );
+            }
+          })()}
 
           <Form>
             <Form.Group className="mb-3" controlId="changePasswordUsername">
@@ -114,14 +118,21 @@ class ChangePassword extends react.Component {
       return;
     }
 
-    const body = new URLSearchParams({
-      newPassword: this.state.newPassword
-    });
+    const requestSpecificParams = this.state.loggedIn ?
+      { newPassword: this.state.newPassword } : // Set the password if able
+      { username: this.state.username }; // Otherwise request verification email
+    const body = new URLSearchParams(
+      Object.assign({ types: "garage" }, requestSpecificParams)
+    );
+
+    const headers = this.props.auth.token !== null ? {
+      "Authorization": "bearer " + this.props.auth.token.encoded
+    } : {};
 
     fetchJSON(
         "POST",
         this.props.approot + "/api/change-password",
-        this.getHeaders(),
+        headers,
         body
     )
       .then(() => {
@@ -160,19 +171,6 @@ class ChangePassword extends react.Component {
     if (token !== null) {
       this.setState({ loggedIn: true, username: token.decoded.username });
     }
-  }
-
-  /* Utils
-  -------------------------------------------------- */
-
-  /**
-   * @returns The headers needed for this component's fetches.
-   */
-  getHeaders = () => {
-    if (this.props.auth.token === null) return {};
-    return {
-      "Authorization": "bearer " + this.props.auth.token.encoded
-    };
   }
 }
 export default makeAuthConsumer(ChangePassword);
