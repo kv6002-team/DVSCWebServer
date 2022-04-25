@@ -37,11 +37,11 @@ class UpdateInstrument extends react.Component {
 
           {this.state.updateSuccessful !== null ?
             (this.state.updateSuccessful === true ? (
-              <Alert variant="success" dismissible>
+              <Alert variant="success" dismissible onClose={() => this.setUpdateSuccess(null)}>
                 <p>Instrument due date updated successfully.</p>
               </Alert>
             ) : (
-              <Alert variant="danger" dismissible>
+              <Alert variant="danger" dismissible onClose={() => this.setUpdateSuccess(null)}>
                 <p>Attempting to update the instrument due date failed.</p>
                 <p>{this.state.updateError.explanation}</p>
               </Alert>
@@ -88,6 +88,11 @@ class UpdateInstrument extends react.Component {
     newExpiryDate: this.formatDate(
       new Date(instruments[selectedID].officialCheckExpiryDate)
     )
+  });
+
+  setUpdateSuccess = (status, error) => this.setState({
+    updateSuccessful: status,
+    updateError: status === false ? error : null
   });
   setInstrument = (instrumentID) => this.setState(
     this.newInstrumentStateFor(this.state.instruments, instrumentID)
@@ -152,12 +157,10 @@ class UpdateInstrument extends react.Component {
         this.getHeaders(),
         body
     )
-      .then(() => {
-        this.setState({ updateSuccessful: true });
-      })
+      .then(() => this.setUpdateSuccess(true))
       .catch((error) => {
         this.props.handleIfAuthError(error);
-        this.setState({ updateSuccessful: false, updateError: error });
+        this.setUpdateSuccess(false, error);
       });
   }
 

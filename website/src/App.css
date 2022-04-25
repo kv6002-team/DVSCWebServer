@@ -42,3 +42,26 @@ pre, code {
     monospace;
   white-space: pre-wrap;
 }
+
+/* Patch Bootstrap CSS
+-------------------------------------------------- */
+
+/* From: https://stackoverflow.com/a/67875303 */
+/* -------------------------------------------------- */
+.btn-close::before {
+  visibility: visible;
+  content: '✕';
+  font-size: 1.5rem;
+}
+
+.sr-only::before {
+  visibility: hidden;
+}
+
+.btn-close {
+  visibility: hidden;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+/* -------------------------------------------------- */
