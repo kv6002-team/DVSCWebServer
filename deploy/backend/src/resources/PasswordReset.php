@@ -90,7 +90,11 @@ class PasswordReset extends BasicResource {
                     $jwt = [
                         "token_type" => "bearer",
                         "token" => $this->authenticator->standardAuthToken(
-                            $user, ["password_reset__email_auth"]
+                            $user,
+                            [
+                                "password_reset__email_auth",
+                                $user->type()
+                            ]
                         )
                     ];
 
