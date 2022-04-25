@@ -82,7 +82,7 @@ $garageRes = new resources\Garages($db, $authenticator);
 $router->register("/api/garages", $garageRes);
 $router->register("/api/garages/:id<int>", $garageRes);
 
-$instrumentRes = new resources\Instruments($db);
+$instrumentRes = new resources\Instruments($db, $authenticator);
 $router->register("/api/instruments", $instrumentRes);
 $router->register("/api/instruments/:id<int>", $instrumentRes);
 
