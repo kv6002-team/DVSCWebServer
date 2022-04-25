@@ -10,6 +10,7 @@ import UpdateInstrument from './pages/UpdateInstrument';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ChangePassword from './pages/ChangePassword';
 import NotFound from './pages/NotFound';
+import AdditionalFiles from './pages/AdditionalFiles'
 
 import './App.css';
 
@@ -42,6 +43,12 @@ export default function App() {
     "/update-instrument": {
       name: "Update Instrument",
       content: UpdateInstrument,
+      onNav: (auth) => auth !== null
+    },
+
+    "/additional-files": {
+      name: "Additional Files",
+      content: AdditionalFiles,
       onNav: (auth) => auth !== null
     },
 
