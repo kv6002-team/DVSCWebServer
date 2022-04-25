@@ -65,7 +65,7 @@ class ChangePassword extends react.Component {
             </Form.Group>
 
             {!this.state.loggedIn ? (
-              <Alert variant="danger">
+              <Alert variant="warning">
                 You must verify your account's email address before you can
                 change your password. We will send you an email containing link
                 to a page in which you can change your password. The page will
