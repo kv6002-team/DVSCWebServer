@@ -119,7 +119,7 @@ class AuthenticationProvider extends react.Component {
     };
 
     const supplementaryInfo = new FormData();
-    supplementaryInfo.append('types', 'garage');
+    supplementaryInfo.append('types', 'garage,garage-consultant');
 
     fetchJSON("POST", authEndpoint, headers, supplementaryInfo)
       .then(({token}) => this.setToken(token))

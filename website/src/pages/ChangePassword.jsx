@@ -122,7 +122,7 @@ class ChangePassword extends react.Component {
       { newPassword: this.state.newPassword } : // Set the password if able
       { username: this.state.username }; // Otherwise request verification email
     const body = new URLSearchParams(
-      Object.assign({ types: "garage" }, requestSpecificParams)
+      Object.assign({ types: "garage,garage-consultant" }, requestSpecificParams)
     );
 
     const headers = this.props.auth.token !== null ? {
