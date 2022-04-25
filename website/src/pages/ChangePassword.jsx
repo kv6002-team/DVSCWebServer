@@ -33,20 +33,24 @@ class ChangePassword extends react.Component {
       <Main>
         <Container>
           <h1>Change Password</h1>
-          <p className="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla laoreet tellus velit, at efficitur magna malesuada fermentum. Proin interdum tristique ultrices. Morbi maximus ex in mi ultricies pretium tincidunt id.</p>
 
-          {this.state.success !== null ?
-            (this.state.success === true ? (
-              <Alert variant="success" dismissible onClose={() => this.setState({success: null})}>
-                <p>Password changed successfully.</p>
-              </Alert>
-            ) : (
-              <Alert variant="danger" dismissible onClose={() => this.setState({success: null})}>
-                <p>Attempting to change your password failed.</p>
-                <p>{this.state.error}</p>
-              </Alert>
-            )) : null
-          }
+          {(() => {
+            if (this.state.success === null) return null;
+            if (this.state.success === true) {
+              return (
+                <Alert variant="success" dismissible onClose={() => this.setState({success: null})}>
+                  <p>{this.state.loggedIn ? "Password changed successfully" : "Verification email sent"}.</p>
+                </Alert>
+              );
+            } else {
+              return (
+                <Alert variant="danger" dismissible onClose={() => this.setState({success: null})}>
+                  <p>{this.state.loggedIn ? "Attempting to change your password failed" : "VerificationEmail failed to send"}.</p>
+                  <p>{this.state.error}</p>
+                </Alert>
+              );
+            }
+          })()}
 
           <Form>
             <Form.Group className="mb-3" controlId="changePasswordUsername">
