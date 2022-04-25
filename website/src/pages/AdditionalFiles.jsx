@@ -16,45 +16,51 @@ class AdditionalFiles extends react.Component {
       <Main>
         <Container>
           <h1>Additional Forms</h1>
-          <p className='mb-3'>Here is where you can download additional files related to DVSC</p>
-          <Table>
-            <thead>
-              <tr>
-                <th>File</th>
-                <th>Download</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Monthly Report</td>
-                <td><Button onClick={this.getFile('monthlyreport')}>Download</Button></td>
-              </tr>
-              <tr>
-                <td>Contract</td>
-                <td><Button onClick={this.getFile('contract')}>Download</Button></td>
-              </tr>
-              <tr>
-                <td>Monthly Check Sheet</td>
-                <td><Button onClick={this.getFile('monthlychecksheet')}>Download</Button></td>
-              </tr>
-              <tr>
-                <td>Calibration Date Document</td>
-                <td><Button onClick={this.getFile('calibrationdatedocument')}>Download</Button></td>
-              </tr>
-              <tr>
-                <td>Defective Equipment Log</td>
-                <td><Button onClick={this.getFile('defectiveequipmentlog')}>Download</Button></td>
-              </tr>
-              <tr>
-                <td>Quality Control Sheet</td>
-                <td><Button onClick={this.getFile('qualitycontrolsheet')}>Download</Button></td>
-              </tr>
-              <tr>
-                <td>Tyre Depth Check Sheet</td>
-                <td><Button onClick={this.getFile('tyredepthchecksheet')}>Download</Button></td>
-              </tr>
-            </tbody>
-          </Table>
+          <Row>
+            <Col lg={3}></Col>
+            <Col lg={6}>
+            <p className='mb-3'>Here is where you can download additional files related to DVSC</p>
+            <Table>
+              <thead>
+                <tr>
+                  <th>File</th>
+                  <th>Download</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Monthly Report</td>
+                  <td><Button onClick={this.getFile('monthlyreport')}>Download</Button></td>
+                </tr>
+                <tr>
+                  <td>Contract</td>
+                  <td><Button onClick={this.getFile('contract')}>Download</Button></td>
+                </tr>
+                <tr>
+                  <td>Monthly Check Sheet</td>
+                  <td><Button onClick={this.getFile('monthlychecksheet')}>Download</Button></td>
+                </tr>
+                <tr>
+                  <td>Calibration Date Document</td>
+                  <td><Button onClick={this.getFile('calibrationdatedocument')}>Download</Button></td>
+                </tr>
+                <tr>
+                  <td>Defective Equipment Log</td>
+                  <td><Button onClick={this.getFile('defectiveequipmentlog')}>Download</Button></td>
+                </tr>
+                <tr>
+                  <td>Quality Control Sheet</td>
+                  <td><Button onClick={this.getFile('qualitycontrolsheet')}>Download</Button></td>
+                </tr>
+                <tr>
+                  <td>Tyre Depth Check Sheet</td>
+                  <td><Button onClick={this.getFile('tyredepthchecksheet')}>Download</Button></td>
+                </tr>
+              </tbody>
+            </Table>
+            </Col>
+            <Col lg={3}></Col>
+          </Row>
         </Container>
       </Main>
     )
