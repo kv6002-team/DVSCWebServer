@@ -33,7 +33,7 @@ class UpdateInstrument extends react.Component {
       <Main>
         <Container>
           <h1>Update Instrument Due Date</h1>
-          <p className="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla laoreet tellus velit, at efficitur magna malesuada fermentum. Proin interdum tristique ultrices. Morbi maximus ex in mi ultricies pretium tincidunt id.</p>
+          <p className="mb-3">Set the due date for the next official check of each of your MoT testing tools using the form below.</p>
 
           {this.state.updateSuccessful !== null ?
             (this.state.updateSuccessful === true ? (
