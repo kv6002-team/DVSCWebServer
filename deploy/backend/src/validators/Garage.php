@@ -30,7 +30,7 @@ class Garage {
 
     public function validateGarageName($name) {
         if(!preg_match(
-            "/^[A-Za-z0-9]+$/",
+            "/^[A-Za-z0-9. ]+$/",
             $name
         )) {
             throw new HTTPError(422,
@@ -42,7 +42,7 @@ class Garage {
 
     public function validateOwnerName($ownerName) {
         if(!preg_match(
-            "/^[A-Za-z0-9]+$/",
+            "/^[A-Za-z0-9. ]+$/",
             $ownerName
         )) {
             throw new HTTPError(422,
@@ -72,6 +72,7 @@ class Garage {
                 "emailAddress is not a valid email address"
             );
         }
+        return $emailAddress;
     }
 
     public function validateTelephoneNumber($telephoneNumber) {
