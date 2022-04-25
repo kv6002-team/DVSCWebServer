@@ -1,6 +1,8 @@
 import react from 'react';
 import { Container } from 'react-bootstrap/lib/Tab';
 import { makeAuthConsumer } from '../utils/components/Authentication';
+import fileDownload from 'js-file-download';
+import axios from 'axios'
 
 /**
  * @author Scotty (w19019810)
@@ -58,8 +60,13 @@ class AdditionalFiles extends react.Component {
     )
   }
 
-  getFile = filename => {
-    //send request to server to get file... then figure out a way to download it I guess...
+  getFile = async filename => {
+    let res = await axios.get(`dvsc.services/files/${filename}`, {
+      Headers : {
+        'Authorization' : `bearer ${this.props.auth.token.encoded}`
+      }
+    })
+     fileDownload(res.data, `${filename}.pdf`)
   }
 }
 export default makeAuthConsumer(AdditionalFiles)
