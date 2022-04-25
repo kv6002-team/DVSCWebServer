@@ -56,18 +56,31 @@ class AuthenticationProvider extends react.Component {
   }
 
   /**
+   * Parse the given token into its JSON object representation.
+   * 
+   * @param {string} tokenEncoded The encoded JWT to parse (retaining the
+   *   encoded version).
+   * @returns {{encoded: string, decoded: object}} The parsed token, or null if
+   *   null was given.
+   */
+  parseToken = (tokenEncoded) => {
+    if (tokenEncoded == null) return null;
+    return {
+      encoded: tokenEncoded,
+      decoded: jwtDecode(tokenEncoded)
+    };
+  }
+
+  /**
    * Set the auth token in this auth context to the given token.
    * 
    * @param {string|null} token A valid JWT, or null to clear the token.
    */
   setToken = (token) => {
-    let fullToken = null;
-    if (token != null) {
-      fullToken = {
-        encoded: token,
-        decoded: jwtDecode(token)
-      };
-      localStorage.setItem(this.localStorageKey, token);
+    const fullToken = this.parseToken(token);
+
+    if (fullToken != null) {
+      localStorage.setItem(this.localStorageKey, fullToken.encoded);
     } else {
       localStorage.removeItem(this.localStorageKey);
     }
@@ -120,9 +133,22 @@ class AuthenticationProvider extends react.Component {
   logout = () => this.setToken(null);
 
   /**
-   * Load the auth token from localstorage, if it exists.
+   * Load the auth token from the URL query, or from localstorage, if it exists.
    */
   componentDidMount() {
+    // Were we sent a token to use?
+    const queryTokenType = this.props.router.searchParams.get("token_type");
+    const queryToken = this.props.router.searchParams.get("token");
+
+    if (
+      queryTokenType === "bearer" &&
+      this.hasResetEmailAuthorisation(this.parseToken(queryToken))
+    ) {
+      this.setToken(queryToken);
+      return;
+    }
+
+    // Otherwise, try to load the stored one
     this.setToken(localStorage.getItem(this.localStorageKey));
   }
 
@@ -139,7 +165,7 @@ class AuthenticationProvider extends react.Component {
       this.prevToken = this.state.token;
     }
 
-    if (this.hasResetAuthorisation(this.state.token)) {
+    if (this.hasResetPasswordAuthorisation(this.state.token)) {
       this.props.router.navigate(this.props.resetPasswordRequiredRoute);
     }
   }
@@ -154,10 +180,15 @@ class AuthenticationProvider extends react.Component {
     token !== null &&
     token.decoded.authorisations.includes("general")
   );
-  hasResetAuthorisation = (token) => (
+  hasResetPasswordAuthorisation = (token) => (
     token !== null &&
     !token.decoded.authorisations.includes("general") &&
     token.decoded.authorisations.includes("password_reset__password_auth")
+  );
+  hasResetEmailAuthorisation = (token) => (
+    token !== null &&
+    !token.decoded.authorisations.includes("general") &&
+    token.decoded.authorisations.includes("password_reset__email_auth")
   );
 }
 export const AuthProvider = withRouter(AuthenticationProvider);

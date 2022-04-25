@@ -114,14 +114,21 @@ class ChangePassword extends react.Component {
       return;
     }
 
-    const body = new URLSearchParams({
-      newPassword: this.state.newPassword
-    });
+    const requestSpecificParams = this.state.loggedIn ?
+      { newPassword: this.state.newPassword } : // Set the password if able
+      { username: this.state.username }; // Otherwise request verification email
+    const body = new URLSearchParams(
+      Object.assign({ types: "garage" }, requestSpecificParams)
+    );
+
+    const headers = this.props.auth.token !== null ? {
+      "Authorization": "bearer " + this.props.auth.token.encoded
+    } : {};
 
     fetchJSON(
         "POST",
         this.props.approot + "/api/change-password",
-        this.getHeaders(),
+        headers,
         body
     )
       .then(() => {
@@ -160,19 +167,6 @@ class ChangePassword extends react.Component {
     if (token !== null) {
       this.setState({ loggedIn: true, username: token.decoded.username });
     }
-  }
-
-  /* Utils
-  -------------------------------------------------- */
-
-  /**
-   * @returns The headers needed for this component's fetches.
-   */
-  getHeaders = () => {
-    if (this.props.auth.token === null) return {};
-    return {
-      "Authorization": "bearer " + this.props.auth.token.encoded
-    };
   }
 }
 export default makeAuthConsumer(ChangePassword);
