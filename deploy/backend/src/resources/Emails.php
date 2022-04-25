@@ -34,7 +34,14 @@ class Emails extends BasicResource {
 
         $actions = [
             "send_garage_emails" => Dispatcher::funcToPipeOf([
-                function ($request) use ($dao){
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
+
+                function ($request) use ($dao) {
                     try {
                         $body = Util::toJSON($request->body());
                     } catch (JsonException $e) {
