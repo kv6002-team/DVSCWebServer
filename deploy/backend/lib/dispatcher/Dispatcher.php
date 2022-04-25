@@ -894,4 +894,28 @@ class Dispatcher {
     ) {
         return (new self($map))->funcToPipe($keys, $defaultKey, $delegateKey);
     }
+
+    /* Combinators over Dispatchers
+    -------------------------------------------------- */
+
+    /**
+     * Returns a function that calls each function given in turn, returning
+     * whatever is returned by the first call that does not throw an exception.
+     * 
+     * @param array<callable> The array of functions to check in turn.
+     * @return mixed Whatever the first function not to throw returns.
+     * @throws Exception If every function throws an exception.
+     */
+    public static function funcToFirstSuccessfulOf($fns) {
+        return function (...$args) use ($fns) {
+            foreach ($fns as $fn) {
+                try {
+                    return $fn(...$args);
+                } catch (\Exception $e) {
+                    var_dump($e);
+                }
+            }
+            throw new \Exception("No function in list was successful (didn't throw)");
+        };
+    }
 }

@@ -46,6 +46,12 @@ class Garages extends BasicResource {
 
         $actions = [
             "get_all_simple" => Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
                 function ($request) {
                     return [$request, $this->usersDAO->getAll(self::USER_TYPE)];
                 },
@@ -57,8 +63,42 @@ class Garages extends BasicResource {
             ]),
 
             "get_one_full" => Dispatcher::funcToPipeOf([
-                function ($request) {
-                    return [$request, $request->endpointParam("id")];
+                $authenticator->auth(),
+                function ($request, $user, $authorisations) {
+                    return [
+                        $request,
+                        $request->endpointParam("id"),
+                        $user,
+                        $authorisations
+                    ];
+                },
+                function ($request, $id, $user, $authorisations) {
+                    try {
+                        $authProcess = Dispatcher::funcToFirstSuccessfulOf([
+                            // Any garage consultant
+                            Dispatcher::funcToPipeOf([
+                                $authenticator->requireAuthentication(),
+                                $authenticator->requireAuthorisation("general"),
+                                $authenticator->requireAuthorisation(
+                                    domain\GarageConsultant::USER_TYPE
+                                )
+                            ]),
+
+                            // The garage that is being requested
+                            Dispatcher::funcToPipeOf([
+                                $authenticator->requireAuthentication($id),
+                                $authenticator->requireAuthorisation("general"),
+                                $authenticator->requireAuthorisation(
+                                    domain\Garage::USER_TYPE
+                                )
+                            ])
+                        ]);
+                        return $authProcess($request, $user, $authorisations);
+                    } catch (\Exception $e) {
+                        throw new HTTPError(401,
+                            "Not an authorised garage or garage consultant"
+                        );
+                    }
                 },
                 function ($request, $id) {
                     $garage = $this->usersDAO->get(self::USER_TYPE, $id);
@@ -77,6 +117,13 @@ class Garages extends BasicResource {
             ]),
 
             "add" => Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
+
                 // Extract and Validate Input
                 function ($request) {
                     // Utility
@@ -170,6 +217,12 @@ class Garages extends BasicResource {
             ]),
 
             "update" => Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
                 function ($request) {
                     // Utility
                     $requiredPrivateParam = function ($name) use ($request) {
@@ -265,7 +318,13 @@ class Garages extends BasicResource {
                 new NoContentBuilder()
             ]),
 
-            "updateJSON" => Dispatcher::funcToPipeOf([ 
+            "updateJSON" => Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
                 function ($request) {
                     // Utility
                     $requiredAttr = function ($obj, $name) {
@@ -446,6 +505,12 @@ class Garages extends BasicResource {
             ]),
 
             "remove" => Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
                 function ($request) {
                     $id = $request->endpointParam("id");
                     if ($id === null) {

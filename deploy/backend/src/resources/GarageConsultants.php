@@ -245,8 +245,14 @@ class GarageConsultants extends BasicResource implements WithMetadata {
          *              /                            \
          *   method ---/                              \--- action
          */
-        $getAction = function ($actionKey) use ($actions) {
+        $getAction = function ($actionKey) use ($actions, $authenticator) {
             return Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
                 Dispatcher::funcToKeyOf($actions, $actionKey),
                 function ($response) {
                     $headers = [
