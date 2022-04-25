@@ -156,7 +156,7 @@ class Instruments extends BasicResource {
                         $instrumentData["name"]    
                     );
 
-                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialExpiryDate(
+                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate(
                         $instrumentData["officialCheckExpiryDate"]
                     );
 
@@ -191,12 +191,15 @@ class Instruments extends BasicResource {
                     }
 
                     try {
-                        $this->loggerDAO->add(
-                            daos\EventLog::DATA_UPDATED_EVENT,
-                            daos\EventLog::INFO_LEVEL,
-                            "Instrument modified: " . $instrumentData['serialNumber'] . "'",
-                            new \DateTimeImmutable("now")
-                        );
+                        $instrument = $this->dao->get($id);
+                        if ($instrument !== null) {
+                            $this->loggerDAO->add(
+                                daos\EventLog::DATA_UPDATED_EVENT,
+                                daos\EventLog::INFO_LEVEL,
+                                "Instrument modified: '" . $instrument->serialNumber() . "'",
+                                new \DateTimeImmutable("now")
+                            );
+                        }
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
