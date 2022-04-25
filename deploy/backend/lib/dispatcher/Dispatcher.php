@@ -911,9 +911,7 @@ class Dispatcher {
             foreach ($fns as $fn) {
                 try {
                     return $fn(...$args);
-                } catch (\Exception $e) {
-                    var_dump($e);
-                }
+                } catch (\Exception $e) { /* Do nothing */ }
             }
             throw new \Exception("No function in list was successful (didn't throw)");
         };

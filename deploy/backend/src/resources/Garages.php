@@ -72,7 +72,7 @@ class Garages extends BasicResource {
                         $authorisations
                     ];
                 },
-                function ($request, $id, $user, $authorisations) {
+                function ($request, $id, $user, $authorisations) use ($authenticator) {
                     try {
                         $authProcess = Dispatcher::funcToFirstSuccessfulOf([
                             // Any garage consultant
@@ -93,7 +93,8 @@ class Garages extends BasicResource {
                                 )
                             ])
                         ]);
-                        return $authProcess($request, $user, $authorisations);
+                        $checked = $authProcess($request, $user, $authorisations);
+                        return [$checked[0], $id, $checked[1], $checked[2]];
                     } catch (\Exception $e) {
                         throw new HTTPError(401,
                             "Not an authorised garage or garage consultant"
