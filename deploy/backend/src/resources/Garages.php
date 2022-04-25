@@ -143,36 +143,17 @@ class Garages extends BasicResource {
                         "name" => $requiredPrivateParam("name"),
                         "ownerName" => $requiredPrivateParam("ownerName"),
                         "emailAddress" => $requiredPrivateParam("emailAddress"),
-                        "telephoneNumber" => $requiredPrivateParam(
-                            "telephoneNumber"
-                        ),
+                        "telephoneNumber" => $requiredPrivateParam("telephoneNumber"),
                         "paidUntil" => $requiredPrivateParam("paidUntil")
                     ];
 
                     // Validate
-                    $garageData["vts"] = $this->garageValidator->validateVTS(
-                        $garageData["vts"]
-                    );
-
-                    $garageData["name"] = $this->garageValidator->validateGarageName(
-                        $garageData["name"]
-                    );
-
-                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName(
-                        $garageData["ownerName"]
-                    );
-
-                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress(
-                        $garageData["emailAddress"]
-                    );
-
-                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber(
-                        $garageData["telephoneNumber"]
-                    );
-
-                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil(
-                        $garageData["paidUntil"]
-                    );
+                    $garageData["vts"] = $this->garageValidator->validateVTS($garageData["vts"]);
+                    $garageData["name"] = $this->garageValidator->validateGarageName($garageData["name"]);
+                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName($garageData["ownerName"]);
+                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress($garageData["emailAddress"]);
+                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber($garageData["telephoneNumber"]);
+                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil($garageData["paidUntil"]);
 
                     // Return
                     return [$request, $garageData];
@@ -241,9 +222,7 @@ class Garages extends BasicResource {
                         "name" => $requiredPrivateParam("name"),
                         "ownerName" => $requiredPrivateParam("ownerName"),
                         "emailAddress" => $requiredPrivateParam("emailAddress"),
-                        "telephoneNumber" => $requiredPrivateParam(
-                            "telephoneNumber"
-                        ),
+                        "telephoneNumber" => $requiredPrivateParam("telephoneNumber"),
                         "paidUntil" => $requiredPrivateParam("paidUntil")
                     ];
 
@@ -255,29 +234,18 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    $id = $this->garageValidator->validateGarageID(
-                        $id
-                    );
+                    $id = $this->garageValidator->validateGarageID($id);
+                    if ($this->usersDAO->get(self::USER_TYPE, $id) === null) {
+                        throw new HTTPError(404,
+                            "Requested Garage not found"
+                        );
+                    }
 
-                    $garageData["name"] = $this->garageValidator->validateGarageName(
-                        $garageData["name"]
-                    );
-
-                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName(
-                        $garageData["ownerName"]
-                    );
-
-                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress(
-                        $garageData["emailAddress"]
-                    );
-
-                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber(
-                        $garageData["telephoneNumber"]
-                    );
-
-                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil(
-                        $garageData["paidUntil"]
-                    );
+                    $garageData["name"] = $this->garageValidator->validateGarageName($garageData["name"]);
+                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName($garageData["ownerName"]);
+                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress($garageData["emailAddress"]);
+                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber($garageData["telephoneNumber"]);
+                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil($garageData["paidUntil"]);
 
                     // Return
                     return [
@@ -304,12 +272,15 @@ class Garages extends BasicResource {
                     }
 
                     try {
-                        $this->loggerDAO->add(
-                            daos\EventLog::DATA_UPDATED_EVENT,
-                            daos\EventLog::INFO_LEVEL,
-                            "Garage modified: '" . $garageData['vts'] ."'",
-                            new \DateTimeImmutable("now")
-                        );
+                        $user = $this->usersDAO->get(self::USER_TYPE, $id);
+                        if ($user !== null) {
+                            $this->loggerDAO->add(
+                                daos\EventLog::DATA_UPDATED_EVENT,
+                                daos\EventLog::INFO_LEVEL,
+                                "Garage modified: '" . $user->username() ."'",
+                                new \DateTimeImmutable("now")
+                            );
+                        }
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
@@ -334,10 +305,17 @@ class Garages extends BasicResource {
                         }
                         return $obj[$name];
                     };
-                    
+
+                    $garageJSON = $request->privateParam("garage");
+                    if ($garageJSON === null) {
+                        throw new HTTPError(422,
+                            "Garage does not exist"
+                        );
+                    }
+
                     // Parse JSON
                     try {
-                        $body = Util::toJSON($request->body());
+                        $body = Util::toJSON($garageJSON);
                     } catch (JsonException $e) {
                         throw new HTTPError(422,
                             "Requested Garage JSON is invalid"
@@ -345,7 +323,7 @@ class Garages extends BasicResource {
                     }
 
                     // Extract Garage
-                    $garageID = $request->endpointParam("id");
+                    $id = $request->endpointParam("id");
                     $garageData = [
                         "name" => $requiredAttr($body, "name"),
                         "ownerName" => $requiredAttr($body, "ownerName"),
@@ -353,40 +331,27 @@ class Garages extends BasicResource {
                         "telephoneNumber" => $requiredAttr($body, "telephoneNumber"),
                         "paidUntil" => $requiredAttr($body, "paidUntil")
                     ];
-                    
+
                     // Validate Garage
-                    if ($garageID === null) {
+                    if ($id === null) {
                         throw new HTTPError(422,
                             "Cannot update the whole collection of garages"
                             ." (did you mean to `PATCH /api/garages/:id`?)"
                         );
                     }
 
-                    if ($this->usersDAO->get(self::USER_TYPE, $garageID) === null) {
+                    $id = $this->garageValidator->validateGarageID($id);
+                    if ($this->usersDAO->get(self::USER_TYPE, $id) === null) {
                         throw new HTTPError(404,
                             "Requested Garage not found"
                         );
                     }
 
-                    $garageData["name"] = $this->garageValidator->validateGarageName(
-                        $garageData["name"]
-                    );
-
-                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName(
-                        $garageData["ownerName"]
-                    );
-
-                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress(
-                        $garageData["emailAddress"]
-                    );
-
-                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber(
-                        $garageData["telephoneNumber"]
-                    );
-
-                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil(
-                        $garageData["paidUntil"]
-                    );
+                    $garageData["name"] = $this->garageValidator->validateGarageName($garageData["name"]);
+                    $garageData["ownerName"] = $this->garageValidator->validateOwnerName($garageData["ownerName"]);
+                    $garageData["emailAddress"] = $this->garageValidator->validateEmailAddress($garageData["emailAddress"]);
+                    $garageData["telephoneNumber"] = $this->garageValidator->validateTelephoneNumber($garageData["telephoneNumber"]);
+                    $garageData["paidUntil"] = $this->garageValidator->validatePaidUntil($garageData["paidUntil"]);
 
                     // Extract Instruments
                     $instrumentsDataRaw = $requiredAttr($body, "instruments");
@@ -412,30 +377,18 @@ class Garages extends BasicResource {
                                 "Instrument ID invalid"
                             );
                         }
-                        
+
+                        $instrumentID = $this->instrumentValidator->validateInstrumentID($instrumentID);
                         if ($this->instrumentsDAO->get($instrumentID) === null) {
                             throw new HTTPError(404,
                                 "Requested Instrument not found"
                             );
                         }
-                        
-                        $instrumentID = $this->instrumentValidator->validateInstrumentID($instrumentID);
-                        
-                        $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName(
-                            $instrumentData["name"]
-                        );
 
-                        $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate(
-                            $instrumentData["officialCheckExpiryDate"]
-                        );
-
-                        $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus(
-                            $instrumentData["ourCheckStatus"]
-                        );
-
-                        $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate(
-                            $instrumentData["ourCheckDate"]
-                        );
+                        $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName($instrumentData["name"]);
+                        $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate($instrumentData["officialCheckExpiryDate"]);
+                        $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus($instrumentData["ourCheckStatus"]);
+                        $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate($instrumentData["ourCheckDate"]);
 
                         array_push(
                             $instrumentsData,
@@ -445,11 +398,10 @@ class Garages extends BasicResource {
                             )                            
                         );
                     }
-                    return [$request, $garageID, $garageData, $instrumentsData];
+                    return [$request, $id, $garageData, $instrumentsData];
                 },
-                function ($request, $garageID, $garageData, $instrumentsData) {
+                function ($request, $id, $garageData, $instrumentsData) {
                     try {
-        
                         foreach ($instrumentsData as $instrument) {
                             $this->instrumentsDAO->updateRaw(
                                 $instrument["id"],
@@ -461,14 +413,14 @@ class Garages extends BasicResource {
                         }
                     } catch (DatabaseError $e) {
                         throw new HTTPError(404,
-                            "Instrument with id '".$instrument["id"]."' does not exist."
+                            "Instrument with id '".$instrument["id"]."' does not exist"
                         );
                     }
 
                     try {
                         $this->usersDAO->update(
                             self::USER_TYPE,
-                            $garageID,
+                            $id,
                             $garageData["name"],
                             $garageData["ownerName"],
                             $garageData["emailAddress"],
@@ -482,14 +434,17 @@ class Garages extends BasicResource {
                     }
 
                     try {
-                        $this->loggerDAO->add(
-                            daos\EventLog::DATA_UPDATED_EVENT,
-                            daos\EventLog::INFO_LEVEL,
-                            "Garage modified: '" . $garageData['vts'] ."'."
-                            ." Note: Instruments for this garage may also have"
-                            ." been modified.",
-                            new \DateTimeImmutable("now")
-                        );
+                        $user = $this->usersDAO->get(self::USER_TYPE, $id);
+                        if ($user !== null) {
+                            $this->loggerDAO->add(
+                                daos\EventLog::DATA_UPDATED_EVENT,
+                                daos\EventLog::INFO_LEVEL,
+                                "Garage modified: '" . $user->username() ."'."
+                                ." Note: Instruments for this garage may also have"
+                                ." been modified.",
+                                new \DateTimeImmutable("now")
+                            );
+                        }
                     } catch (DatabaseError $e) { /*Do nothing*/ }
 
                     return [$request];
@@ -516,6 +471,11 @@ class Garages extends BasicResource {
                     return [$request, $id];
                 },
                 function ($request, $id) {
+                    $user = null;
+                    try {
+                        $user = $this->usersDAO->get(self::USER_TYPE, $id);
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     try {
                         $this->usersDAO->remove(self::USER_TYPE, $id);
                     } catch (DatabaseError $e) {
@@ -525,7 +485,6 @@ class Garages extends BasicResource {
                     }
 
                     try {
-                        $user = $this->dao->get(self::USER_TYPE, $id);
                         if ($user !== null) {
                             $this->loggerDAO->add(
                                 daos\EventLog::DATA_DELETED_EVENT,
@@ -608,7 +567,7 @@ class Garages extends BasicResource {
             "POST" => $getAction("add"),
             "PATCH" => $getAction(
                 function ($request) {
-                    if ($request->contentType() === "application/json") {
+                    if ($request->privateParam("garage") !== null) {
                         return "updateJSON";
                     }
                     return "update";

@@ -57,29 +57,12 @@ class Instruments extends BasicResource {
                     ];
 
                     // Validate
-                    $instrumentData["garageID"] = $this->garageValidator->validateGarageID(
-                        $instrumentData["garageID"]
-                    );
-
-                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName(
-                        $instrumentData["name"]    
-                    );
-
-                    $instrumentData["serialNumber"] = $this->instrumentValidator->validateSerialNumber(
-                        $instrumentData["serialNumber"]
-                    );
-
-                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate(
-                        $instrumentData["officialCheckExpiryDate"]
-                    );
-
-                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus(
-                        $instrumentData["ourCheckStatus"]
-                    );
-
-                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate(
-                        $instrumentData["ourCheckDate"]
-                    );
+                    $instrumentData["garageID"] = $this->garageValidator->validateGarageID($instrumentData["garageID"]);
+                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName($instrumentData["name"]);
+                    $instrumentData["serialNumber"] = $this->instrumentValidator->validateSerialNumber($instrumentData["serialNumber"]);
+                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate($instrumentData["officialCheckExpiryDate"]);
+                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus($instrumentData["ourCheckStatus"]);
+                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate($instrumentData["ourCheckDate"]);
 
                     // Return
                     return [
@@ -112,6 +95,8 @@ class Instruments extends BasicResource {
 
                     return [$request, $instrument];
                 },
+
+                // Generate Response
                 JSONBuilder::typeSelector(
                     function ($request, $instrument) {
                         $request->setExpectedResponseStatusCode(201);
@@ -152,21 +137,10 @@ class Instruments extends BasicResource {
                     }
                     $id = $this->instrumentValidator->validateInstrumentID($id);
 
-                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName(
-                        $instrumentData["name"]    
-                    );
-
-                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate(
-                        $instrumentData["officialCheckExpiryDate"]
-                    );
-
-                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus(
-                        $instrumentData["ourCheckStatus"]
-                    );
-                    
-                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate(
-                        $instrumentData["ourCheckDate"]
-                    );
+                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName($instrumentData["name"]);
+                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate($instrumentData["officialCheckExpiryDate"]);
+                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus($instrumentData["ourCheckStatus"]);
+                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate($instrumentData["ourCheckDate"]);
 
                     // Return
                     return [
@@ -204,10 +178,13 @@ class Instruments extends BasicResource {
 
                     return [$request];
                 },
+
+                // Generate Response
                 new NoContentBuilder()
             ]),
 
             "remove" => Dispatcher::funcToPipeOf([
+                // Extract and validate input
                 function ($request) {
                     $id = $request->endpointParam("id");
                     if ($id === null) {
@@ -219,7 +196,14 @@ class Instruments extends BasicResource {
 
                     return [$request, $id];
                 },
+
+                // Process Request
                 function ($request, $id) {
+                    $instrument = null;
+                    try {
+                        $instrument = $this->dao->get($id);
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     try {
                         $this->dao->remove($id);
                     } catch (DatabaseError $e) {
@@ -229,7 +213,6 @@ class Instruments extends BasicResource {
                     }
 
                     try {
-                        $instrument = $this->dao->get($id);
                         if ($instrument !== null) {
                             $this->loggerDAO->add(
                                 daos\EventLog::DATA_DELETED_EVENT,
@@ -242,6 +225,8 @@ class Instruments extends BasicResource {
 
                     return [$request];
                 },
+
+                // Generate Response
                 new NoContentBuilder()
             ]),
 
