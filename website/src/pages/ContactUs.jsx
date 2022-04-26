@@ -72,8 +72,9 @@ export default class ContactUs extends react.Component {
                 onChange={(e) => this.setMessage(e.target.value)}
               />
             </Form.Group>
+
             <Button variant="primary">
-              Login
+              Send Message
             </Button>
           </Form>
         </Container>
