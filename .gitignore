@@ -3,6 +3,7 @@
 
 deploy/frontend
 deploy/static
+deploy/backend/src/Config.php
 
 # IDE files
 # --------------------
