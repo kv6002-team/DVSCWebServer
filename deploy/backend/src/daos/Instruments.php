@@ -16,11 +16,16 @@ use kv6002\domain;
  */
 class Instruments{
     private $db;
+    private $usersDAO;
 
-    public function __construct($db) {
+    public function __construct($db, $usersDAO) {
         $this->db = $db;
+        $this->usersDAO = $usersDAO;
     }
 
+    /**
+     * 
+     */
     public function get($id) {
         return $instrument = $this->db->fetch(
             "SELECT garageID,"
@@ -50,11 +55,18 @@ class Instruments{
         );
     }
 
+    /**
+     * 
+     */
     public function getGarageIDFor($id) {
-        return $this->db->fetch(
-            "SELECT garageID FROM Instruments WHERE id = :id",
+        // As a string
+        $garageID = $this->db->fetch(
+            "SELECT garageID FROM Instrument WHERE id = :id",
             ["id" => $id]
         )->garageID;
+
+        // So convert it through the domain class
+        return $this->usersDAO->get(domain\Garage::USER_TYPE, $garageID)->id();
     }
 
     /**

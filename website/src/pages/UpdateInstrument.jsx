@@ -54,13 +54,14 @@ class UpdateInstrument extends react.Component {
               <Col lg={6}>
                 <Form.Group className="mb-3" controlId="contactSubject">
                   <Form.Label></Form.Label>
-                  <Form.Select
+                  <Form.Control
+                    as="select"
                     onChange={(e) => this.setInstrument(e.target.value)}
                   >
                     {mapObj(this.state.instruments, (_, instrument, i) => (
                       <option key={i} value={instrument.id}>{instrument.name}</option>
                     ), false)}
-                  </Form.Select>
+                  </Form.Control>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="contactMessage">

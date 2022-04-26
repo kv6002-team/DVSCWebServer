@@ -39,7 +39,7 @@ class Garages extends BasicResource {
         $this->instrumentValidator = new validators\Instrument();
 
         $this->usersDAO = new daos\Users($db);
-        $this->instrumentsDAO = new daos\Instruments($db);
+        $this->instrumentsDAO = new daos\Instruments($db, $this->usersDAO);
         $this->loggerDAO = new daos\EventLog($db);
 
         $this->view = new views\GaragesJSON();
