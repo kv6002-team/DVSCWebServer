@@ -1,7 +1,7 @@
 <?php
 namespace email;
 
-class ContactFormDetails {
+class ContactMessage {
   private $email_address;
   private $phone_number;
   private $email_subject;
