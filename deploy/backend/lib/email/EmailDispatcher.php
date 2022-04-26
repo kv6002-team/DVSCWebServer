@@ -50,7 +50,7 @@ class EmailDispatcher {
 
     $email_subject = CONTACT_US_CONFIG['subject'] . " - " . $contact_message['email_subject'];
 
-    // Nobody likes emails of portal messages that don't keep newlines
+    // Nobody likes emails of messages coming from a website that don't keep paragraphs
     $paragraphs = explode("\n\n", // double-newline to only split paragraphs
       htmlspecialchars($contact_message['message_content'])
     );
