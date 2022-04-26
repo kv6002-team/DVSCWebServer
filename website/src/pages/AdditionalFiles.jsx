@@ -1,78 +1,75 @@
 import react from 'react';
-import { Container } from 'react-bootstrap/lib/Tab';
-import { makeAuthConsumer } from '../utils/components/Authentication';
+
+import { defaultFetch } from '../utils/fetch';
 import fileDownload from 'js-file-download';
-import axios from 'axios'
+
+import { makeAuthConsumer } from '../utils/components/Authentication';
+import Main from '../standard/Main';
+import { Container, Button, Table } from 'react-bootstrap';
 
 /**
  * @author Scotty (w19019810)
+ * @author William Taylor (w19009576)
  */
 class AdditionalFiles extends react.Component {
-  constructor(props){
-  }
-
-  render(){
+  render() {
     return (
       <Main>
         <Container>
           <h1>Additional Forms</h1>
-          <Row>
-            <Col lg={3}></Col>
-            <Col lg={6}>
-            <p className='mb-3'>Here is where you can download additional files related to DVSC</p>
-            <Table>
-              <thead>
-                <tr>
-                  <th>File</th>
-                  <th>Download</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Monthly Report</td>
-                  <td><Button onClick={this.getFile('monthlyreport')}>Download</Button></td>
-                </tr>
-                <tr>
-                  <td>Contract</td>
-                  <td><Button onClick={this.getFile('contract')}>Download</Button></td>
-                </tr>
-                <tr>
-                  <td>Monthly Check Sheet</td>
-                  <td><Button onClick={this.getFile('monthlychecksheet')}>Download</Button></td>
-                </tr>
-                <tr>
-                  <td>Calibration Date Document</td>
-                  <td><Button onClick={this.getFile('calibrationdatedocument')}>Download</Button></td>
-                </tr>
-                <tr>
-                  <td>Defective Equipment Log</td>
-                  <td><Button onClick={this.getFile('defectiveequipmentlog')}>Download</Button></td>
-                </tr>
-                <tr>
-                  <td>Quality Control Sheet</td>
-                  <td><Button onClick={this.getFile('qualitycontrolsheet')}>Download</Button></td>
-                </tr>
-                <tr>
-                  <td>Tyre Depth Check Sheet</td>
-                  <td><Button onClick={this.getFile('tyredepthchecksheet')}>Download</Button></td>
-                </tr>
-              </tbody>
-            </Table>
-            </Col>
-            <Col lg={3}></Col>
-          </Row>
+          <p className='mb-3'>Here is where you can download additional files related to DVSC.</p>
+
+          <Table id="additional-files-downloads">
+            <thead>
+              <tr>
+                <th>File</th>
+                <th className="download-row">Download</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Monthly Report</td>
+                <td className="download-row"><Button onClick={() => this.getFile('monthly-report')}>Download</Button></td>
+              </tr>
+              <tr>
+                <td>Contract</td>
+                <td className="download-row"><Button onClick={() => this.getFile('contract')}>Download</Button></td>
+              </tr>
+              <tr>
+                <td>Monthly Check Sheet</td>
+                <td className="download-row"><Button onClick={() => this.getFile('monthly-check-sheet')}>Download</Button></td>
+              </tr>
+              <tr>
+                <td>Calibration Date Document</td>
+                <td className="download-row"><Button onClick={() => this.getFile('calibration-date-document')}>Download</Button></td>
+              </tr>
+              <tr>
+                <td>Defective Equipment Log</td>
+                <td className="download-row"><Button onClick={() => this.getFile('defective-equipment-log')}>Download</Button></td>
+              </tr>
+              <tr>
+                <td>Quality Control Sheet</td>
+                <td className="download-row"><Button onClick={() => this.getFile('quality-control-sheet')}>Download</Button></td>
+              </tr>
+              <tr>
+                <td>Tyre Depth Check Sheet</td>
+                <td className="download-row"><Button onClick={() => this.getFile('tyre-depth-check-sheet')}>Download</Button></td>
+              </tr>
+            </tbody>
+          </Table>
         </Container>
       </Main>
     )
   }
 
-  getFile = async filename => {
-    let res = await axios.get(`dvsc.services/files/${filename}`, {
-      Headers : {
-        'Authorization' : `bearer ${this.props.auth.token.encoded}`
-      }
-    })
-     fileDownload(res.data, `${filename}.pdf`)
+  getFile = async (filename) => {
+    if (this.props.auth.token === null) return;
+
+    const response = await defaultFetch(
+      "GET", this.props.approot + `/api/files/${filename}`,
+      { "Authorization" : `bearer ${this.props.auth.token.encoded}` }
+    );
+    fileDownload(response.blob(), `${filename}.pdf`);
   }
 }
 export default makeAuthConsumer(AdditionalFiles)
