@@ -307,6 +307,7 @@ class Garages extends BasicResource {
                         return $obj[$name];
                     };
 
+                    // Parse JSON
                     $garageJSON = $request->privateParam("garage");
                     if ($garageJSON === null) {
                         throw new HTTPError(422,
@@ -314,7 +315,6 @@ class Garages extends BasicResource {
                         );
                     }
 
-                    // Parse JSON
                     try {
                         $body = Util::toJSON($garageJSON);
                     } catch (JsonException $e) {

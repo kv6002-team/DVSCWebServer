@@ -42,24 +42,37 @@ class Emails extends BasicResource {
                 ),
 
                 function ($request) use ($dao) {
+                    // Parse JSON input
+                    $garageJSON = $request->privateParam("garages");
+                    if ($garageJSON === null) {
+                        throw new HTTPError(422,
+                            "Garage list not sent"
+                        );
+                    }
+
                     try {
-                        $body = Util::toJSON($request->body());
+                        $garageIDList = Util::toJSON($garageJSON);
                     } catch (JsonException $e) {
                         throw new HTTPError(422,
-                            "requested Garage list JSON is not valid"
+                            "Garage ID list is invalid JSON"
+                        );
+                    }
+
+                    // Validate JSON input
+                    if (!is_array($garageIDList)) {
+                        throw new HTTPError(422,
+                            "Garage ID list was not given as a JSON list"
                         );
                     }
 
                     $garageIDs = [];
-                    if (!isset($body["garages"])) {
-                        throw new HTTPError(422,
-                            "garage ID list wasn't given"
-                        );
-                    }
-                    foreach ($body["garages"] as $garageID) {
-                        if (!is_numeric($garageID)) {
+                    foreach ($garageIDList as $garageID) {
+                        if (
+                            !is_numeric($garageID) ||
+                            str_contains($garageID, ".")
+                        ) {
                             throw new HTTPError(422,
-                                "garage ID list contained a non valid ID"
+                                "Garage ID list contained an invalid ID"
                             );
                         }
                         $garageIDs[] = $garageID;
