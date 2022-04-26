@@ -18,7 +18,11 @@ class Instruments{
     private $db;
     private $usersDAO;
 
-    public function __construct($db, $usersDAO) {
+    /**
+     * To get the garage for a given instrument, the users DAO must also be
+     * passed.
+     */
+    public function __construct($db, $usersDAO = null) {
         $this->db = $db;
         $this->usersDAO = $usersDAO;
     }
@@ -59,6 +63,12 @@ class Instruments{
      * 
      */
     public function getGarageIDFor($id) {
+        if ($this->usersDAO === null) {
+            throw new \Exception(
+                "Cannot get garage for instrument: missing dependency"
+            );
+        }
+
         // As a string
         $garageID = $this->db->fetch(
             "SELECT garageID FROM Instrument WHERE id = :id",
