@@ -89,7 +89,7 @@ $router->register("/api/instruments/:id<int>", $instrumentRes);
 $contactRes = new resources\ContactMessages($db, $authenticator);
 $router->register("/api/contact-messages", $contactRes);
 
-$router->register("/api/send-emails", new resources\Emails($db));
+$router->register("/api/send-emails", new resources\Emails($db, $authenticator));
 
 /* Dispatch Request
 -------------------------------------------------- */

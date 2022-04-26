@@ -28,11 +28,16 @@ class ContactMessages extends BasicResource {
         // Which actions can we take?
         $actions = [
             "send_contact_message" => Dispatcher::funcToPipeOf([
-                $authenticator->auth(),
-                function ($request, $user, $authorisations) use ($authenticator) {
+                $this->authenticator->auth(),
+                function ($request, $user, $authorisations) {
                     try {
-                        $hasAuthentication = $authenticator->requireAuthentication();
-                        $ret = $hasAuthentication($request, $user, $authorisations);
+                        $hasAuthentication =
+                            $this->authenticator->requireAuthentication();
+                        $ret = $hasAuthentication(
+                            $request,
+                            $user,
+                            $authorisations
+                        );
                     } catch (HTTPError $e) {
                         // If it doesn't have authentication, don't require
                         // authorisation.
@@ -42,8 +47,8 @@ class ContactMessages extends BasicResource {
                     // If it does have authentication, then require
                     // authorisation, otherwise error.
                     $hasAuthorisation = Dispatcher::funcToPipeOf([
-                        $authenticator->requireAuthorisation("general"),
-                        $authenticator->requireAuthorisation(
+                        $this->authenticator->requireAuthorisation("general"),
+                        $this->authenticator->requireAuthorisation(
                             domain\Garage::USER_TYPE
                         )
                     ]);

@@ -2,9 +2,9 @@ import react from 'react';
 
 import { makeAuthConsumer } from "../utils/components/Authentication";
 import Main from '../standard/Main';
+import { Container, Form, Button, Alert } from 'react-bootstrap';
 
 import { fetchJSON } from '../utils/fetch';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
 
 /**
  * The page for changing and resetting an account password.

@@ -28,7 +28,7 @@ require_once __DIR__ . "/../../lib/email/DispatcherObject.php";
 class Emails extends BasicResource {
     private $loggerDAO;
 
-    public function __construct($db) {
+    public function __construct($db, $authenticator) {
         $dao = new daos\Users($db);
         $this->loggerDAO = new daos\EventLog($db);
 
