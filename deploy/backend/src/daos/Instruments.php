@@ -52,7 +52,7 @@ class Instruments{
 
     public function getGarageIDFor($id) {
         return $this->db->fetch(
-            "SELECT garageID FROM Instruments WHERE id = :id",
+            "SELECT garageID FROM Instrument WHERE id = :id",
             ["id" => $id]
         )->garageID;
     }
