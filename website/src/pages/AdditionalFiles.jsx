@@ -40,8 +40,8 @@ class AdditionalFiles extends react.Component {
                 <td className="download-row"><Button onClick={() => this.getFile('monthly-check-sheet')}>Download</Button></td>
               </tr>
               <tr>
-                <td>Calibration Date Document</td>
-                <td className="download-row"><Button onClick={() => this.getFile('calibration-date-document')}>Download</Button></td>
+                <td>Calibration Dates Document</td>
+                <td className="download-row"><Button onClick={() => this.getFile('calibration-dates-document')}>Download</Button></td>
               </tr>
               <tr>
                 <td>Defective Equipment Log</td>
@@ -65,11 +65,12 @@ class AdditionalFiles extends react.Component {
   getFile = async (filename) => {
     if (this.props.auth.token === null) return;
 
-    const response = await defaultFetch(
+    defaultFetch(
       "GET", this.props.approot + `/api/files/${filename}`,
       { "Authorization" : `bearer ${this.props.auth.token.encoded}` }
-    );
-    fileDownload(response.blob(), `${filename}.pdf`);
+    )
+      .then((response) => response.blob())
+      .then((blob) => fileDownload(blob, `${filename}.pdf`));
   }
 }
 export default makeAuthConsumer(AdditionalFiles)

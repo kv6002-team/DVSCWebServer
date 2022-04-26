@@ -86,10 +86,17 @@ $instrumentRes = new resources\Instruments($db, $authenticator);
 $router->register("/api/instruments", $instrumentRes);
 $router->register("/api/instruments/:id<int>", $instrumentRes);
 
-$contactRes = new resources\ContactMessages($db, $authenticator);
-$router->register("/api/contact-messages", $contactRes);
+$router->register("/api/contact-messages",
+    new resources\ContactMessages($db, $authenticator)
+);
 
-$router->register("/api/send-emails", new resources\Emails($db, $authenticator));
+$router->register("/api/send-emails",
+    new resources\Emails($db, $authenticator)
+);
+
+$router->register("/api/files/:filename",
+    new resources\Files($pathfinder, $authenticator)
+);
 
 /* Dispatch Request
 -------------------------------------------------- */
