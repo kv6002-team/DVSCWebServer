@@ -43,18 +43,29 @@ class EmailDispatcher {
     $email->send();
   }
 
-  public static function send_contactus_email($recipient_email = null, $contact_form) {
-    $contact_form = $contact_form->as_array();
+  public static function send_contactus_email($recipient_email = null, $contact_message) {
+    $contact_message = $contact_message->as_array();
 
     if (is_null($recipient_email)) $recipient_email = CONTACT_US_CONFIG['fallback_recipient'];
 
-    $email_subject = CONTACT_US_CONFIG['subject'] . " " . $contact_form['email_subject'];
+    $email_subject = CONTACT_US_CONFIG['subject'] . " - " . $contact_message['email_subject'];
 
-    $email_content = (
-      $contact_form['message_content']
-      . "\n" . "Phone Number : " . $contact_form['phone_number']
-      . "\n" . "Email Address : " . $contact_form['email_address']
+    // Nobody likes emails of messages coming from a website that don't keep paragraphs
+    $paragraphs = explode("\n\n", // double-newline to only split paragraphs
+      htmlspecialchars($contact_message['message_content'])
     );
+    $message = implode("\n", array_map(
+      function ($paragraph) { return "<p>$paragraph</p>"; },
+      $paragraphs
+    ));
+    $email_content = implode("\n", [
+      "<p><strong>Message</strong>:</p>"
+      ."<div style=\"padding-left: 10px\">"
+      .$message
+      ."</div>"
+      ."<p><strong>Phone Number</strong>: " . $contact_message['phone_number'] . "</p>"
+      ."<p><strong>Email Address</strong>: " . $contact_message['email_address'] . "</p>"
+    ]);
 
     $email = new Email(
       $recipient_email,

@@ -82,11 +82,14 @@ $garageRes = new resources\Garages($db, $authenticator);
 $router->register("/api/garages", $garageRes);
 $router->register("/api/garages/:id<int>", $garageRes);
 
-$instrumentRes = new resources\Instruments($db);
+$instrumentRes = new resources\Instruments($db, $authenticator);
 $router->register("/api/instruments", $instrumentRes);
 $router->register("/api/instruments/:id<int>", $instrumentRes);
 
-$router->register("/api/send-emails", new resources\Emails($db));
+$contactRes = new resources\ContactMessages($db, $authenticator);
+$router->register("/api/contact-messages", $contactRes);
+
+$router->register("/api/send-emails", new resources\Emails($db, $authenticator));
 
 /* Dispatch Request
 -------------------------------------------------- */

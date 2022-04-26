@@ -128,7 +128,7 @@ class JWTAuthenticator {
                     );
                 }
 
-                // Decode
+                // Decode and verify token
                 $encodedToken = $request->authValue();
                 try {
                     $token = JWT::decode(
@@ -149,35 +149,33 @@ class JWTAuthenticator {
                     throw new HTTPError(401, "Auth token signature invalid");
                 }
 
-                // Validate and extract authorisations
-                if (!property_exists($token, "authorisations")) {
-                    throw new HTTPError(401,
-                        "Auth token must contain authorisation list"
-                    );
-                }
-                $authorisations = $token->authorisations;
-                if (!is_array($authorisations)) {
-                    throw new HTTPError(401,
-                        "`authorisation` property of auth token must be a list"
-                    );
+                // Validate and extract user of authentication (if claimed)
+                if (property_exists($token, "id")) {
+                    if (!property_exists($token, "usertype")) {
+                        throw new HTTPError(401,
+                            "Auth token claiming authentication must contain user type"
+                        );
+                    }
+                    $user = $this->dao->get($token->usertype, $token->id);
+                    if ($user === null) {
+                        throw new HTTPError(401,
+                            "User given in auth token claiming authentication no longer exists"
+                        );
+                    }
+                } else {
+                    $user = null;
                 }
 
-                // Validate and extract user
-                if (!property_exists($token, "usertype")) {
-                    throw new HTTPError(401,
-                        "Auth token must contain user type"
-                    );
-                }
-                if (!property_exists($token, "id")) {
-                    throw new HTTPError(401,
-                        "Auth token must contain user ID"
-                    );
-                }
-                $user = $this->dao->get($token->usertype, $token->id);
-                if ($user === null) {
-                    throw new HTTPError(401,
-                        "User given in auth token no longer exists"
-                    );
+                // Validate and extract authorisations (if claimed)
+                if (property_exists($token, "authorisations")) {
+                    $authorisations = $token->authorisations;
+                    if (!is_array($authorisations)) {
+                        throw new HTTPError(401,
+                            "`authorisation` property of auth token claiming authorisations must be a list"
+                        );
+                    }
+                } else {
+                    $authorisations = [];
                 }
             }
 
@@ -205,12 +203,14 @@ class JWTAuthenticator {
     public function requireAuthentication($id = null) {
         return function ($request, $user, $authorisations) use ($id) {
             if ($user === null) {
-                throw new HTTPError(401, "Authentication not given");
+                throw new HTTPError(401,
+                    "Authentication required, but not claimed"
+                );
             }
 
             if ($id !== null && $user->id() !== $id) {
-                throw new HTTPError(401,
-                    "User not authorised to take that action"
+                throw new HTTPError(403,
+                    "Authenticated user is not authorised to take that action"
                 );
             }
 
@@ -240,8 +240,10 @@ class JWTAuthenticator {
         return function ($request, $user, $authorisations)
                 use ($validAuthorisations)
         {
-            if ($authorisations === null) {
-                throw new HTTPError(403, "Authorisation not given");
+            if ($authorisations === null || count($authorisations) === 0) {
+                throw new HTTPError(403,
+                    "Authorisation required, but none claimed"
+                );
             }
 
             $hasValidAuthorisations = Util::any(
@@ -252,7 +254,7 @@ class JWTAuthenticator {
             );
             if (!$hasValidAuthorisations) {
                 throw new HTTPError(403,
-                    "Authorisation not valid for this resource"
+                    "Authenticated user is not authorised to take that action"
                 );
             }
 

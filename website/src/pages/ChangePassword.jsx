@@ -2,9 +2,9 @@ import react from 'react';
 
 import { makeAuthConsumer } from "../utils/components/Authentication";
 import Main from '../standard/Main';
+import { Container, Form, Button, Alert } from 'react-bootstrap';
 
 import { fetchJSON } from '../utils/fetch';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
 
 /**
  * The page for changing and resetting an account password.
@@ -65,7 +65,7 @@ class ChangePassword extends react.Component {
             </Form.Group>
 
             {!this.state.loggedIn ? (
-              <Alert variant="danger">
+              <Alert variant="warning">
                 You must verify your account's email address before you can
                 change your password. We will send you an email containing link
                 to a page in which you can change your password. The page will
@@ -122,7 +122,7 @@ class ChangePassword extends react.Component {
       { newPassword: this.state.newPassword } : // Set the password if able
       { username: this.state.username }; // Otherwise request verification email
     const body = new URLSearchParams(
-      Object.assign({ types: "garage" }, requestSpecificParams)
+      Object.assign({ types: "garage,garage-consultant" }, requestSpecificParams)
     );
 
     const headers = this.props.auth.token !== null ? {

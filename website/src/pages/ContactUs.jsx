@@ -1,8 +1,10 @@
 import react from 'react';
 
+import { makeAuthConsumer } from "../utils/components/Authentication";
 import Main from '../standard/Main';
+import { Container, Form, Button, Alert } from 'react-bootstrap';
 
-import { Container, Form, Button } from 'react-bootstrap';
+import { fetchJSON } from '../utils/fetch';
 
 /**
  * The contact us page.
@@ -11,14 +13,15 @@ import { Container, Form, Button } from 'react-bootstrap';
  * 
  * @author William Taylor (19009576)
  */
-export default class ContactUs extends react.Component {
+class ContactUs extends react.Component {
   constructor(props) {
     super(props);
     this.state = {
-      useLogin: false, // TODO: Make this the current auth state by default
+      success: null,
+      error: null,
+
       email: "",
       phone: "",
-
       subject: "",
       message: ""
     };
@@ -30,6 +33,24 @@ export default class ContactUs extends react.Component {
         <Container>
           <h1>Contact Us</h1>
           <p className="mb-3">Please do not hesitate to get in contact with us. DVSC aim to respond in a timely manner. If your request is more urgent then please phone: +44 07493904628</p>
+
+          {(() => {
+            if (this.state.success === null) return null;
+            if (this.state.success === true) {
+              return (
+                <Alert variant="success" dismissible onClose={() => this.setState({success: null})}>
+                  <p>Message sent successfully.</p>
+                </Alert>
+              );
+            } else {
+              return (
+                <Alert variant="danger" dismissible onClose={() => this.setState({success: null})}>
+                  <p>Message failed to send.</p>
+                  <p>{this.state.error}</p>
+                </Alert>
+              );
+            }
+          })()}
 
           <Form>
             <Form.Group className="mb-3" controlId="contactEmail">
@@ -72,8 +93,9 @@ export default class ContactUs extends react.Component {
                 onChange={(e) => this.setMessage(e.target.value)}
               />
             </Form.Group>
-            <Button variant="primary">
-              Login
+
+            <Button variant="primary" onClick={this.send}>
+              Send Message
             </Button>
           </Form>
         </Container>
@@ -85,4 +107,32 @@ export default class ContactUs extends react.Component {
   setPhone = (phone) => this.setState({ phone: phone });
   setSubject = (subject) => this.setState({ subject: subject });
   setMessage = (message) => this.setState({ message: message });
+
+  send = () => {
+    const body = new URLSearchParams({
+      emailAddress: this.state.email,
+      telephoneNumber: this.state.phone,
+      subject: this.state.subject,
+      message: this.state.message
+    });
+
+    const headers = this.props.auth.token !== null ? {
+      "Authorization": "bearer " + this.props.auth.token.encoded
+    } : {};
+
+    fetchJSON(
+        "POST",
+        this.props.approot + "/api/contact-messages",
+        headers,
+        body
+    )
+      .then(() => {
+        this.setState({ success: true });
+      })
+      .catch((error) => {
+        this.props.handleIfAuthError(error);
+        this.setState({ success: false, error: error.explanation });
+      });
+  }
 }
+export default makeAuthConsumer(ContactUs);

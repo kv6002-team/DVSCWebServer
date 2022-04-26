@@ -17,12 +17,11 @@ use kv6002\domain;
 class Instruments{
     private $db;
 
-    public function __construct($db){
+    public function __construct($db) {
         $this->db = $db;
     }
 
     public function get($id) {
-       
         return $instrument = $this->db->fetch(
             "SELECT garageID,"
             ."   name,"
@@ -49,6 +48,13 @@ class Instruments{
                     [standard\DateTime::class, "parse"])
             ]
         );
+    }
+
+    public function getGarageIDFor($id) {
+        return $this->db->fetch(
+            "SELECT garageID FROM Instruments WHERE id = :id",
+            ["id" => $id]
+        )->garageID;
     }
 
     /**

@@ -41,7 +41,7 @@ class PasswordReset extends BasicResource {
                 function ($request) {
                     // Try to get the username a change is being requested for
                     $username = $request->privateParam("username");
-                    if ($username === "") {
+                    if ($username === null || $username === "") {
                         throw new HTTPError(422,
                             self::$USERNAME_NOT_GIVEN_ERR_STR
                         );
@@ -90,7 +90,11 @@ class PasswordReset extends BasicResource {
                     $jwt = [
                         "token_type" => "bearer",
                         "token" => $this->authenticator->standardAuthToken(
-                            $user, ["password_reset__email_auth"]
+                            $user,
+                            [
+                                "password_reset__email_auth",
+                                $user->type()
+                            ]
                         )
                     ];
 

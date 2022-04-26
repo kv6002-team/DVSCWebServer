@@ -100,7 +100,7 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                 },
                 function ($request, $emailAddress) {
                     try {
-                        $defaultPass = (new DateTime())->format("dmy");
+                        $defaultPass = (new \DateTimeImmutable())->format("dmy");
                         $garageConsultant = $this->dao->add(
                             self::USER_TYPE,
                             password_hash($defaultPass, PASSWORD_DEFAULT),
@@ -142,19 +142,35 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                         );
                     }
 
-                    $username = $request->privateParam("emailAddress");
-                    if ($username === null || $username === "") {
+                    $emailAddress = $request->privateParam("emailAddress");
+                    if ($emailAddress === null || $emailAddress === "") {
                         throw new HTTPError(422,
                             "Must provide a non-empty emailAddress parameter"
                         );
                     }
-                    if (str_contains($username, ":")) {
+                    // Must not contain a colon
+                    // Must not contain a colon
+                    if (!preg_match(
+                        "/^"                   // From start of string
+                        ."(?=.{1,128}@)"       // Before @ must be 1-128 chars
+                        ."[A-Za-z0-9_-]+"      // First '.'-delimited segment
+                        ."(\.[A-Za-z0-9_-]+)*" // Other '.'-delimited segments
+                        ."@"                   // @ symbol
+                        ."(?=.{1,128})"        // After @ must be 1-128 chars
+                        ."[A-Za-z0-9]"         // First char of domain name
+                        ."[A-Za-z0-9-]*"       // Bottom level domain name
+                        ."(\.[A-Za-z0-9-]+)*"  // Intermediate domain names
+                        ."(\.[A-Za-z]{2,})"    // Top level domain name (TLD)
+                        ."$/"                  // To end of string
+                        ."u",                  // FLAGS: Use Unicode matching
+                        $emailAddress
+                    )) {
                         throw new HTTPError(422,
-                            "emailAddress must not contain a colon"
+                            "emailAddress is not a valid email address"
                         );
                     }
 
-                    return [$request, $id, $username];
+                    return [$request, $id, $emailAddress];
                 },
                 function ($request, $id, $emailAddress) {
                     try {
@@ -190,6 +206,11 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                     return [$request, $id];
                 },
                 function ($request, $id) {
+                    $user = null;
+                    try {
+                        $user = $this->dao->get(self::USER_TYPE, $id);
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     try {
                         $this->dao->remove(self::USER_TYPE, $id);
                     } catch (DatabaseError $e) {
@@ -199,7 +220,6 @@ class GarageConsultants extends BasicResource implements WithMetadata {
                     }
 
                     try {
-                        $user = $this->dao->get(self::USER_TYPE, $id);
                         if ($user !== null) {
                             $this->loggerDAO->add(
                                 daos\EventLog::DATA_DELETED_EVENT,
@@ -245,8 +265,14 @@ class GarageConsultants extends BasicResource implements WithMetadata {
          *              /                            \
          *   method ---/                              \--- action
          */
-        $getAction = function ($actionKey) use ($actions) {
+        $getAction = function ($actionKey) use ($actions, $authenticator) {
             return Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
                 Dispatcher::funcToKeyOf($actions, $actionKey),
                 function ($response) {
                     $headers = [

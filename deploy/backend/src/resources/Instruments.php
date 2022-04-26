@@ -25,7 +25,7 @@ class Instruments extends BasicResource {
     private $validator;
     private $loggerDAO;
 
-    public function __construct($db) {
+    public function __construct($db, $authenticator) {
         $this->dao = new daos\Instruments($db);
         $this->loggerDAO = new daos\EventLog($db);
         $this->instrumentValidator = new validators\Instrument();
@@ -33,6 +33,13 @@ class Instruments extends BasicResource {
 
         $actions = [
             "add" => Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
+
                 // Extract and validate input
                 function ($request) {
                     // Utility
@@ -57,29 +64,12 @@ class Instruments extends BasicResource {
                     ];
 
                     // Validate
-                    $instrumentData["garageID"] = $this->garageValidator->validateGarageID(
-                        $instrumentData["garageID"]
-                    );
-
-                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName(
-                        $instrumentData["name"]    
-                    );
-
-                    $instrumentData["serialNumber"] = $this->instrumentValidator->validateSerialNumber(
-                        $instrumentData["serialNumber"]
-                    );
-
-                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate(
-                        $instrumentData["officialCheckExpiryDate"]
-                    );
-
-                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus(
-                        $instrumentData["ourCheckStatus"]
-                    );
-
-                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate(
-                        $instrumentData["ourCheckDate"]
-                    );
+                    $instrumentData["garageID"] = $this->garageValidator->validateGarageID($instrumentData["garageID"]);
+                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName($instrumentData["name"]);
+                    $instrumentData["serialNumber"] = $this->instrumentValidator->validateSerialNumber($instrumentData["serialNumber"]);
+                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate($instrumentData["officialCheckExpiryDate"]);
+                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus($instrumentData["ourCheckStatus"]);
+                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate($instrumentData["ourCheckDate"]);
 
                     // Return
                     return [
@@ -112,6 +102,8 @@ class Instruments extends BasicResource {
 
                     return [$request, $instrument];
                 },
+
+                // Generate Response
                 JSONBuilder::typeSelector(
                     function ($request, $instrument) {
                         $request->setExpectedResponseStatusCode(201);
@@ -121,8 +113,59 @@ class Instruments extends BasicResource {
             ]),
 
             "update" => Dispatcher::funcToPipeOf([
+                // Parse auth token
+                $authenticator->auth(),
+
+                // Extract and validate ID
+                function ($request, $user, $authorisations) {
+                    $id = $request->endpointParam("id");
+
+                    if ($id === null) {
+                        throw new HTTPError(422,
+                            "Cannot update the whole collection of instruments"
+                            ." (did you mean to `PATCH /api/instruments/:id`?)"
+                        );
+                    }
+                    $id = $this->instrumentValidator->validateInstrumentID($id);
+
+                    $garageID = $this->dao->getGarageIDFor($id);
+                    return [$request, $id, $garageID, $user, $authorisations];
+                },
+
+                // Authenticate & authorise (any consultant, or that garage only)
+                function ($request, $id, $garageID, $user, $authorisations) use ($authenticator) {
+                    try {
+                        $authProcess = Dispatcher::funcToFirstSuccessfulOf([
+                            // Any garage consultant
+                            Dispatcher::funcToPipeOf([
+                                $authenticator->requireAuthentication(),
+                                $authenticator->requireAuthorisation("general"),
+                                $authenticator->requireAuthorisation(
+                                    domain\GarageConsultant::USER_TYPE
+                                )
+                            ]),
+
+                            // The garage that owns the instrument being requested
+                            Dispatcher::funcToPipeOf([
+                                $authenticator->requireAuthentication($garageID),
+                                $authenticator->requireAuthorisation("general"),
+                                $authenticator->requireAuthorisation(
+                                    domain\Garage::USER_TYPE
+                                )
+                            ])
+                        ]);
+                        $checked = $authProcess($request, $user, $authorisations);
+                        return [$checked[0], $id];
+
+                    } catch (\Exception $e) {
+                        throw new HTTPError(401,
+                            "Not an authorised garage or garage consultant"
+                        );
+                    }
+                },
+
                 // Extract and validate input
-                function ($request) {
+                function ($request, $id) {
                     // Utility
                     $requiredPrivateParam = function ($name) use ($request) {
                         $value = $request->privateParam($name);
@@ -135,7 +178,6 @@ class Instruments extends BasicResource {
                     };
 
                     // Extract
-                    $id = $request->endpointParam("id");
                     $instrumentData = [
                         "name" => $requiredPrivateParam("name"),
                         "officialCheckExpiryDate" => $requiredPrivateParam("officialCheckExpiryDate"),
@@ -144,36 +186,13 @@ class Instruments extends BasicResource {
                     ];
 
                     // Validate
-                    if ($id === null) {
-                        throw new HTTPError(422,
-                            "Cannot update the whole collection of instruments"
-                            ." (did you mean to `PATCH /api/instruments/:id`?)"
-                        );
-                    }
-                    $id = $this->instrumentValidator->validateInstrumentID($id);
-
-                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName(
-                        $instrumentData["name"]    
-                    );
-
-                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate(
-                        $instrumentData["officialCheckExpiryDate"]
-                    );
-
-                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus(
-                        $instrumentData["ourCheckStatus"]
-                    );
-                    
-                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate(
-                        $instrumentData["ourCheckDate"]
-                    );
+                    $instrumentData["name"] = $this->instrumentValidator->validateInstrumentName($instrumentData["name"]);
+                    $instrumentData["officialCheckExpiryDate"] = $this->instrumentValidator->validateOfficialCheckExpiryDate($instrumentData["officialCheckExpiryDate"]);
+                    $instrumentData["ourCheckStatus"] = $this->instrumentValidator->validateOurCheckStatus($instrumentData["ourCheckStatus"]);
+                    $instrumentData["ourCheckDate"] = $this->instrumentValidator->validateOurCheckDate($instrumentData["ourCheckDate"]);
 
                     // Return
-                    return [
-                        $request,
-                        $id,
-                        $instrumentData
-                    ];
+                    return [$request, $id, $instrumentData];
                 },
 
                 // Process Request
@@ -204,10 +223,20 @@ class Instruments extends BasicResource {
 
                     return [$request];
                 },
+
+                // Generate Response
                 new NoContentBuilder()
             ]),
 
             "remove" => Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE
+                ),
+
+                // Extract and validate input
                 function ($request) {
                     $id = $request->endpointParam("id");
                     if ($id === null) {
@@ -219,7 +248,14 @@ class Instruments extends BasicResource {
 
                     return [$request, $id];
                 },
+
+                // Process Request
                 function ($request, $id) {
+                    $instrument = null;
+                    try {
+                        $instrument = $this->dao->get($id);
+                    } catch (DatabaseError $e) { /*Do nothing*/ }
+
                     try {
                         $this->dao->remove($id);
                     } catch (DatabaseError $e) {
@@ -229,7 +265,6 @@ class Instruments extends BasicResource {
                     }
 
                     try {
-                        $instrument = $this->dao->get($id);
                         if ($instrument !== null) {
                             $this->loggerDAO->add(
                                 daos\EventLog::DATA_DELETED_EVENT,
@@ -242,6 +277,8 @@ class Instruments extends BasicResource {
 
                     return [$request];
                 },
+
+                // Generate Response
                 new NoContentBuilder()
             ]),
 

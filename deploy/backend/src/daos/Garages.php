@@ -301,7 +301,6 @@ class Garages{
     
     public function update(
             $id,
-            $vts,
             $name,
             $ownerName,
             $emailAddress,
@@ -311,7 +310,6 @@ class Garages{
     ) {
         $this->db->execute(
             "UPDATE Garage SET"
-            ."   vts = :vts,"
             ."   name = :name,"
             ."   ownerName = :ownerName,"
             ."   emailAddress = :emailAddress,"
@@ -320,7 +318,6 @@ class Garages{
             ." WHERE id = :id",
             [
                 "id" => $id,
-                "vts" => $vts,
                 "name" => $name,
                 "ownerName" => $ownerName,
                 "emailAddress" => $emailAddress,
