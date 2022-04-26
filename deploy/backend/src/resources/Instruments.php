@@ -26,7 +26,7 @@ class Instruments extends BasicResource {
     private $loggerDAO;
 
     public function __construct($db, $authenticator) {
-        $this->dao = new daos\Instruments($db);
+        $this->dao = new daos\Instruments($db, new daos\Users($db));
         $this->loggerDAO = new daos\EventLog($db);
         $this->instrumentValidator = new validators\Instrument();
         $this->garageValidator = new validators\Garage();
