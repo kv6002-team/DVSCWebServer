@@ -3,6 +3,8 @@
  * Registers this project's autoloaders.
  */
 
+require(__DIR__ . "/vendor/autoload.php");
+
 // Ref: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader-examples.md
 
 // Use anonymous functions to avoid defining names that shouldn't be used
@@ -34,5 +36,3 @@ spl_autoload_register(function ($className) {
         }
     }
 });
-
-spl_autoload_register(require(__DIR__ . "/vendor/autoload.php"));

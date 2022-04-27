@@ -1,6 +1,7 @@
 <?php
 namespace kv6002\resources;
 
+use util\Util;
 use email\EmailContent;
 
 use dispatcher\Dispatcher;
@@ -40,11 +41,11 @@ class Files extends BasicResource {
                 $authenticator->auth(),
                 $authenticator->requireAuthentication(),
                 $authenticator->requireAuthorisation("general"),
-                $authenticator->requireAuthorisation(
+                $authenticator->requireAuthorisation([
                     domain\GarageConsultant::USER_TYPE,
                     domain\Garage::USER_TYPE
-                ),
-                function ($request) use ($staticFiles) {
+                ]),
+                function ($request) use ($staticFiles, $pathfinder) {
                     $fileName = $request->endpointParam("filename");
                     $realFileName = $staticFiles[$fileName];
                     $fileData = file_get_contents(
@@ -124,10 +125,20 @@ class Files extends BasicResource {
 
                     $content = new EmailContent(
                         $garage->name(),
-                        $garage->instruments()
+                        Util::mapValues(
+                            $garage->instruments(),
+                            function ($instrument) {
+                                return [
+                                    "instrument_name" => $instrument->name(),
+                                    "instrument_serial_number" => $instrument->serialNumber(),
+                                    "instrument_expiry_date" => $instrument->officialCheckExpiryDate()
+                                ];
+                            },
+                            false
+                        )
                     );
 
-                    $date = date();
+                    $date = (new \DateTimeImmutable("now"))->format("Y-m-d H:i:s");
                     return [
                         $request,
                         $content->get_email_html_string(),
