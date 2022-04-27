@@ -9,6 +9,7 @@ use router\exceptions\HTTPError;
 use kv6002\standard\builders\FileBuilder;
 use kv6002\standard\builders\NoContentBuilder;
 
+use kv6002\daos;
 use kv6002\domain;
 
 /**
@@ -17,10 +18,15 @@ use kv6002\domain;
  * @author William Taylor (19009576)
  */
 class Files extends BasicResource {
-    public function __construct($pathfinder, $authenticator) {
+    private $usersDAO;
+
+    public function __construct($db, $pathfinder, $authenticator) {
+        $this->usersDAO = new daos\Users($db);
+
+        // Utility
         $getRawFile = function ($fileType, $fileName) use ($pathfinder) {
-            return function ($request) use ($fileType, $fileName, $pathfinder) {
-                return [$request, $fileType, file_get_contents(
+            return function () use ($fileType, $fileName, $pathfinder) {
+                return [$fileType, file_get_contents(
                     $pathfinder->internalPathFor(
                         "/static-private/$fileName",
                         true // Enforce exists
@@ -29,29 +35,52 @@ class Files extends BasicResource {
             };
         };
 
-        $fileFetchers = [
-            "monthly-report" => function ($request) {
-                return [$request, "application/pdf", ""];
-            },
-
-            "contract" => $getRawFile("application/pdf", "contract.pdf"),
-            "monthly-check-sheet" => $getRawFile("application/pdf", "checklist.pdf"),
-            "calibration-dates-document" => $getRawFile("application/pdf", "calibration_dates.pdf"),
-            "defective-equipment-log" => $getRawFile("application/pdf", "defective_equipment_log.pdf"),
-            "quality-control-sheet" => $getRawFile("application/pdf", "quality_control_checks.pdf"),
-            "tyre-depth-check-sheet" => $getRawFile("application/pdf", "tyre_depth_gauge_check.pdf"),
-        ];
-
+        // Actions
         $actions = [
             "get_file" => Dispatcher::funcToPipeOf([
                 $authenticator->auth(),
-                $authenticator->requireAuthentication(),
-                $authenticator->requireAuthorisation("general"),
-                $authenticator->requireAuthorisation([
-                    domain\GarageConsultant::USER_TYPE,
-                    domain\Garage::USER_TYPE
-                ]),
-                function ($request) use ($fileFetchers) {
+                function ($request, $user, $authorisations) {
+                    $garageID = $request->param("garage");
+                    if (!is_numeric($garageID) || str_contains($garageID, ".")) {
+                        throw new HTTPError(422,
+                            "Must specify which garage to get the monthly report for"
+                        );
+                    }
+                    $garageID = intval($garageID);
+
+                    return [$request, $garageID, $user, $authorisations];
+                },
+                function ($request, $garageID, $user, $authorisations) use ($authenticator) {
+                    try {
+                        $authProcess = Dispatcher::funcToFirstSuccessfulOf([
+                            // Any garage consultant
+                            Dispatcher::funcToPipeOf([
+                                $authenticator->requireAuthentication(),
+                                $authenticator->requireAuthorisation("general"),
+                                $authenticator->requireAuthorisation(
+                                    domain\GarageConsultant::USER_TYPE
+                                )
+                            ]),
+
+                            // The garage that is being requested
+                            Dispatcher::funcToPipeOf([
+                                $authenticator->requireAuthentication($garageID),
+                                $authenticator->requireAuthorisation("general"),
+                                $authenticator->requireAuthorisation(
+                                    domain\Garage::USER_TYPE
+                                )
+                            ])
+                        ]);
+                        $checked = $authProcess($request, $user, $authorisations);
+                        return [$checked[0], $garageID, $checked[1]];
+
+                    } catch (\Exception $e) {
+                        throw new HTTPError(401,
+                            "Not an authorised garage or garage consultant"
+                        );
+                    }
+                },
+                function ($request, $garageID, $user) use ($getRawFile) {
                     $filename = $request->endpointParam("filename");
                     if ($filename === null || $filename === "") {
                         throw new HTTPError(422,
@@ -59,9 +88,35 @@ class Files extends BasicResource {
                         );
                     }
 
+                    $fileFetchers = [
+                        "monthly-report" => function ($garageID) {
+                            $garage = $this->usersDAO->get(
+                                domain\Garage::USER_TYPE,
+                                $garageID
+                            );
+                            if ($garage === null) {
+                                throw new HTTPError(404,
+                                    "Cannot get monthly report for garage that does not exist"
+                                );
+                            }
+
+                            return [
+                                "application/pdf",
+                                null // FIXME: Try to find a PDF library that works
+                            ];
+                        },
+
+                        "contract" => $getRawFile("application/pdf", "contract.pdf"),
+                        "monthly-check-sheet" => $getRawFile("application/pdf", "checklist.pdf"),
+                        "calibration-dates-document" => $getRawFile("application/pdf", "calibration_dates.pdf"),
+                        "defective-equipment-log" => $getRawFile("application/pdf", "defective_equipment_log.pdf"),
+                        "quality-control-sheet" => $getRawFile("application/pdf", "quality_control_checks.pdf"),
+                        "tyre-depth-check-sheet" => $getRawFile("application/pdf", "tyre_depth_gauge_check.pdf"),
+                    ];
+
                     $fileFetcher = Dispatcher::funcToKeyOf($fileFetchers, $filename);
                     try {
-                        return $fileFetcher($request);
+                        return [$request, ...$fileFetcher($garageID)];
                     } catch (UndispatchableError $e) {
                         throw new HTTPError(404, "Requested file not found");
                     }

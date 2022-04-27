@@ -95,7 +95,7 @@ $router->register("/api/send-emails",
 );
 
 $router->register("/api/files/:filename",
-    new resources\Files($pathfinder, $authenticator)
+    new resources\Files($db, $pathfinder, $authenticator)
 );
 
 /* Dispatch Request

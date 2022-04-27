@@ -14,4 +14,3 @@ class MonthlyReportGenerator {
     return $pdf_obj->Output('S');
   }
 }
-?>

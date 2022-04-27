@@ -29,31 +29,35 @@ class AdditionalFiles extends react.Component {
             <tbody>
               <tr>
                 <td>Monthly Report</td>
-                <td className="download-row"><Button onClick={() => this.getFile('monthly-report')}>Download</Button></td>
+                <td>
+                  <Button onClick={() => this.getFile('monthly-report?garage='+this.props.auth.token.decoded.id)}>
+                    Download
+                  </Button>
+                </td>
               </tr>
               <tr>
                 <td>Contract</td>
-                <td className="download-row"><Button onClick={() => this.getFile('contract')}>Download</Button></td>
+                <td><Button onClick={() => this.getFile('contract')}>Download</Button></td>
               </tr>
               <tr>
                 <td>Monthly Check Sheet</td>
-                <td className="download-row"><Button onClick={() => this.getFile('monthly-check-sheet')}>Download</Button></td>
+                <td><Button onClick={() => this.getFile('monthly-check-sheet')}>Download</Button></td>
               </tr>
               <tr>
                 <td>Calibration Dates Document</td>
-                <td className="download-row"><Button onClick={() => this.getFile('calibration-dates-document')}>Download</Button></td>
+                <td><Button onClick={() => this.getFile('calibration-dates-document')}>Download</Button></td>
               </tr>
               <tr>
                 <td>Defective Equipment Log</td>
-                <td className="download-row"><Button onClick={() => this.getFile('defective-equipment-log')}>Download</Button></td>
+                <td><Button onClick={() => this.getFile('defective-equipment-log')}>Download</Button></td>
               </tr>
               <tr>
                 <td>Quality Control Sheet</td>
-                <td className="download-row"><Button onClick={() => this.getFile('quality-control-sheet')}>Download</Button></td>
+                <td><Button onClick={() => this.getFile('quality-control-sheet')}>Download</Button></td>
               </tr>
               <tr>
                 <td>Tyre Depth Check Sheet</td>
-                <td className="download-row"><Button onClick={() => this.getFile('tyre-depth-check-sheet')}>Download</Button></td>
+                <td><Button onClick={() => this.getFile('tyre-depth-check-sheet')}>Download</Button></td>
               </tr>
             </tbody>
           </Table>

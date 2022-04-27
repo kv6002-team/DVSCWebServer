@@ -1,7 +1,7 @@
 <?php
-
 namespace pdf;
-require('fpdf.php');
+
+require "fpdf.php";
 
 class PDFGenerator extends \FPDF {
   public function generate_header($title){
@@ -19,4 +19,3 @@ class PDFGenerator extends \FPDF {
     $this->Ln();
   }
 }
-?>
