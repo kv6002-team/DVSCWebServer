@@ -95,6 +95,7 @@ class Garages extends BasicResource {
                         ]);
                         $checked = $authProcess($request, $user, $authorisations);
                         return [$checked[0], $id, $checked[1], $checked[2]];
+
                     } catch (\Exception $e) {
                         throw new HTTPError(401,
                             "Not an authorised garage or garage consultant"

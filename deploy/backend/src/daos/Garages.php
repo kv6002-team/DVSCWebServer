@@ -13,7 +13,7 @@ use kv6002\domain;
  * 
  * @author Callum
  */
-class Garages{
+class Garages {
     private $db;
     private $instrumentsDAO;
 

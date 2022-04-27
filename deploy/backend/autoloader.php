@@ -1,7 +1,9 @@
 <?php
 /**
- * Registers this project's autoloader.
+ * Registers this project's autoloaders.
  */
+
+require(__DIR__ . "/vendor/autoload.php");
 
 // Ref: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader-examples.md
 

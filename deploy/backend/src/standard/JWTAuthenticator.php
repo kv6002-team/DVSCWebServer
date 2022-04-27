@@ -211,6 +211,7 @@ class JWTAuthenticator {
             if ($id !== null && $user->id() !== $id) {
                 throw new HTTPError(403,
                     "Authenticated user is not authorised to take that action"
+                    ." (only another user is authorised)"
                 );
             }
 
@@ -255,6 +256,8 @@ class JWTAuthenticator {
             if (!$hasValidAuthorisations) {
                 throw new HTTPError(403,
                     "Authenticated user is not authorised to take that action"
+                    ." (missing required authorisation; must include one of:"
+                    ." ".implode(", ", $validAuthorisations).")"
                 );
             }
 

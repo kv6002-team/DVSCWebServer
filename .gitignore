@@ -1,8 +1,18 @@
+# Sensitive files/directories
+# --------------------
+
+deploy/backend/src/Config.php
+
 # Build files/directories
 # --------------------
 
 deploy/frontend
 deploy/static
+
+# External files/directories
+# --------------------
+
+deploy/backend/vendor
 
 # IDE files
 # --------------------
