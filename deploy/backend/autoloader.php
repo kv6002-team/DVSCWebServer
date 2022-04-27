@@ -1,6 +1,6 @@
 <?php
 /**
- * Registers this project's autoloader.
+ * Registers this project's autoloaders.
  */
 
 // Ref: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader-examples.md
@@ -34,3 +34,5 @@ spl_autoload_register(function ($className) {
         }
     }
 });
+
+spl_autoload_register(require(__DIR__ . "/vendor/autoload.php"));

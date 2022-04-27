@@ -1,12 +1,14 @@
 <?php
 namespace kv6002\resources;
 
+use email\EmailContent;
+
 use dispatcher\Dispatcher;
 use dispatcher\exceptions\UndispatchableError;
 use router\Response;
 use router\resource\BasicResource;
 use router\exceptions\HTTPError;
-use kv6002\standard\builders\FileBuilder;
+use kv6002\standard\builders\PDFBuilder;
 use kv6002\standard\builders\NoContentBuilder;
 
 use kv6002\daos;
@@ -23,21 +25,43 @@ class Files extends BasicResource {
     public function __construct($db, $pathfinder, $authenticator) {
         $this->usersDAO = new daos\Users($db);
 
-        // Utility
-        $getRawFile = function ($fileType, $fileName) use ($pathfinder) {
-            return function () use ($fileType, $fileName, $pathfinder) {
-                return [$fileType, file_get_contents(
-                    $pathfinder->internalPathFor(
-                        "/static-private/$fileName",
-                        true // Enforce exists
-                    )
-                )];
-            };
-        };
+        $staticFiles = [
+            "contract" => "contract.pdf",
+            "monthly-check-sheet" => "checklist.pdf",
+            "calibration-dates-document" => "calibration_dates.pdf",
+            "defective-equipment-log" => "defective_equipment_log.pdf",
+            "quality-control-sheet" => "quality_control_checks.pdf",
+            "tyre-depth-check-sheet" => "tyre_depth_gauge_check.pdf"
+        ];
 
         // Actions
         $actions = [
-            "get_file" => Dispatcher::funcToPipeOf([
+            "get_static_file" => Dispatcher::funcToPipeOf([
+                $authenticator->auth(),
+                $authenticator->requireAuthentication(),
+                $authenticator->requireAuthorisation("general"),
+                $authenticator->requireAuthorisation(
+                    domain\GarageConsultant::USER_TYPE,
+                    domain\Garage::USER_TYPE
+                ),
+                function ($request) use ($staticFiles) {
+                    $fileName = $request->endpointParam("filename");
+                    $realFileName = $staticFiles[$fileName];
+                    $fileData = file_get_contents(
+                        $pathfinder->internalPathFor(
+                            "/static-private/$realFileName",
+                            true // Enforce exists
+                        )
+                    );
+                    return [new Response(
+                        200,
+                        ["Content-Type" => "application/pdf"],
+                        $fileData
+                    )];
+                }
+            ]),
+
+            "get_monthly_report_file" => Dispatcher::funcToPipeOf([
                 $authenticator->auth(),
                 function ($request, $user, $authorisations) {
                     $garageID = $request->param("garage");
@@ -80,7 +104,7 @@ class Files extends BasicResource {
                         );
                     }
                 },
-                function ($request, $garageID, $user) use ($getRawFile) {
+                function ($request, $garageID, $user) {
                     $filename = $request->endpointParam("filename");
                     if ($filename === null || $filename === "") {
                         throw new HTTPError(422,
@@ -88,46 +112,33 @@ class Files extends BasicResource {
                         );
                     }
 
-                    $fileFetchers = [
-                        "monthly-report" => function ($garageID) {
-                            $garage = $this->usersDAO->get(
-                                domain\Garage::USER_TYPE,
-                                $garageID
-                            );
-                            if ($garage === null) {
-                                throw new HTTPError(404,
-                                    "Cannot get monthly report for garage that does not exist"
-                                );
-                            }
-
-                            return [
-                                "application/pdf",
-                                null // FIXME: Try to find a PDF library that works
-                            ];
-                        },
-
-                        "contract" => $getRawFile("application/pdf", "contract.pdf"),
-                        "monthly-check-sheet" => $getRawFile("application/pdf", "checklist.pdf"),
-                        "calibration-dates-document" => $getRawFile("application/pdf", "calibration_dates.pdf"),
-                        "defective-equipment-log" => $getRawFile("application/pdf", "defective_equipment_log.pdf"),
-                        "quality-control-sheet" => $getRawFile("application/pdf", "quality_control_checks.pdf"),
-                        "tyre-depth-check-sheet" => $getRawFile("application/pdf", "tyre_depth_gauge_check.pdf"),
-                    ];
-
-                    $fileFetcher = Dispatcher::funcToKeyOf($fileFetchers, $filename);
-                    try {
-                        return [$request, ...$fileFetcher($garageID)];
-                    } catch (UndispatchableError $e) {
-                        throw new HTTPError(404, "Requested file not found");
-                    }
-                },
-                function ($request, $fileType, $fileData) {
-                    return new Response(
-                        200,
-                        ["Content-Type" => $fileType],
-                        $fileData
+                    $garage = $this->usersDAO->get(
+                        domain\Garage::USER_TYPE,
+                        $garageID
                     );
-                }
+                    if ($garage === null) {
+                        throw new HTTPError(404,
+                            "Cannot get monthly report for garage that does not exist"
+                        );
+                    }
+
+                    $content = new EmailContent(
+                        $garage->name(),
+                        $garage->instruments()
+                    );
+
+                    $date = date();
+                    return [
+                        $request,
+                        $content->get_email_html_string(),
+                        "monthly-report-$date.pdf"
+                    ];
+                },
+                PDFBuilder::typeSelector(
+                    function ($request, $html, $filename) {
+                        return [$html, $filename];
+                    }
+                )
             ]),
 
             "cors_preflight" => Dispatcher::funcToPipeOf([
@@ -183,7 +194,15 @@ class Files extends BasicResource {
         };
 
         parent::__construct([
-            "GET" => $getAction("get_file"),
+            "GET" => $getAction(
+                function ($request) use ($staticFiles) {
+                    $fileName = $request->endpointParam("filename");
+                    if ($fileName !== null && in_array($fileName, array_keys($staticFiles))) {
+                        return "get_static_file";
+                    }
+                    return "get_monthly_report_file";
+                }
+            ),
             "OPTIONS" => $getAction("cors_preflight") // Might not need it yet
         ]);
     }
