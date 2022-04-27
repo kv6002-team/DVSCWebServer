@@ -54,10 +54,10 @@ class ChangePassword extends react.Component {
 
           <Form>
             <Form.Group className="mb-3" controlId="changePasswordUsername">
-              <Form.Label>Username</Form.Label>
+              <Form.Label>VTS Number</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="username"
+                placeholder="vts number"
                 value={this.state.username}
                 disabled={this.state.loggedIn}
                 onChange={(e) => this.setUsername(e.target.value)}
