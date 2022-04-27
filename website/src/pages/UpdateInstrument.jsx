@@ -53,7 +53,7 @@ class UpdateInstrument extends react.Component {
               <Col lg={3}></Col>
               <Col lg={6}>
                 <Form.Group className="mb-3" controlId="contactSubject">
-                  <Form.Label></Form.Label>
+                  <Form.Label>Instrument to Update</Form.Label>
                   <Form.Control
                     as="select"
                     onChange={(e) => this.setInstrument(e.target.value)}
