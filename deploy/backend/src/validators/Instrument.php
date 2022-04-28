@@ -73,11 +73,6 @@ class Instrument {
             );
         }
 
-        if ($ourCheckDate < new \DateTimeImmutable('today + 1 day')) {
-            throw new HTTPError(422,
-                "Must provide a date from today for ourCheckDate"
-            );
-        }
         return $ourCheckDate;
     }
 
