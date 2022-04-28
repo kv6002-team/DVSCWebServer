@@ -28,14 +28,6 @@ class AdditionalFiles extends react.Component {
             </thead>
             <tbody>
               <tr>
-                <td>Monthly Report</td>
-                <td>
-                  <Button onClick={() => this.getFile('monthly-report?garage='+this.props.auth.token.decoded.id)}>
-                    Download
-                  </Button>
-                </td>
-              </tr>
-              <tr>
                 <td>Contract</td>
                 <td><Button onClick={() => this.getFile('contract')}>Download</Button></td>
               </tr>
