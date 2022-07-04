@@ -84,13 +84,13 @@ export default class PrivacyPolicy extends react.Component {
             </li>
             <li>
               <strong>Your right to data portability</strong>
-              <p>
-                You have the right to ask that we transfer the personal information you gave us to another organisation, or to you, in certain circumstances.
-                You are not required to pay any charge for exercising your rights. If you make a request, we have one month to respond to you.
-              </p>
+              <p>You have the right to ask that we transfer the personal information you gave us to another organisation, or to you, in certain circumstances.</p>
             </li>
           </ul>
-          <p>Please contact us at: kevindonaldsondvsc@outlook.com or +44 07493904628</p>
+          <p>
+            You are not required to pay any charge for exercising your rights. If you make a request, we have one month to respond to you.
+            Please contact us at: kevindonaldsondvsc@outlook.com or +44 07493904628
+          </p>
 
           <h2>How to complain</h2>
           <p>
