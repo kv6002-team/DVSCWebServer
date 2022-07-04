@@ -21,7 +21,7 @@ export default class PrivacyPolicy extends react.Component {
 
           <h2>Contact Details</h2>
           <p>Name: Kevin Donaldson</p>
-          <p>Email: kevindonaldsondvsc@outlook.co.uk</p>
+          <p>Email: kevindonaldsondvsc@outlook.com</p>
 
           <h2>Types of personal information we collect</h2>
           <p>We currently collect and process the following information:</p>
@@ -32,31 +32,31 @@ export default class PrivacyPolicy extends react.Component {
           <h2>How we collect personal information and why we have it</h2>
           <p>
             We do not collect information indirectly and only process information directly provided by you.
-            Most of the personal infomation we process is provided to us directly by you for one of the following reasons:
+            Most of the personal information we process is provided to us directly by you for one of the following reasons:
           </p>
           <ul>
             <li>Processing garage information to track instrument details</li>
-            <li>Storing personal information required to contact you if required</li>
+            <li>Storing personal information needed to contact you if required</li>
           </ul>
           <p>
-            We use the personal infromation you have provided us to keep track of garage information, allowing us to perform our job
+            We use the personal information you have provided us to keep track of garage information, allowing us to perform our job
             in ensuring that garage quality is sufficient according to a standards board.
           </p>
 
-          <p>We will not share any of your information provided with any other 3rd-party organisation or individual.</p>
+          <p>We will not share any of the information you provide with any 3rd-party organisation or individual.</p>
 
-          <p>Under the UK General Data Protecection Regulation (UK GDPR), the lawfull bases we rely on for processing this information are:</p>
+          <p>Under the UK General Data Protecection Regulation (UK GDPR), the lawful bases we rely on for processing this information are:</p>
           <ul>
-            <li>Your consent. You are able to remove your conset at any time. You can do this by contacting Kevin Donaldson at kevindonaldsondvsc@outlook.com.</li>
+            <li>Your consent. You can remove your consent at any time by contacting Kevin Donaldson at kevindonaldsondvsc@outlook.com.</li>
             <li>We have a contractual obligation.</li>
-            <li>We have legitimate interest.</li>
+            <li>We have a legitimate interest.</li>
           </ul>
 
           <h2>How we store your information</h2>
           <p>
             Your information is stored securely on an offsite server located in the UK.
             We keep your information for as long as you remain a customer.
-            Data is deleted by permenantly removing it from our service database immediately after you are no longer a customer.
+            Data is deleted by permanently removing it from our service database immediately after you are no longer a customer.
           </p>
 
           <h2>Your data protection rights</h2>
@@ -102,7 +102,6 @@ export default class PrivacyPolicy extends react.Component {
             <li>Information Commissioner's Office</li>
             <li>Wycliffe House</li>
             <li>Water Lane</li>
-            <li>Wilmslow</li>
             <li>Wilmslow</li>
             <li>Cheshire</li>
             <li>SK9 5AF</li>
