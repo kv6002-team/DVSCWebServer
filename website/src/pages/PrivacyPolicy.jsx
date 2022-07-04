@@ -20,8 +20,8 @@ export default class PrivacyPolicy extends react.Component {
           <h1>Donaldsons' Vehicle Specialist Consultancy Privacy Policy</h1>
 
           <h2>Contact Details</h2>
-          <p>Name: Kevin Donaldson</p>
-          <p>Email: kevindonaldsondvsc@outlook.com</p>
+          <p><strong>Name</strong>: Kevin Donaldson</p>
+          <p><strong>Email</strong>: kevindonaldsondvsc@outlook.com</p>
 
           <h2>Types of personal information we collect</h2>
           <p>We currently collect and process the following information:</p>
@@ -98,16 +98,16 @@ export default class PrivacyPolicy extends react.Component {
             You can also complain to the ICO if you are unhappy with how we have used your data.
           </p>
           <p>The ICO's address:</p>
-          <ul id='ICO-Address'>
-            <li>Information Commissioner's Office</li>
-            <li>Wycliffe House</li>
-            <li>Water Lane</li>
-            <li>Wilmslow</li>
-            <li>Cheshire</li>
-            <li>SK9 5AF</li>
-            <li>Helpline number: 0303 123 1113</li>
-            <li>ICO website: https://www.ico.org.uk</li>
-          </ul>
+          <div className="address">
+            <p>Information Commissioner's Office</p>
+            <p>Wycliffe House</p>
+            <p>Water Lane</p>
+            <p>Wilmslow</p>
+            <p>Cheshire</p>
+            <p>SK9 5AF</p>
+          </div>
+          <p>ICO helpline number: 0303 123 1113</p>
+          <p>ICO website: <a href="https://ico.org.uk/">https://ico.org.uk/</a></p>
         </Container>
       </Main>
     );
