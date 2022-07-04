@@ -15,52 +15,52 @@ import './PrivacyPolicy.css';
 export default class PrivacyPolicy extends react.Component {
   render() {
     return (
-      <Main header="Donaldsons' Vehicle Specialist Consultancy Privacy Policy">
+      <Main>
         <Container>
-        <br/>
-        <h2>Contact Details</h2>
-        <p>
-          Name: Kevin Donaldson
-        </p>
-        <p>
-          Email: kevindonaldsondvsc@outlook.co.uk
-        </p>
-        <h2>Types of personal information we collect</h2>
-        <p>
-          We currently collect and process the following information:
+          <h1>Donaldsons' Vehicle Specialist Consultancy Privacy Policy</h1>
+
+          <h2>Contact Details</h2>
+          <p><strong>Name</strong>: Kevin Donaldson</p>
+          <p><strong>Email</strong>: kevindonaldsondvsc@outlook.com</p>
+
+          <h2>Types of personal information we collect</h2>
+          <p>We currently collect and process the following information:</p>
           <ul>
             <li>Personal identifiers, contacts and characteristics (For example, name and contact details)</li>
           </ul>
-        </p>
-        <h2>How we collect personal information and why we have it</h2>
-        <p>
-          We do not collect information indirectly and only process information directly provided by you.
-          Most of the personal infomation we process is provided to us directly by you for one of the following reasons:
+
+          <h2>How we collect personal information and why we have it</h2>
+          <p>
+            We do not collect information indirectly and only process information directly provided by you.
+            Most of the personal information we process is provided to us directly by you for one of the following reasons:
+          </p>
           <ul>
             <li>Processing garage information to track instrument details</li>
-            <li>Storing personal information required to contact you if required</li>
+            <li>Storing personal information needed to contact you if required</li>
           </ul>
-          We use the personal infromation you have provided us to keep track of garage information, allowing us to perform our job
-          in ensuring that garage quality is sufficient according to a standards board.
+          <p>
+            We use the personal information you have provided us to keep track of garage information, allowing us to perform our job
+            in ensuring that garage quality is sufficient according to a standards board.
+          </p>
 
-          We will not share any of your information provided with any other 3rd-party organisation or individual.
+          <p>We will not share any of the information you provide with any 3rd-party organisation or individual.</p>
 
-          Under the UK General Data Protecection Regulation (UK GDPR), the lawfull bases we rely on for processing this information are:
+          <p>Under the UK General Data Protecection Regulation (UK GDPR), the lawful bases we rely on for processing this information are:</p>
           <ul>
-            <li>Your consent. You are able to remove your conset at any time. You can do this by contacting Kevin Donaldson at kevindonaldsondvsc@outlook.com.</li>
+            <li>Your consent. You can remove your consent at any time by contacting Kevin Donaldson at kevindonaldsondvsc@outlook.com.</li>
             <li>We have a contractual obligation.</li>
-            <li>We have legitimate interest.</li>
+            <li>We have a legitimate interest.</li>
           </ul>
-        </p>
-        <h2>How we store your information</h2>
-        <p>
-          Your information is stored securely on an offsite server located in the UK.
-          We keep your information for as long as you remain a customer.
-          Data is deleted by permenantly removing it from our service database immediately after you are no longer a customer.
-        </p>
-        <h2>Your data protection rights</h2>
-        <p>
-          Under data protection law, you have rights including:
+
+          <h2>How we store your information</h2>
+          <p>
+            Your information is stored securely on an offsite server located in the UK.
+            We keep your information for as long as you remain a customer.
+            Data is deleted by permanently removing it from our service database immediately after you are no longer a customer.
+          </p>
+
+          <h2>Your data protection rights</h2>
+          <p>Under data protection law, you have rights including:</p>
           <ul>
             <li>
               <strong>Your right of access</strong>
@@ -84,31 +84,30 @@ export default class PrivacyPolicy extends react.Component {
             </li>
             <li>
               <strong>Your right to data portability</strong>
-              <p>
-                You have the right to ask that we transfer the personal information you gave us to another organisation, or to you, in certain circumstances.
-                You are not required to pay any charge for exercising your rights. If you make a request, we have one month to respond to you.
-              </p>
+              <p>You have the right to ask that we transfer the personal information you gave us to another organisation, or to you, in certain circumstances.</p>
             </li>
           </ul>
-          Please contact us at: kevindonaldsondvsc@outlook.com or +44 07493904628
-        </p><br/>
-        <h2>How to complain</h2>
-        <p>
-          If you have any concerns about our use of your personal information, you can make a complaint to us at kevindonaldsondvsc@outlook.com or +44 07493904628.
-          You can also complain to the ICO if you are unhappy with how we have used your data.
-          The ICO's address:      
-          <ul id='ICO-Address'>
-            <li>Information Commissioner's Office</li>
-            <li>Wycliffe House</li>
-            <li>Water Lane</li>
-            <li>Wilmslow</li>
-            <li>Wilmslow</li>
-            <li>Cheshire</li>
-            <li>SK9 5AF</li>
-            <li>Helpline number: 0303 123 1113</li>
-            <li>ICO website: https://www.ico.org.uk</li>
-          </ul>
-        </p>
+          <p>
+            You are not required to pay any charge for exercising your rights. If you make a request, we have one month to respond to you.
+            Please contact us at: kevindonaldsondvsc@outlook.com or +44 07493904628
+          </p>
+
+          <h2>How to complain</h2>
+          <p>
+            If you have any concerns about our use of your personal information, you can make a complaint to us at kevindonaldsondvsc@outlook.com or +44 07493904628.
+            You can also complain to the ICO if you are unhappy with how we have used your data.
+          </p>
+          <p>The ICO's address:</p>
+          <div className="address">
+            <p>Information Commissioner's Office</p>
+            <p>Wycliffe House</p>
+            <p>Water Lane</p>
+            <p>Wilmslow</p>
+            <p>Cheshire</p>
+            <p>SK9 5AF</p>
+          </div>
+          <p>ICO helpline number: 0303 123 1113</p>
+          <p>ICO website: <a href="https://ico.org.uk/">https://ico.org.uk/</a></p>
         </Container>
       </Main>
     );
